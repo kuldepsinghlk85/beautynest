@@ -1,0 +1,624 @@
+// BeautyNest - Ladies Doorstep Salon Prisma Schema
+// Production-ready data model
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum RoleType {
+  CUSTOMER
+  BEAUTICIAN
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+}
+
+enum Gender {
+  FEMALE
+  MALE
+  OTHER
+}
+
+enum KycStatus {
+  NOT_SUBMITTED
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum BookingStatus {
+  PENDING
+  ASSIGNED
+  NAVIGATING
+  ARRIVED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  CAPTURED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  RAZORPAY_UPI
+  RAZORPAY_CARD
+  RAZORPAY_NETBANKING
+  WALLET
+  CASH_ON_DELIVERY
+}
+
+enum WalletTransactionType {
+  CREDIT
+  DEBIT
+  CASHBACK
+  REFUND
+}
+
+// ----------------------------------------------------
+// Core Users & Roles
+// ----------------------------------------------------
+
+model User {
+  id            String       @id @default(uuid())
+  phoneNumber   String       @unique
+  email         String?      @unique
+  passwordHash  String?
+  fullName      String
+  role          RoleType     @default(CUSTOMER)
+  status        UserStatus   @default(ACTIVE)
+  avatarUrl     String?
+  gender        Gender       @default(FEMALE)
+  fcmToken      String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  customerProfile   Customer?
+  beauticianProfile Beautician?
+  adminLogs         AdminLog[]
+  notifications     Notification[]
+  roleAssignments   RoleAssignment[]
+  otpVerifications  OTPVerification[]
+
+  @@index([phoneNumber])
+  @@index([role])
+}
+
+model Role {
+  id          String           @id @default(uuid())
+  name        String           @unique
+  description String?
+  permissions RolePermission[]
+  users       RoleAssignment[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model Permission {
+  id          String           @id @default(uuid())
+  name        String           @unique
+  category    String
+  roles       RolePermission[]
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+model RoleAssignment {
+  userId    String
+  roleId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, roleId])
+}
+
+model OTPVerification {
+  id          String   @id @default(uuid())
+  phoneNumber String
+  otpCode     String
+  expiresAt   DateTime
+  isUsed      Boolean  @default(false)
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  @@index([phoneNumber, otpCode])
+}
+
+// ----------------------------------------------------
+// Customer Module
+// ----------------------------------------------------
+
+model Customer {
+  id               String            @id @default(uuid())
+  userId           String            @unique
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  city             String            @default("Varanasi")
+  preferredLanguage String           @default("en")
+  totalBookings    Int               @default(0)
+  totalSpent       Decimal           @default(0.0) @db.Decimal(10, 2)
+  referralCode     String            @unique
+  referredBy       String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  addresses        Address[]
+  bookings         Booking[]
+  reviews          Review[]
+  wallet           Wallet?
+  membership       Membership?
+  couponUsages     CouponUsage[]
+
+  @@index([city])
+}
+
+model Address {
+  id           String    @id @default(uuid())
+  customerId   String
+  customer     Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  title        String    // Home, Work, Other
+  addressLine1 String
+  addressLine2 String?
+  landmark     String?
+  city         String    @default("Varanasi")
+  state        String    @default("Uttar Pradesh")
+  postalCode   String
+  latitude     Float
+  longitude    Float
+  isDefault    Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  bookings     Booking[]
+
+  @@index([customerId])
+}
+
+// ----------------------------------------------------
+// Beautician Module
+// ----------------------------------------------------
+
+model Beautician {
+  id               String            @id @default(uuid())
+  userId           String            @unique
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio              String?           @db.Text
+  experienceYears  Int               @default(3)
+  rating           Float             @default(5.0)
+  totalRatings     Int               @default(0)
+  isOnline         Boolean           @default(false)
+  isVerified       Boolean           @default(false)
+  kycStatus        KycStatus         @default(PENDING)
+  currentLat       Float?
+  currentLng       Float?
+  lastLocationAt   DateTime?
+  aadhaarNumber    String?
+  aadhaarCardUrl   String?
+  certificateUrl   String?
+  policeClearanceUrl String?
+  portfolioUrls    String[]
+  bankAccountNumber String?
+  bankIfscCode     String?
+  bankAccountName  String?
+  baseCity         String            @default("Varanasi")
+  area             String?
+  totalJobs        Int               @default(0)
+  completionRate   Float             @default(100.0)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  skills           BeauticianSkill[]
+  bookings         Booking[]
+  gpsTrackings     GPSTracking[]
+  attendances      Attendance[]
+  reviews          Review[]
+
+  @@index([isOnline, isVerified])
+  @@index([baseCity])
+}
+
+model BeauticianSkill {
+  id           String          @id @default(uuid())
+  beauticianId String
+  beautician   Beautician      @relation(fields: [beauticianId], references: [id], onDelete: Cascade)
+  categoryId   String
+  category     ServiceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  proficiency  Int             @default(5) // 1-5
+
+  @@unique([beauticianId, categoryId])
+}
+
+// ----------------------------------------------------
+// Services Catalog
+// ----------------------------------------------------
+
+model ServiceCategory {
+  id          String            @id @default(uuid())
+  name        String            @unique // Facial, Hair, Waxing, Makeup, Spa, Nails, Skin Care, Threading, Kids, Men Grooming
+  slug        String            @unique
+  description String?           @db.Text
+  iconUrl     String?
+  bannerUrl   String?
+  displayOrder Int              @default(0)
+  isActive    Boolean           @default(true)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  services    Service[]
+  skills      BeauticianSkill[]
+
+  @@index([slug])
+}
+
+model Service {
+  id              String            @id @default(uuid())
+  categoryId      String
+  category        ServiceCategory   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name            String
+  slug            String            @unique
+  shortDesc       String?
+  about           String?           @db.Text
+  benefits        String[]
+  processSteps    String[]
+  targetGender    Gender            @default(FEMALE)
+  price           Decimal           @db.Decimal(10, 2)
+  originalPrice   Decimal?          @db.Decimal(10, 2)
+  discountPercent Int?              @default(0)
+  durationMinutes Int               @default(60)
+  isBestseller    Boolean           @default(false)
+  isFeatured      Boolean           @default(false)
+  isActive        Boolean           @default(true)
+  rating          Float             @default(4.9)
+  reviewCount     Int               @default(0)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  images          ServiceImage[]
+  bookingServices BookingService[]
+
+  @@index([categoryId])
+  @@index([slug])
+}
+
+model ServiceImage {
+  id        String   @id @default(uuid())
+  serviceId String
+  service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  imageUrl  String
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+// ----------------------------------------------------
+// Bookings Module
+// ----------------------------------------------------
+
+model Booking {
+  id                 String           @id @default(uuid())
+  bookingNumber      String           @unique // e.g. BK-6887
+  customerId         String
+  customer           Customer         @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  beauticianId       String?
+  beautician         Beautician?      @relation(fields: [beauticianId], references: [id], onDelete: SetNull)
+  addressId          String
+  address            Address          @relation(fields: [addressId], references: [id])
+  status             BookingStatus    @default(PENDING)
+  scheduledDate      DateTime         @db.Date
+  scheduledTimeSlot  String           // e.g. "11:30 AM - 12:30 PM"
+  serviceStartOtp    String?          // 4-digit OTP shared with customer to start service
+  subTotal           Decimal          @db.Decimal(10, 2)
+  discountAmount     Decimal          @default(0.0) @db.Decimal(10, 2)
+  taxAmount          Decimal          @default(0.0) @db.Decimal(10, 2)
+  tipAmount          Decimal          @default(0.0) @db.Decimal(10, 2)
+  totalAmount        Decimal          @db.Decimal(10, 2)
+  specialNotes       String?          @db.Text
+  cancellationReason String?
+  startedAt          DateTime?
+  completedAt        DateTime?
+  cancelledAt        DateTime?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  bookingServices    BookingService[]
+  statusLogs         BookingStatusLog[]
+  payment            Payment?
+  review             Review?
+  gpsTrackings       GPSTracking[]
+
+  @@index([customerId])
+  @@index([beauticianId])
+  @@index([status])
+  @@index([scheduledDate])
+}
+
+model BookingService {
+  id         String   @id @default(uuid())
+  bookingId  String
+  booking    Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  serviceId  String
+  service    Service  @relation(fields: [serviceId], references: [id])
+  unitPrice  Decimal  @db.Decimal(10, 2)
+  quantity   Int      @default(1)
+  totalPrice Decimal  @db.Decimal(10, 2)
+
+  @@index([bookingId])
+}
+
+model BookingStatusLog {
+  id        String        @id @default(uuid())
+  bookingId String
+  booking   Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  status    BookingStatus
+  note      String?
+  updatedBy String?
+  createdAt DateTime      @default(now())
+
+  @@index([bookingId])
+}
+
+// ----------------------------------------------------
+// Payments & Wallet Module
+// ----------------------------------------------------
+
+model Payment {
+  id                String        @id @default(uuid())
+  bookingId         String        @unique
+  booking           Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  amount            Decimal       @db.Decimal(10, 2)
+  currency          String        @default("INR")
+  method            PaymentMethod @default(RAZORPAY_UPI)
+  status            PaymentStatus @default(PENDING)
+  razorpayOrderId   String?       @unique
+  razorpayPaymentId String?       @unique
+  razorpaySignature String?
+  paidAt            DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  transactions      Transaction[]
+}
+
+model Transaction {
+  id          String        @id @default(uuid())
+  paymentId   String
+  payment     Payment       @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  amount      Decimal       @db.Decimal(10, 2)
+  status      PaymentStatus
+  gatewayRef  String?
+  payloadJson Json?
+  createdAt   DateTime      @default(now())
+
+  @@index([paymentId])
+}
+
+model Wallet {
+  id           String              @id @default(uuid())
+  customerId   String              @unique
+  customer     Customer            @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  balance      Decimal             @default(0.0) @db.Decimal(10, 2)
+  currency     String              @default("INR")
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  transactions WalletTransaction[]
+}
+
+model WalletTransaction {
+  id          String                @id @default(uuid())
+  walletId    String
+  wallet      Wallet                @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  amount      Decimal               @db.Decimal(10, 2)
+  type        WalletTransactionType
+  description String
+  balanceAfter Decimal              @db.Decimal(10, 2)
+  createdAt   DateTime              @default(now())
+
+  @@index([walletId])
+}
+
+// ----------------------------------------------------
+// Reviews & Ratings
+// ----------------------------------------------------
+
+model Review {
+  id           String        @id @default(uuid())
+  bookingId    String        @unique
+  booking      Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  customerId   String
+  customer     Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  beauticianId String
+  beautician   Beautician    @relation(fields: [beauticianId], references: [id], onDelete: Cascade)
+  rating       Int           // 1 to 5
+  comment      String?       @db.Text
+  isPublic     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+
+  images       ReviewImage[]
+
+  @@index([beauticianId])
+  @@index([customerId])
+}
+
+model ReviewImage {
+  id        String   @id @default(uuid())
+  reviewId  String
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  imageUrl  String
+  createdAt DateTime @default(now())
+}
+
+// ----------------------------------------------------
+// Coupons & Promotions
+// ----------------------------------------------------
+
+model Coupon {
+  id             String        @id @default(uuid())
+  code           String        @unique
+  title          String
+  description    String?
+  discountPercent Int?
+  discountAmount Decimal?      @db.Decimal(10, 2)
+  minOrderValue  Decimal       @default(499.0) @db.Decimal(10, 2)
+  maxDiscount    Decimal?      @db.Decimal(10, 2)
+  validFrom      DateTime
+  validTo        DateTime
+  usageLimit     Int?          @default(1000)
+  usedCount      Int           @default(0)
+  isActive       Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+
+  usages         CouponUsage[]
+
+  @@index([code])
+}
+
+model CouponUsage {
+  id         String   @id @default(uuid())
+  couponId   String
+  coupon     Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  bookingId  String
+  usedAt     DateTime @default(now())
+
+  @@unique([couponId, customerId, bookingId])
+}
+
+// ----------------------------------------------------
+// Memberships & Subscriptions
+// ----------------------------------------------------
+
+model MembershipPlan {
+  id              String       @id @default(uuid())
+  name            String       // Gold Club, Diamond Care
+  price           Decimal      @db.Decimal(10, 2)
+  durationDays    Int          @default(365)
+  discountPercent Int          @default(15)
+  freeDeliveries  Boolean      @default(true)
+  perks           String[]
+  isActive        Boolean      @default(true)
+  createdAt       DateTime     @default(now())
+
+  memberships     Membership[]
+}
+
+model Membership {
+  id         String         @id @default(uuid())
+  customerId String         @unique
+  customer   Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  planId     String
+  plan       MembershipPlan @relation(fields: [planId], references: [id])
+  startDate  DateTime       @default(now())
+  endDate    DateTime
+  isActive   Boolean        @default(true)
+}
+
+// ----------------------------------------------------
+// Realtime GPS & Attendance
+// ----------------------------------------------------
+
+model GPSTracking {
+  id           String      @id @default(uuid())
+  beauticianId String
+  beautician   Beautician  @relation(fields: [beauticianId], references: [id], onDelete: Cascade)
+  bookingId    String?
+  booking      Booking?    @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  latitude     Float
+  longitude    Float
+  heading      Float?
+  speed        Float?
+  timestamp    DateTime    @default(now())
+
+  @@index([beauticianId, timestamp])
+}
+
+model Attendance {
+  id           String     @id @default(uuid())
+  beauticianId String
+  beautician   Beautician @relation(fields: [beauticianId], references: [id], onDelete: Cascade)
+  date         DateTime   @db.Date
+  checkIn      DateTime
+  checkOut     DateTime?
+  totalHours   Float?
+  isLeave      Boolean    @default(false)
+  leaveReason  String?
+
+  @@unique([beauticianId, date])
+}
+
+// ----------------------------------------------------
+// Notifications & Templates
+// ----------------------------------------------------
+
+model NotificationTemplate {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  title     String
+  body      String   @db.Text
+  smsText   String?
+  channel   String   @default("PUSH") // PUSH, SMS, WHATSAPP
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  body      String   @db.Text
+  dataJson  Json?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+}
+
+// ----------------------------------------------------
+// Admin Logs & Reporting
+// ----------------------------------------------------
+
+model AdminLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String
+  target    String
+  metadata  Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Report {
+  id          String   @id @default(uuid())
+  name        String
+  reportType  String   // REVENUE, BOOKINGS, BEAUTICIAN_PERFORMANCE
+  filtersJson Json?
+  fileUrl     String?
+  generatedBy String
+  createdAt   DateTime @default(now())
+}

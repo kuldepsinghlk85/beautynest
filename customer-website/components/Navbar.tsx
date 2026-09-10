@@ -1,0 +1,512 @@
+'use client';
+
+import React, { useState, useRef } from 'react';
+import Link from 'next/link';
+import { MapPin, ShoppingBag, Sparkles, Menu, X, User, CheckCircle2, Heart, Camera, Upload } from 'lucide-react';
+import { VARANASI_AREAS } from '../lib/data';
+
+const PRESET_USER_AVATARS = [
+  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&q=80',
+  'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80',
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80',
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80',
+];
+
+export default function Navbar() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [selectedCity, setSelectedCity] = useState('Varanasi');
+  const [selectedArea, setSelectedArea] = useState<string>(VARANASI_AREAS[0]);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<'register' | 'login'>('register');
+
+  // Registration Form State
+  const [fullName, setFullName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [email, setEmail] = useState('');
+  const [regArea, setRegArea] = useState<string>(VARANASI_AREAS[0]);
+  const [doorstepAddress, setDoorstepAddress] = useState('');
+  const [customerPhotoUrl, setCustomerPhotoUrl] = useState<string>(PRESET_USER_AVATARS[0]);
+  const [regSuccess, setRegSuccess] = useState(false);
+
+  const customerFileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleCustomerPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          setCustomerPhotoUrl(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRegisterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setRegSuccess(true);
+    setTimeout(() => {
+      setRegSuccess(false);
+      setShowAuthModal(false);
+    }, 2200);
+  };
+
+  return (
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-brand-border shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-brand-primary to-pink-400 flex items-center justify-center text-white shadow-pink-soft group-hover:scale-105 transition-transform">
+              <Sparkles className="w-6 h-6 text-brand-accentLight" />
+            </div>
+            <div>
+              <div className="flex items-center gap-1">
+                <span className="text-2xl font-serif font-bold tracking-tight text-brand-charcoal">
+                  Beauty<span className="text-brand-primary">Nest</span>
+                </span>
+                <span className="text-xs bg-brand-primaryLight text-brand-primary px-2 py-0.5 rounded-full font-medium ml-1">
+                  Ladies Only
+                </span>
+              </div>
+              <p className="text-[11px] text-gray-500 tracking-wider uppercase font-medium">
+                Varanasi Doorstep Salon
+              </p>
+            </div>
+          </Link>
+
+          {/* Navigation Links */}
+          <nav className="hidden lg:flex items-center gap-8 text-sm font-medium text-gray-700">
+            <Link href="/" className="text-brand-primary font-semibold hover:text-brand-primaryDark transition-colors">
+              Home
+            </Link>
+            <Link href="/services" className="hover:text-brand-primary transition-colors">
+              Services
+            </Link>
+            <Link href="/professionals" className="hover:text-brand-primary transition-colors">
+              Our Beauticians
+            </Link>
+            <Link href="/offers" className="hover:text-brand-primary transition-colors flex items-center gap-1">
+              Offers
+              <span className="bg-rose-100 text-rose-600 text-[10px] font-bold px-1.5 py-0.5 rounded">HOT</span>
+            </Link>
+            <Link href="/about" className="hover:text-brand-primary transition-colors">
+              About
+            </Link>
+            <Link href="/contact" className="hover:text-brand-primary transition-colors">
+              Contact
+            </Link>
+          </nav>
+
+          {/* Right Action Bar */}
+          <div className="hidden md:flex items-center gap-4">
+            {/* Varanasi City & Area Selector */}
+            <div className="flex items-center gap-1.5 bg-brand-bg px-3 py-1.5 rounded-full border border-pink-200 text-xs font-semibold text-gray-700">
+              <MapPin className="w-3.5 h-3.5 text-brand-primary animate-pulse" />
+              <span className="font-bold text-brand-primary">Varanasi:</span>
+              <select
+                value={selectedArea}
+                onChange={(e) => setSelectedArea(e.target.value)}
+                className="bg-transparent border-none outline-none cursor-pointer text-gray-800 font-medium"
+              >
+                {VARANASI_AREAS.map((area) => (
+                  <option key={area} value={area}>
+                    {area}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Cart / Bookings Quick View */}
+            <Link
+              href="/services"
+              className="p-2.5 rounded-full text-gray-600 hover:text-brand-primary hover:bg-brand-primaryLight transition-all relative"
+              title="Cart / Quick Book"
+            >
+              <ShoppingBag className="w-5 h-5" />
+              <span className="absolute top-1 right-1 w-4 h-4 bg-brand-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                1
+              </span>
+            </Link>
+
+            {/* Login / Register CTA */}
+            <button
+              onClick={() => {
+                setAuthMode('register');
+                setShowAuthModal(true);
+              }}
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-brand-primary to-pink-500 hover:from-brand-primaryDark hover:to-brand-primary text-white text-sm font-semibold px-5 py-2.5 rounded-full shadow-pink-soft hover:shadow-pink-hover transition-all transform hover:-translate-y-0.5"
+            >
+              <User className="w-4 h-4" />
+              <span>Customer Register</span>
+            </button>
+          </div>
+
+          {/* Mobile Menu Toggle */}
+          <div className="lg:hidden flex items-center gap-2">
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 text-gray-700 hover:text-brand-primary focus:outline-none"
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6 text-brand-charcoal" />}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Drawer */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden bg-white border-b border-brand-border px-4 pt-3 pb-6 space-y-3">
+          <div className="flex items-center gap-2 pb-3 border-b border-gray-100">
+            <MapPin className="w-4 h-4 text-brand-primary" />
+            <span className="text-sm font-semibold text-gray-700">Varanasi: {selectedArea}</span>
+          </div>
+          <Link
+            href="/"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-3 py-2 rounded-lg text-base font-medium text-gray-900 hover:bg-pink-50"
+          >
+            Home
+          </Link>
+          <Link
+            href="/services"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-3 py-2 rounded-lg text-base font-medium text-gray-900 hover:bg-pink-50"
+          >
+            Services Catalog (Varanasi)
+          </Link>
+          <Link
+            href="/professionals"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-3 py-2 rounded-lg text-base font-medium text-gray-900 hover:bg-pink-50"
+          >
+            Our 20 Verified Beauticians
+          </Link>
+          <Link
+            href="/offers"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-3 py-2 rounded-lg text-base font-medium text-gray-900 hover:bg-pink-50"
+          >
+            Offers & Packages
+          </Link>
+          <Link
+            href="/about"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-3 py-2 rounded-lg text-base font-medium text-gray-900 hover:bg-pink-50"
+          >
+            About BeautyNest
+          </Link>
+          <Link
+            href="/contact"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-3 py-2 rounded-lg text-base font-medium text-gray-900 hover:bg-pink-50"
+          >
+            Contact & Support
+          </Link>
+          <div className="pt-2 space-y-2">
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setAuthMode('register');
+                setShowAuthModal(true);
+              }}
+              className="w-full flex justify-center items-center gap-2 bg-gradient-to-r from-brand-primary to-pink-500 text-white py-3 rounded-xl font-semibold shadow-md"
+            >
+              <User className="w-4 h-4" />
+              Customer Registration (Varanasi)
+            </button>
+            <Link
+              href="/services"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full flex justify-center items-center gap-2 bg-pink-100 text-brand-primary py-3 rounded-xl font-semibold"
+            >
+              Book Doorstep Service Now
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Customer Registration Modal */}
+      {showAuthModal && (
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowAuthModal(false);
+          }}
+          className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm p-3 sm:p-4 flex items-center justify-center"
+        >
+          <div className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-pink-100 my-auto max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Modal Fixed Header (ALWAYS visible, never cut off) */}
+            <div className="p-5 sm:p-6 pb-3 border-b border-pink-50 relative shrink-0 bg-white">
+              <button
+                type="button"
+                onClick={() => setShowAuthModal(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition-colors z-10"
+                title="Close Modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="flex items-center gap-2 text-brand-primary mb-1">
+                <Heart className="w-4 h-4 fill-brand-primary" />
+                <span className="text-[11px] font-bold uppercase tracking-wider">Ladies Doorstep Salon • Varanasi</span>
+              </div>
+              <h3 className="text-xl sm:text-2xl font-bold font-serif text-gray-900">
+                {authMode === 'register' ? 'New Customer Registration' : 'Customer Login'}
+              </h3>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {authMode === 'register'
+                  ? 'Register with your photo & address for safe, 100% hygienic doorstep salon services'
+                  : 'Sign in to your registered BeautyNest account'}
+              </p>
+
+              {/* Tabs */}
+              <div className="flex rounded-xl bg-pink-50 p-1 mt-3">
+                <button
+                  type="button"
+                  onClick={() => setAuthMode('register')}
+                  className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                    authMode === 'register'
+                      ? 'bg-white text-brand-primary shadow-sm'
+                      : 'text-gray-500 hover:text-gray-800'
+                  }`}
+                >
+                  Register New Customer
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAuthMode('login')}
+                  className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                    authMode === 'login'
+                      ? 'bg-white text-brand-primary shadow-sm'
+                      : 'text-gray-500 hover:text-gray-800'
+                  }`}
+                >
+                  Existing Customer Login
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Scrollable Body */}
+            <div className="p-5 sm:p-6 overflow-y-auto space-y-4">
+              {regSuccess ? (
+                <div className="text-center py-6 space-y-4">
+                  <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto animate-bounce">
+                    <CheckCircle2 className="w-10 h-10" />
+                  </div>
+                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-brand-primary mx-auto shadow-md">
+                    <img src={customerPhotoUrl} alt={fullName || 'Customer'} className="w-full h-full object-cover" />
+                  </div>
+                  <h3 className="text-2xl font-serif font-bold text-gray-900">
+                    Welcome to BeautyNest!
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Congratulations {fullName || 'Dear Customer'}! Your customer account for Varanasi ({regArea}) is registered with your photo. A verified female beautician can now be booked at your doorstep!
+                  </p>
+                  <div className="bg-pink-50 p-4 rounded-2xl text-xs text-brand-primary font-medium">
+                    🎉 Special Welcome Gift: ₹200 added to your BeautyNest Wallet!
+                  </div>
+                </div>
+              ) : authMode === 'register' ? (
+                <form onSubmit={handleRegisterSubmit} className="space-y-4">
+                  {/* Photo Uploader */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                      Customer Photo / Profile Picture
+                    </label>
+                    <div className="flex items-center gap-4 p-3 bg-pink-50/50 rounded-2xl border border-pink-100">
+                      <div className="relative w-14 h-14 rounded-full overflow-hidden border-2 border-brand-primary shrink-0 shadow-sm">
+                        <img
+                          src={customerPhotoUrl}
+                          alt="Customer Avatar Preview"
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => customerFileInputRef.current?.click()}
+                          className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 flex items-center justify-center text-white transition-opacity"
+                        >
+                          <Camera className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="flex-1 space-y-1.5">
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => customerFileInputRef.current?.click()}
+                            className="inline-flex items-center gap-1.5 bg-white border border-pink-200 text-brand-primary px-3 py-1.5 rounded-xl text-xs font-bold shadow-xs hover:bg-pink-50 transition-colors"
+                          >
+                            <Upload className="w-3.5 h-3.5" />
+                            <span>Upload Photo</span>
+                          </button>
+                          <input
+                            ref={customerFileInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleCustomerPhotoUpload}
+                            className="hidden"
+                          />
+                        </div>
+                        <p className="text-[10px] text-gray-500">
+                          Click to upload your photo or choose a preset:
+                        </p>
+                        <div className="flex items-center gap-1.5 pt-0.5">
+                          {PRESET_USER_AVATARS.map((avatar, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => setCustomerPhotoUrl(avatar)}
+                              className={`w-6 h-6 rounded-full overflow-hidden border transition-all ${
+                                customerPhotoUrl === avatar
+                                  ? 'border-brand-primary scale-110 ring-2 ring-pink-200'
+                                  : 'border-gray-200 hover:border-pink-300'
+                              }`}
+                            >
+                              <img src={avatar} alt="Preset" className="w-full h-full object-cover" />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1">
+                      Full Name (Female Customer) *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="e.g. Priya Sharma"
+                      className="w-full px-4 py-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-brand-primary focus:bg-white"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 mb-1">
+                        Mobile Number *
+                      </label>
+                      <div className="flex">
+                        <span className="inline-flex items-center px-3 text-xs bg-gray-100 border border-r-0 border-gray-200 rounded-l-xl text-gray-600 font-semibold">
+                          +91
+                        </span>
+                        <input
+                          type="tel"
+                          required
+                          maxLength={10}
+                          value={phoneNumber}
+                          onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
+                          placeholder="9876543210"
+                          className="w-full px-3 py-2.5 text-xs bg-gray-50 border border-gray-200 rounded-r-xl outline-none focus:border-brand-primary focus:bg-white"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 mb-1">
+                        Email Address
+                      </label>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="priya@example.com"
+                        className="w-full px-4 py-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-brand-primary focus:bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1">
+                      Select Varanasi Major Area *
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={regArea}
+                        onChange={(e) => setRegArea(e.target.value)}
+                        className="w-full px-4 py-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-brand-primary focus:bg-white appearance-none cursor-pointer font-medium"
+                      >
+                        {VARANASI_AREAS.map((area) => (
+                          <option key={area} value={area}>
+                            {area}, Varanasi
+                          </option>
+                        ))}
+                      </select>
+                      <MapPin className="w-4 h-4 text-brand-primary absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1">
+                      Doorstep Address (House / Flat No, Street, Landmark) *
+                    </label>
+                    <textarea
+                      required
+                      rows={2}
+                      value={doorstepAddress}
+                      onChange={(e) => setDoorstepAddress(e.target.value)}
+                      placeholder="e.g. Flat 302, Gangotri Enclave, Near BHU Main Gate, Varanasi"
+                      className="w-full px-4 py-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-brand-primary focus:bg-white resize-none"
+                    />
+                  </div>
+
+                  <div className="p-3 bg-pink-50/70 rounded-2xl border border-pink-100 flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-brand-primary text-white flex items-center justify-center shrink-0 font-bold text-xs">
+                      🛡️
+                    </div>
+                    <p className="text-[11px] text-gray-600 leading-snug">
+                      <strong>100% Female Safety Guarantee:</strong> Services provided exclusively by background-verified female beauticians with single-use sterile kits.
+                    </p>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-brand-primary to-pink-500 hover:from-brand-primaryDark hover:to-brand-primary text-white font-bold py-3.5 rounded-2xl shadow-pink-soft hover:shadow-pink-hover transition-all text-xs uppercase tracking-wider"
+                  >
+                    Complete Customer Registration
+                  </button>
+                </form>
+              ) : (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1">
+                      Enter Registered Mobile Number
+                    </label>
+                    <div className="flex">
+                      <span className="inline-flex items-center px-3 text-xs bg-gray-100 border border-r-0 border-gray-200 rounded-l-xl text-gray-600 font-semibold">
+                        +91
+                      </span>
+                      <input
+                        type="tel"
+                        maxLength={10}
+                        placeholder="9876543210"
+                        defaultValue="9876543210"
+                        className="w-full px-3 py-2.5 text-xs bg-gray-50 border border-gray-200 rounded-r-xl outline-none focus:border-brand-primary focus:bg-white"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setRegSuccess(true);
+                      setTimeout(() => {
+                        setRegSuccess(false);
+                        setShowAuthModal(false);
+                      }, 1800);
+                    }}
+                    className="w-full bg-brand-primary hover:bg-brand-primaryDark text-white font-bold py-3.5 rounded-2xl shadow-pink-soft transition-all text-xs uppercase tracking-wider"
+                  >
+                    Send Login OTP (123456)
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </header>
+  );
+}

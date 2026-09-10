@@ -1,0 +1,503 @@
+export interface Service {
+  id: string;
+  serviceId?: string;
+  name: string;
+  slug: string;
+  category: string;
+  categoryName: string;
+  subcategory?: string;
+  price: number;
+  originalPrice: number;
+  discountPercent: number;
+  durationMinutes: number;
+  rating: number;
+  reviewCount: number;
+  imageUrl: string;
+  shortDesc: string;
+  about: string;
+  benefits: string[];
+  processSteps: string[];
+  isBestseller?: boolean;
+  lucknowPriceRange?: string;
+  varanasiPriceRange?: string;
+  prayagrajPriceRange?: string;
+  homeService?: boolean;
+  onlineBooking?: boolean;
+  gender?: string;
+  beauticianCommissionPercent?: number;
+  beauticianCommissionAmount?: number;
+  platformCommissionPercent?: number;
+  platformCommissionAmount?: number;
+  gstPercent?: number;
+  gstAmount?: number;
+  estimatedBusinessNet?: number;
+  estimatedProfit?: number;
+  suggestedAddOns?: string;
+}
+
+export interface Beautician {
+  id: string;
+  name: string;
+  phone?: string;
+  rating: number;
+  reviewCount: number;
+  experienceYears: number;
+  specialization: string;
+  area: string;
+  city: string;
+  distanceKm: number;
+  imageUrl: string;
+  isVerified: boolean;
+  totalJobs: number;
+}
+
+export const VARANASI_AREAS = [
+  'Sigra',
+  'Lanka (BHU)',
+  'Assi Ghat',
+  'Godowlia',
+  'Dashashwamedh',
+  'Bhelupur',
+  'Varanasi Cantt',
+  'Shivpur',
+  'Mahmoorganj',
+  'Orderly Bazar',
+  'Pandeypur',
+  'Sarnath',
+  'Durgakund',
+  'Luxa',
+  'Rathyatra',
+  'Maldahiya',
+  'Chowk',
+  'Nadesar',
+  'Paharia',
+  'Ramnagar',
+] as const;
+
+import {
+  BEAUTYNEST_SERVICES,
+  SERVICE_CATEGORIES,
+  getServiceById,
+  getServicesByCategory,
+  getServicesByGender,
+  searchServices,
+  type BeautyService
+} from './allServices';
+
+export {
+  BEAUTYNEST_SERVICES,
+  SERVICE_CATEGORIES,
+  getServiceById,
+  getServicesByCategory,
+  getServicesByGender,
+  searchServices,
+  type BeautyService
+};
+
+export const CATEGORIES = [
+  { id: 'facial', name: 'Facial & Cleanup', icon: 'Sparkles', image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&q=80', count: 18 },
+  { id: 'bleach-dtan', name: 'Bleach & De-Tan', icon: 'Sun', image: 'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=400&q=80', count: 13 },
+  { id: 'threading', name: 'Threading & Face Grooming', icon: 'Smile', image: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=400&q=80', count: 6 },
+  { id: 'waxing', name: 'Waxing & Hair Removal', icon: 'Flame', image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80', count: 18 },
+  { id: 'manicure-pedicure', name: 'Manicure & Pedicure', icon: 'Heart', image: 'https://images.unsplash.com/photo-1632345031435-8727f6897d53?w=400&q=80', count: 11 },
+  { id: 'body-care', name: 'Body Care & Spa', icon: 'Flower', image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=400&q=80', count: 7 },
+  { id: 'hair-care', name: 'Hair Care & Treatments', icon: 'Scissors', image: 'https://images.unsplash.com/photo-1560869713-7d0a29430803?w=400&q=80', count: 19 },
+  { id: 'massage-spa', name: 'Massage & Spa', icon: 'Sparkles', image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=400&q=80', count: 10 },
+  { id: 'bridal-makeup', name: 'Bridal & Party Makeup', icon: 'Crown', image: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400&q=80', count: 18 },
+  { id: 'male-kids', name: 'Male Grooming & Kids', icon: 'Smile', image: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&q=80', count: 12 },
+];
+
+const categorySlugMap: Record<string, string> = {
+  'Facial & Cleanup': 'facial',
+  'Bleach & De-Tan': 'bleach-dtan',
+  'Threading': 'threading',
+  'Waxing': 'waxing',
+  'Manicure': 'manicure-pedicure',
+  'Pedicure': 'manicure-pedicure',
+  'Body Care': 'body-care',
+  'Hair': 'hair-care',
+  'Massage & Spa': 'massage-spa',
+  'Makeup': 'bridal-makeup',
+  'Mehendi': 'bridal-makeup',
+  'Male Grooming': 'male-kids',
+  'Kids': 'male-kids',
+  'Bridal & Pre-Bridal': 'bridal-makeup',
+};
+
+export const SERVICES: Service[] = BEAUTYNEST_SERVICES.map((item) => ({
+  id: item.slug || item.id,
+  serviceId: item.serviceId,
+  name: item.name,
+  slug: item.slug,
+  category: categorySlugMap[item.category] || 'facial',
+  categoryName: item.category,
+  subcategory: item.subCategory,
+  price: item.price,
+  originalPrice: item.originalPrice,
+  discountPercent: item.discountPercent,
+  durationMinutes: item.durationMinutes,
+  rating: item.rating,
+  reviewCount: item.reviewCount,
+  imageUrl: item.imageUrl,
+  shortDesc: `${item.keyFeatures}. Specially curated doorstep salon service in Varanasi.`,
+  about: `${item.name} (${item.serviceId}) - ${item.keyFeatures}. Enjoy relaxing, premium, and hygienic doorstep salon care across Varanasi with certified beauty professionals.`,
+  benefits: [
+    '100% single-use disposable & sanitized kit',
+    `Varanasi price range: ₹${item.varanasiPriceRange}`,
+    `Service duration: ${item.duration}`,
+    item.suggestedAddOns ? `Best paired with: ${item.suggestedAddOns}` : 'Premium salon grade cosmetic products',
+  ],
+  processSteps: [
+    '1. Consultation & assessment',
+    '2. Sanitization of tools and workspace setup',
+    `3. Professional treatment execution (${item.duration})`,
+    '4. Final touch-up, cleanup, and aftercare guidance',
+  ],
+  isBestseller: item.isBestseller,
+  lucknowPriceRange: item.lucknowPriceRange,
+  varanasiPriceRange: item.varanasiPriceRange,
+  prayagrajPriceRange: item.prayagrajPriceRange,
+  homeService: item.homeService,
+  onlineBooking: item.onlineBooking,
+  gender: item.gender,
+  beauticianCommissionPercent: item.beauticianCommissionPercent,
+  beauticianCommissionAmount: item.beauticianCommissionAmount,
+  platformCommissionPercent: item.platformCommissionPercent,
+  platformCommissionAmount: item.platformCommissionAmount,
+  gstPercent: item.gstPercent,
+  gstAmount: item.gstAmount,
+  estimatedBusinessNet: item.estimatedBusinessNet,
+  estimatedProfit: item.estimatedProfit,
+  suggestedAddOns: item.suggestedAddOns,
+}));
+
+// 20 Realistic Beauticians across major Varanasi areas
+export const BEAUTICIANS: Beautician[] = [
+  {
+    id: 'bea-1',
+    name: 'Sunita Sharma',
+    phone: '+91 98390 12341',
+    rating: 4.95,
+    reviewCount: 480,
+    experienceYears: 8,
+    specialization: 'Korean Glass Skin, O3+ Whitening, Rica Waxing',
+    area: 'Sigra',
+    city: 'Varanasi',
+    distanceKm: 1.2,
+    imageUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80',
+    isVerified: true,
+    totalJobs: 1240,
+  },
+  {
+    id: 'bea-2',
+    name: 'Pooja Maurya',
+    phone: '+91 98390 12342',
+    rating: 4.92,
+    reviewCount: 390,
+    experienceYears: 6,
+    specialization: 'Bridal HD Makeup, Hair Spa, Saree Draping',
+    area: 'Lanka (BHU)',
+    city: 'Varanasi',
+    distanceKm: 2.1,
+    imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&q=80',
+    isVerified: true,
+    totalJobs: 890,
+  },
+  {
+    id: 'bea-3',
+    name: 'Anjali Gupta',
+    phone: '+91 98390 12343',
+    rating: 4.88,
+    reviewCount: 310,
+    experienceYears: 5,
+    specialization: 'Aromatherapy Spa, Body Polishing, Mani-Pedi',
+    area: 'Assi Ghat',
+    city: 'Varanasi',
+    distanceKm: 2.8,
+    imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80',
+    isVerified: true,
+    totalJobs: 640,
+  },
+  {
+    id: 'bea-4',
+    name: 'Neha Pandey',
+    phone: '+91 98390 12344',
+    rating: 4.96,
+    reviewCount: 520,
+    experienceYears: 7,
+    specialization: 'Diamond Cellular Facial, Sara D-Tan, Waxing',
+    area: 'Godowlia',
+    city: 'Varanasi',
+    distanceKm: 3.4,
+    imageUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&q=80',
+    isVerified: true,
+    totalJobs: 1120,
+  },
+  {
+    id: 'bea-5',
+    name: 'Rekha Vishwakarma',
+    phone: '+91 98390 12345',
+    rating: 4.98,
+    reviewCount: 610,
+    experienceYears: 9,
+    specialization: 'Keratin Smoothing, Hair Botox, Global Color',
+    area: 'Bhelupur',
+    city: 'Varanasi',
+    distanceKm: 1.8,
+    imageUrl: 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=400&q=80',
+    isVerified: true,
+    totalJobs: 1450,
+  },
+  {
+    id: 'bea-6',
+    name: 'Priya Singh',
+    phone: '+91 98390 12346',
+    rating: 4.85,
+    reviewCount: 220,
+    experienceYears: 4,
+    specialization: 'Roll-on Waxing, Clean-up, Threading Combo',
+    area: 'Varanasi Cantt',
+    city: 'Varanasi',
+    distanceKm: 3.9,
+    imageUrl: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&q=80',
+    isVerified: true,
+    totalJobs: 480,
+  },
+  {
+    id: 'bea-7',
+    name: 'Archana Yadav',
+    phone: '+91 98390 12347',
+    rating: 4.89,
+    reviewCount: 340,
+    experienceYears: 6,
+    specialization: 'Lotus Radiant Gold, Bleach & D-Tan, Swedish Spa',
+    area: 'Shivpur',
+    city: 'Varanasi',
+    distanceKm: 5.2,
+    imageUrl: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=400&q=80',
+    isVerified: true,
+    totalJobs: 720,
+  },
+  {
+    id: 'bea-8',
+    name: 'Kavita Mishra',
+    phone: '+91 98390 12348',
+    rating: 4.94,
+    reviewCount: 460,
+    experienceYears: 8,
+    specialization: 'Royal Bridal Makeup, Sangeet Glam, Airbrush Look',
+    area: 'Mahmoorganj',
+    city: 'Varanasi',
+    distanceKm: 1.5,
+    imageUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&q=80',
+    isVerified: true,
+    totalJobs: 1050,
+  },
+  {
+    id: 'bea-9',
+    name: 'Shalini Verma',
+    phone: '+91 98390 12349',
+    rating: 4.86,
+    reviewCount: 270,
+    experienceYears: 5,
+    specialization: 'L’Oreal Hair Spa, O3+ Whitening, Rica Waxing',
+    area: 'Orderly Bazar',
+    city: 'Varanasi',
+    distanceKm: 4.1,
+    imageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80',
+    isVerified: true,
+    totalJobs: 530,
+  },
+  {
+    id: 'bea-10',
+    name: 'Suman Srivastava',
+    phone: '+91 98390 12350',
+    rating: 4.91,
+    reviewCount: 410,
+    experienceYears: 7,
+    specialization: 'Crystal Spa Pedicure, Gel Nails, Cheryl’s GloVite',
+    area: 'Pandeypur',
+    city: 'Varanasi',
+    distanceKm: 4.8,
+    imageUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&q=80',
+    isVerified: true,
+    totalJobs: 910,
+  },
+  {
+    id: 'bea-11',
+    name: 'Ritu Tripathi',
+    phone: '+91 98390 12351',
+    rating: 4.9,
+    reviewCount: 360,
+    experienceYears: 6,
+    specialization: 'Deep Tissue Massage, Aromatherapy, Body Polishing',
+    area: 'Sarnath',
+    city: 'Varanasi',
+    distanceKm: 6.5,
+    imageUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400&q=80',
+    isVerified: true,
+    totalJobs: 770,
+  },
+  {
+    id: 'bea-12',
+    name: 'Poonam Tiwari',
+    phone: '+91 98390 12352',
+    rating: 4.99,
+    reviewCount: 680,
+    experienceYears: 10,
+    specialization: 'O3+ Bridal Glow, Kashi Bridal Master, Hair Botox',
+    area: 'Durgakund',
+    city: 'Varanasi',
+    distanceKm: 2.3,
+    imageUrl: 'https://images.unsplash.com/photo-1548142813-c348350df52b?w=400&q=80',
+    isVerified: true,
+    totalJobs: 1620,
+  },
+  {
+    id: 'bea-13',
+    name: 'Mamta Jaiswal',
+    phone: '+91 98390 12353',
+    rating: 4.82,
+    reviewCount: 190,
+    experienceYears: 4,
+    specialization: 'Honey Waxing, Sara D-Tan, Papaya Clean Up',
+    area: 'Luxa',
+    city: 'Varanasi',
+    distanceKm: 2.9,
+    imageUrl: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&q=80',
+    isVerified: true,
+    totalJobs: 410,
+  },
+  {
+    id: 'bea-14',
+    name: 'Vandana Patel',
+    phone: '+91 98390 12354',
+    rating: 4.93,
+    reviewCount: 440,
+    experienceYears: 7,
+    specialization: 'Korean Glass Skin, Hydra Facial, Rica Brazilian',
+    area: 'Rathyatra',
+    city: 'Varanasi',
+    distanceKm: 1.4,
+    imageUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80',
+    isVerified: true,
+    totalJobs: 990,
+  },
+  {
+    id: 'bea-15',
+    name: 'Babita Dubey',
+    phone: '+91 98390 12355',
+    rating: 4.87,
+    reviewCount: 290,
+    experienceYears: 5,
+    specialization: 'L’Oreal Majirel Color, Hair Spa, Cut & Blowdry',
+    area: 'Maldahiya',
+    city: 'Varanasi',
+    distanceKm: 2.0,
+    imageUrl: 'https://images.unsplash.com/photo-1502685104226-ee32379fefbe?w=400&q=80',
+    isVerified: true,
+    totalJobs: 620,
+  },
+  {
+    id: 'bea-16',
+    name: 'Preeti Rawat',
+    phone: '+91 98390 12356',
+    rating: 4.89,
+    reviewCount: 370,
+    experienceYears: 6,
+    specialization: 'Sara Oxy D-Tan, Diamond Facial, Body Massage',
+    area: 'Chowk',
+    city: 'Varanasi',
+    distanceKm: 3.7,
+    imageUrl: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=400&q=80',
+    isVerified: true,
+    totalJobs: 810,
+  },
+  {
+    id: 'bea-17',
+    name: 'Deepa Sen',
+    phone: '+91 98390 12357',
+    rating: 4.83,
+    reviewCount: 210,
+    experienceYears: 4,
+    specialization: 'Deluxe Mani-Pedi, Crystal Pedicure, Threading',
+    area: 'Nadesar',
+    city: 'Varanasi',
+    distanceKm: 3.3,
+    imageUrl: 'https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?w=400&q=80',
+    isVerified: true,
+    totalJobs: 460,
+  },
+  {
+    id: 'bea-18',
+    name: 'Meena Chaurasia',
+    phone: '+91 98390 12358',
+    rating: 4.95,
+    reviewCount: 510,
+    experienceYears: 8,
+    specialization: 'Cheryl’s Cosmeceuticals, Rica Waxing, Hair Spa',
+    area: 'Paharia',
+    city: 'Varanasi',
+    distanceKm: 5.8,
+    imageUrl: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=400&q=80',
+    isVerified: true,
+    totalJobs: 1180,
+  },
+  {
+    id: 'bea-19',
+    name: 'Swati Agrawal',
+    phone: '+91 98390 12359',
+    rating: 4.88,
+    reviewCount: 300,
+    experienceYears: 5,
+    specialization: 'Engagement Makeup, Saree Draping, Hydra Facial',
+    area: 'Ramnagar',
+    city: 'Varanasi',
+    distanceKm: 7.2,
+    imageUrl: 'https://images.unsplash.com/photo-1546961329-78bef0414d7c?w=400&q=80',
+    isVerified: true,
+    totalJobs: 670,
+  },
+  {
+    id: 'bea-20',
+    name: 'Garima Pathak',
+    phone: '+91 98390 12360',
+    rating: 4.92,
+    reviewCount: 430,
+    experienceYears: 7,
+    specialization: 'Full Body Sea Salt Polishing, Swedish Spa, O3+ Facial',
+    area: 'Dashashwamedh',
+    city: 'Varanasi',
+    distanceKm: 3.1,
+    imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80',
+    isVerified: true,
+    totalJobs: 940,
+  },
+];
+
+export const TESTIMONIALS = [
+  {
+    name: 'Sneha Rastogi',
+    location: 'Sigra, Varanasi',
+    comment: 'The Korean Glass Skin Ritual was heavenly! Sunita arrived right on time with a sealed kit, played relaxing music, and my skin has never looked this luminous. Yes Madam style comfort right at my home in Varanasi!',
+    rating: 5,
+    service: 'Korean Glass Skin Hydra Ritual',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&q=80',
+  },
+  {
+    name: 'Dr. Neha Mehrotra',
+    location: 'Bhelupur, Varanasi',
+    comment: 'Being a busy doctor at BHU, visiting salons was impossible. BeautyNest sent a verified expert with disposable wax cartridges. Clean, painless, and completely transparent pricing!',
+    rating: 5,
+    service: 'Full Body Waxing',
+    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&q=80',
+  },
+  {
+    name: 'Tanvi Saxena',
+    location: 'Lanka, Varanasi',
+    comment: 'Booked Pooja for my sister’s engagement makeup and hair styling near Assi Ghat. The HD look stayed intact all night without any creases. Truly 5-star doorstep luxury in Varanasi!',
+    rating: 5,
+    service: 'Royal Kashi HD Bridal Makeup',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80',
+  },
+];

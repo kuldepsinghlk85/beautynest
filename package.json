@@ -1,0 +1,30 @@
+{
+  "name": "beautynest-monorepo",
+  "version": "1.0.0",
+  "description": "BeautyNest - Ladies Doorstep Salon Ecosystem (Yes Madam Style)",
+  "private": true,
+  "scripts": {
+    "install:all": "npm --prefix backend install && npm --prefix customer-website install && npm --prefix admin-dashboard install",
+    "prisma:generate": "npm --prefix backend run prisma:generate",
+    "prisma:migrate": "npm --prefix backend run prisma:migrate",
+    "prisma:seed": "npm --prefix backend run prisma:seed",
+    "build:backend": "npm --prefix backend run build",
+    "build:website": "npm --prefix customer-website run build",
+    "build:admin": "npm --prefix admin-dashboard run build",
+    "build:all": "npm run build:backend && npm run build:website && npm run build:admin",
+    "dev:backend": "npm --prefix backend run start:dev",
+    "dev:website": "npm --prefix customer-website run dev",
+    "dev:admin": "npm --prefix admin-dashboard run dev",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down"
+  },
+  "keywords": [
+    "doorstep-salon",
+    "beautynest",
+    "yes-madam-clone",
+    "beauty-marketplace",
+    "lucknow-salon"
+  ],
+  "author": "BeautyNest Team",
+  "license": "UNLICENSED"
+}
