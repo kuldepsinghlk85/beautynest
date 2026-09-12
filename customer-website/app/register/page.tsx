@@ -87,7 +87,7 @@ export default function CustomerRegistrationPage() {
                 </div>
                 <div className="inline-flex items-center gap-2 bg-pink-100 text-brand-primary px-3 py-1 rounded-full text-xs font-bold mb-3">
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>Varanasi Ladies Doorstep Salon</span>
+                  <span>Ladies Doorstep Salon</span>
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-serif font-bold text-gray-900">
                   Customer Registration

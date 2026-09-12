@@ -291,7 +291,7 @@ export default function BeauticianMobileApp() {
                 </div>
                 <h2 className="text-xl font-bold text-gray-900">Beautician Partner App</h2>
                 <p className="text-xs text-gray-500">
-                  Welcome to BeautyNest Doorstep Salon Varanasi. Login to manage live trips and orders.
+                  Welcome to BeautyNest Ladies Doorstep Salon. Login to manage live trips and orders.
                 </p>
               </div>
 

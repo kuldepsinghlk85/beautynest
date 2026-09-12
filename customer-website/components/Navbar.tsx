@@ -115,16 +115,11 @@ export default function Navbar() {
               <img src="/logo.png" alt="BeautyNest Logo" className="w-full h-full object-cover rounded-full" />
             </div>
             <div>
-              <div className="flex items-center gap-1">
-                <span className="text-2xl font-serif font-bold tracking-tight text-brand-charcoal">
-                  Beauty<span className="text-brand-primary">Nest</span>
-                </span>
-                <span className="text-xs bg-brand-primaryLight text-brand-primary px-2 py-0.5 rounded-full font-medium ml-1">
-                  Ladies Only
-                </span>
-              </div>
+              <span className="text-2xl font-serif font-bold tracking-tight text-brand-charcoal block">
+                Beauty<span className="text-brand-primary">Nest</span>
+              </span>
               <p className="text-[11px] text-gray-500 tracking-wider uppercase font-medium">
-                {selectedCity} Doorstep Salon
+                Ladies Doorstep Salon
               </p>
             </div>
           </Link>
