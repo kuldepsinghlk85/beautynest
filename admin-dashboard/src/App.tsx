@@ -16,6 +16,8 @@ import BeauticianTiersPage from './pages/BeauticianTiersPage';
 import ConsentFormsPage from './pages/ConsentFormsPage';
 import DistanceRulesPage from './pages/DistanceRulesPage';
 
+import CategoriesPage from './pages/CategoriesPage';
+
 export default function App() {
   const [currentRole, setCurrentRole] = useState<UserRole>('ADMIN');
   const [currentTab, setCurrentTab] = useState('dashboard');
@@ -59,9 +61,21 @@ export default function App() {
         return <BeauticiansPage />;
       case 'customers':
         return <CustomersPage />;
-      case 'services':
       case 'categories':
+        return (
+          <CategoriesPage
+            initialView="categories"
+            onNavigateToServices={() => setCurrentTab('services')}
+          />
+        );
       case 'subcategories':
+        return (
+          <CategoriesPage
+            initialView="subcategories"
+            onNavigateToServices={() => setCurrentTab('services')}
+          />
+        );
+      case 'services':
       case 'products':
       case 'inventory':
         return <ServicesPage />;

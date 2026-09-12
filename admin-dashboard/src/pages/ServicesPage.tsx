@@ -16,8 +16,13 @@ import {
   Save,
   Check,
   Gift,
+  Calculator,
+  Car,
+  Package,
+  Layers,
+  HelpCircle,
 } from 'lucide-react';
-import { BEAUTYNEST_SERVICES, SERVICE_CATEGORIES, type BeautyService } from '../lib/allServices';
+import { BEAUTYNEST_SERVICES, SERVICE_CATEGORIES, type BeautyService, type ServiceCategory } from '../lib/allServices';
 
 interface ServiceItem {
   id: string;
@@ -37,6 +42,14 @@ interface ServiceItem {
   lucknowPriceRange?: string;
   prayagrajPriceRange?: string;
   gender?: string;
+
+  // Dynamic Pricing Formula Breakdown (Basic + Beautician Cut + Cosmetics + Travel + Safety)
+  baseLaborPrice: number;
+  beauticianShare: number;
+  cosmeticProductCost: number;
+  distanceCharge: number;
+  additionalCharges: number;
+
   beauticianCommissionPercent?: number;
   beauticianCommissionAmount?: number;
   platformCommissionPercent?: number;
@@ -82,7 +95,7 @@ export const ACTIVE_PROMO_CODES = [
   },
 ];
 
-// Full suite of 132 services from user sheet (BS-001 to BS-132) with offer mappings
+// Full suite of 132 services from user sheet (BS-001 to BS-132) with offer mappings & dynamic pricing formula
 const CATALOG_SERVICES: ServiceItem[] = BEAUTYNEST_SERVICES.map((s, index) => {
   let offerCode: string | undefined = undefined;
   let offerTag: string | undefined = undefined;
@@ -104,6 +117,14 @@ const CATALOG_SERVICES: ServiceItem[] = BEAUTYNEST_SERVICES.map((s, index) => {
     discountPercent = 25;
   }
 
+  // Exact formula breakdown matching master specification
+  const price = s.price;
+  const baseLaborPrice = Math.round(price * 0.45);
+  const beauticianShare = Math.round(price * 0.20); // 20% Gold partner cut
+  const cosmeticProductCost = Math.round(price * 0.25); // cosmetics portion (waived to 0 if own products)
+  const distanceCharge = 0; // free within 3 KM threshold
+  const additionalCharges = Math.max(0, price - (baseLaborPrice + beauticianShare + cosmeticProductCost + distanceCharge));
+
   return {
     id: s.slug || s.id,
     serviceId: s.serviceId,
@@ -122,6 +143,14 @@ const CATALOG_SERVICES: ServiceItem[] = BEAUTYNEST_SERVICES.map((s, index) => {
     lucknowPriceRange: s.lucknowPriceRange,
     prayagrajPriceRange: s.prayagrajPriceRange,
     gender: s.gender,
+
+    // Formula breakdown:
+    baseLaborPrice,
+    beauticianShare,
+    cosmeticProductCost,
+    distanceCharge,
+    additionalCharges,
+
     beauticianCommissionPercent: s.beauticianCommissionPercent,
     beauticianCommissionAmount: s.beauticianCommissionAmount,
     platformCommissionPercent: s.platformCommissionPercent,
@@ -149,13 +178,32 @@ export default function ServicesPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
+  // Top Formula Simulator State
+  const [simBase, setSimBase] = useState(300);
+  const [simTierPercent, setSimTierPercent] = useState(20);
+  const [simCosmetic, setSimCosmetic] = useState(150);
+  const [simDistanceKm, setSimDistanceKm] = useState(2.5);
+  const [simSafetyKit, setSimSafetyKit] = useState(49);
+  const [simOwnProducts, setSimOwnProducts] = useState(false);
+
+  // Computed simulator values
+  const simBeauticianCut = Math.round(simBase * (simTierPercent / 100));
+  const simEffectiveCosmetics = simOwnProducts ? 0 : simCosmetic;
+  const simDistanceFee = simDistanceKm > 3 ? Math.round((simDistanceKm - 3) * 50) : 0;
+  const simFinalPrice = simBase + simBeauticianCut + simEffectiveCosmetics + simDistanceFee + simSafetyKit;
+
   // Add Form State
   const [newName, setNewName] = useState('');
-  const [newCat, setNewCat] = useState('Facial & Clean Up');
-  const [newSubcat, setNewSubcat] = useState('Hydra & Radiance');
-  const [newPrice, setNewPrice] = useState('899');
-  const [newOriginalPrice, setNewOriginalPrice] = useState('1499');
-  const [newVaranasiRange, setNewVaranasiRange] = useState('799 - 1199');
+  const [newCat, setNewCat] = useState(SERVICE_CATEGORIES[0]?.name || 'Facial & Cleanup');
+  const [newSubcat, setNewSubcat] = useState(SERVICE_CATEGORIES[0]?.subcategories[0] || 'Cleanup');
+  const [newBaseLabor, setNewBaseLabor] = useState(350);
+  const [newBeauticianCut, setNewBeauticianCut] = useState(150);
+  const [newCosmeticCost, setNewCosmeticCost] = useState(200);
+  const [newDistanceCharge, setNewDistanceCharge] = useState(0);
+  const [newAdditionalCharges, setNewAdditionalCharges] = useState(49);
+  const [newPrice, setNewPrice] = useState('749');
+  const [newOriginalPrice, setNewOriginalPrice] = useState('1199');
+  const [newVaranasiRange, setNewVaranasiRange] = useState('699 - 999');
   const [newDuration, setNewDuration] = useState('60');
   const [newDesc, setNewDesc] = useState('');
   const [newImageUrl, setNewImageUrl] = useState('https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&q=80');
@@ -169,6 +217,11 @@ export default function ServicesPage() {
   const [editName, setEditName] = useState('');
   const [editCat, setEditCat] = useState('');
   const [editSubcat, setEditSubcat] = useState('');
+  const [editBaseLabor, setEditBaseLabor] = useState(0);
+  const [editBeauticianCut, setEditBeauticianCut] = useState(0);
+  const [editCosmeticCost, setEditCosmeticCost] = useState(0);
+  const [editDistanceCharge, setEditDistanceCharge] = useState(0);
+  const [editAdditionalCharges, setEditAdditionalCharges] = useState(30);
   const [editPrice, setEditPrice] = useState('');
   const [editOriginalPrice, setEditOriginalPrice] = useState('');
   const [editVaranasiRange, setEditVaranasiRange] = useState('');
@@ -183,6 +236,28 @@ export default function ServicesPage() {
 
   const addFileInputRef = useRef<HTMLInputElement>(null);
   const editFileInputRef = useRef<HTMLInputElement>(null);
+
+  // Recalculate Edit Price whenever formula components change
+  const handleEditFormulaChange = (base: number, provider: number, cosmetic: number, travel: number, addl: number) => {
+    setEditBaseLabor(base);
+    setEditBeauticianCut(provider);
+    setEditCosmeticCost(cosmetic);
+    setEditDistanceCharge(travel);
+    setEditAdditionalCharges(addl);
+    const sum = base + provider + cosmetic + travel + addl;
+    setEditPrice(String(sum));
+  };
+
+  // Recalculate Add Price whenever formula components change
+  const handleAddFormulaChange = (base: number, provider: number, cosmetic: number, travel: number, addl: number) => {
+    setNewBaseLabor(base);
+    setNewBeauticianCut(provider);
+    setNewCosmeticCost(cosmetic);
+    setNewDistanceCharge(travel);
+    setNewAdditionalCharges(addl);
+    const sum = base + provider + cosmetic + travel + addl;
+    setNewPrice(String(sum));
+  };
 
   // Image Upload handler for Add Service
   const handleAddImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -212,12 +287,24 @@ export default function ServicesPage() {
     }
   };
 
-  // Open Edit Service Modal
+  // Open Edit Service Modal with formula pre-population
   const handleStartEditService = (s: ServiceItem) => {
     setEditingService(s);
     setEditName(s.name);
     setEditCat(s.category);
     setEditSubcat(s.subcategory || '');
+
+    const base = s.baseLaborPrice || Math.round(s.price * 0.45);
+    const provider = s.beauticianShare || Math.round(s.price * 0.20);
+    const cosmetic = s.cosmeticProductCost || Math.round(s.price * 0.25);
+    const travel = s.distanceCharge || 0;
+    const addl = s.additionalCharges !== undefined ? s.additionalCharges : Math.max(0, s.price - (base + provider + cosmetic + travel));
+
+    setEditBaseLabor(base);
+    setEditBeauticianCut(provider);
+    setEditCosmeticCost(cosmetic);
+    setEditDistanceCharge(travel);
+    setEditAdditionalCharges(addl);
     setEditPrice(String(s.price));
     setEditOriginalPrice(String(s.originalPrice));
     setEditVaranasiRange(s.varanasiPriceRange || `${Math.round(s.price * 0.9)} - ${Math.round(s.price * 1.3)}`);
@@ -235,6 +322,9 @@ export default function ServicesPage() {
   const handleSaveServiceEdit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingService) return;
+
+    const finalCalculatedPrice = Number(editPrice) || (editBaseLabor + editBeauticianCut + editCosmeticCost + editDistanceCharge + editAdditionalCharges);
+
     setServices((prev) =>
       prev.map((item) =>
         item.id === editingService.id
@@ -243,7 +333,7 @@ export default function ServicesPage() {
               name: editName,
               category: editCat,
               subcategory: editSubcat,
-              price: Number(editPrice) || item.price,
+              price: finalCalculatedPrice,
               originalPrice: Number(editOriginalPrice) || item.originalPrice,
               varanasiPriceRange: editVaranasiRange,
               duration: Number(editDuration) || item.duration,
@@ -254,6 +344,11 @@ export default function ServicesPage() {
               offerCode: editOfferCode || undefined,
               offerTag: editOfferTag || undefined,
               discountPercent: Number(editDiscountPercent) || undefined,
+              baseLaborPrice: editBaseLabor,
+              beauticianShare: editBeauticianCut,
+              cosmeticProductCost: editCosmeticCost,
+              distanceCharge: editDistanceCharge,
+              additionalCharges: editAdditionalCharges,
             }
           : item
       )
@@ -262,20 +357,22 @@ export default function ServicesPage() {
     setTimeout(() => {
       setEditSuccess(false);
       setEditingService(null);
-    }, 1400);
+    }, 1200);
   };
 
   // Add Service Submit
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
+    const finalCalculatedPrice = Number(newPrice) || (newBaseLabor + newBeauticianCut + newCosmeticCost + newDistanceCharge + newAdditionalCharges);
+
     const item: ServiceItem = {
       id: `srv-${Date.now()}`,
       serviceId: `BS-${String(services.length + 1).padStart(3, '0')}`,
       name: newName,
       category: newCat,
       subcategory: newSubcat,
-      price: Number(newPrice),
-      originalPrice: Number(newOriginalPrice) || Number(newPrice) * 1.5,
+      price: finalCalculatedPrice,
+      originalPrice: Number(newOriginalPrice) || Math.round(finalCalculatedPrice * 1.5),
       varanasiPriceRange: newVaranasiRange,
       duration: Number(newDuration) || 60,
       durationString: `${newDuration} mins`,
@@ -286,6 +383,11 @@ export default function ServicesPage() {
       offerCode: newOfferCode || undefined,
       offerTag: newOfferTag || undefined,
       discountPercent: Number(newDiscountPercent) || undefined,
+      baseLaborPrice: newBaseLabor,
+      beauticianShare: newBeauticianCut,
+      cosmeticProductCost: newCosmeticCost,
+      distanceCharge: newDistanceCharge,
+      additionalCharges: newAdditionalCharges,
     };
     setServices([item, ...services]);
     setShowAddModal(false);
@@ -338,6 +440,119 @@ export default function ServicesPage() {
           <Plus className="w-4 h-4" />
           <span>Add New Service</span>
         </button>
+      </div>
+
+      {/* DYNAMIC PRICING FORMULA & TARIFF SIMULATOR BANNER */}
+      <div className="bg-white rounded-2xl p-5 border border-blue-100 shadow-xs space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 pb-3 border-b border-gray-100">
+          <div className="flex items-center gap-2.5 text-xs font-bold text-gray-900">
+            <div className="w-8 h-8 rounded-xl bg-blue-50 text-[#0071E3] flex items-center justify-center">
+              <Calculator className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-gray-900">Master Dynamic Pricing Formula &amp; Tariff Engine</h3>
+              <p className="text-[11px] text-gray-500 font-normal">
+                Final Customer Payable = Basic Cost + Beautician Tier Commission + Cosmetic Products + Distance Charge + Additional Charges
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1 rounded-full border border-emerald-200">
+              ✓ Customer Own Products = ₹0 Cosmetic Cost
+            </span>
+          </div>
+        </div>
+
+        {/* Simulator Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
+          {/* 1. Basic Labor */}
+          <div className="bg-gray-50 p-3 rounded-xl border border-gray-200/80">
+            <span className="text-[10px] font-bold text-gray-500 uppercase block">1. Basic Labor</span>
+            <input
+              type="number"
+              value={simBase}
+              onChange={(e) => setSimBase(Number(e.target.value) || 0)}
+              className="w-full mt-1 px-2 py-1 bg-white border border-gray-200 rounded-lg font-bold text-gray-900 text-xs"
+            />
+            <span className="text-[10px] text-gray-400 mt-1 block">Technician Base</span>
+          </div>
+
+          {/* 2. Beautician Tier */}
+          <div className="bg-gray-50 p-3 rounded-xl border border-gray-200/80">
+            <span className="text-[10px] font-bold text-gray-500 uppercase block">2. Partner Cut ({simTierPercent}%)</span>
+            <select
+              value={simTierPercent}
+              onChange={(e) => setSimTierPercent(Number(e.target.value))}
+              className="w-full mt-1 px-2 py-1 bg-white border border-gray-200 rounded-lg font-bold text-gray-900 text-xs cursor-pointer"
+            >
+              <option value={10}>Bronze (10%)</option>
+              <option value={15}>Silver (15%)</option>
+              <option value={20}>Gold (20%)</option>
+              <option value={25}>Platinum (25%)</option>
+            </select>
+            <span className="text-[10px] text-emerald-600 font-semibold mt-1 block">+₹{simBeauticianCut} Cut</span>
+          </div>
+
+          {/* 3. Cosmetics */}
+          <div className="bg-gray-50 p-3 rounded-xl border border-gray-200/80">
+            <span className="text-[10px] font-bold text-gray-500 uppercase block">3. Cosmetics</span>
+            <input
+              type="number"
+              value={simCosmetic}
+              onChange={(e) => setSimCosmetic(Number(e.target.value) || 0)}
+              disabled={simOwnProducts}
+              className="w-full mt-1 px-2 py-1 bg-white border border-gray-200 rounded-lg font-bold text-gray-900 text-xs disabled:opacity-50"
+            />
+            <label className="flex items-center gap-1 mt-1 text-[10px] text-gray-600 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={simOwnProducts}
+                onChange={(e) => setSimOwnProducts(e.target.checked)}
+                className="w-3 h-3 accent-[#0071E3]"
+              />
+              <span>Own Products</span>
+            </label>
+          </div>
+
+          {/* 4. Distance */}
+          <div className="bg-gray-50 p-3 rounded-xl border border-gray-200/80">
+            <span className="text-[10px] font-bold text-gray-500 uppercase block">4. Travel Distance</span>
+            <select
+              value={simDistanceKm}
+              onChange={(e) => setSimDistanceKm(Number(e.target.value))}
+              className="w-full mt-1 px-2 py-1 bg-white border border-gray-200 rounded-lg font-bold text-gray-900 text-xs cursor-pointer"
+            >
+              <option value={2.5}>2.5 KM (Free)</option>
+              <option value={3.0}>3.0 KM (Free)</option>
+              <option value={5.5}>5.5 KM (+₹125)</option>
+              <option value={8.0}>8.0 KM (+₹250)</option>
+            </select>
+            <span className="text-[10px] text-blue-600 font-semibold mt-1 block">
+              {simDistanceFee === 0 ? 'Free (≤3 KM)' : `+₹${simDistanceFee}`}
+            </span>
+          </div>
+
+          {/* 5. Additional / Safety Kit */}
+          <div className="bg-gray-50 p-3 rounded-xl border border-gray-200/80">
+            <span className="text-[10px] font-bold text-gray-500 uppercase block">5. Safety Kit &amp; PPE</span>
+            <input
+              type="number"
+              value={simSafetyKit}
+              onChange={(e) => setSimSafetyKit(Number(e.target.value) || 0)}
+              className="w-full mt-1 px-2 py-1 bg-white border border-gray-200 rounded-lg font-bold text-gray-900 text-xs"
+            />
+            <span className="text-[10px] text-gray-400 mt-1 block">Disposables Pack</span>
+          </div>
+
+          {/* Result: Calculated Final Price */}
+          <div className="bg-blue-50/70 p-3 rounded-xl border-2 border-[#0071E3]/40 flex flex-col justify-between">
+            <span className="text-[10px] font-bold text-[#0071E3] uppercase block">Final Calculated</span>
+            <span className="text-xl font-extrabold text-[#0071E3] mt-0.5">₹{simFinalPrice}</span>
+            <span className="text-[10px] text-gray-500">
+              {simOwnProducts ? '₹0 product cost applied' : 'Standard salon kit'}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Offers & Promo Codes Quick Manager Bar */}
@@ -430,10 +645,9 @@ export default function ServicesPage() {
               <tr>
                 <th className="py-3.5 px-6">Code &amp; Service</th>
                 <th className="py-3.5 px-6">Category</th>
+                <th className="py-3.5 px-6">Dynamic Pricing Formula Breakdown</th>
                 <th className="py-3.5 px-6">Varanasi Range</th>
-                <th className="py-3.5 px-6">Price / MRP</th>
                 <th className="py-3.5 px-6">Duration</th>
-                <th className="py-3.5 px-6">Commission / Net</th>
                 <th className="py-3.5 px-6">Offers &amp; Codes</th>
                 <th className="py-3.5 px-6 text-right">Actions</th>
               </tr>
@@ -470,32 +684,47 @@ export default function ServicesPage() {
                   </td>
 
                   {/* Category */}
-                  <td className="py-3.5 px-6 font-medium text-gray-600">{s.category}</td>
+                  <td className="py-3.5 px-6 font-medium text-gray-600">
+                    <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md font-semibold text-[11px]">
+                      {s.category}
+                    </span>
+                  </td>
+
+                  {/* Dynamic Pricing Formula Breakdown Column */}
+                  <td className="py-3.5 px-6">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-sm text-gray-900">₹{s.price}</span>
+                        <span className="text-gray-400 line-through text-[10px]">₹{s.originalPrice}</span>
+                        <span className="text-[9px] bg-blue-100 text-[#0071E3] font-extrabold px-1.5 py-0.2 rounded">
+                          Formula Total
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-1 text-[10px]">
+                        <span className="bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded font-medium" title="Technician Service Labor">
+                          🛠️ Base: ₹{s.baseLaborPrice}
+                        </span>
+                        <span className="bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded font-medium" title="Provider Tier Commission">
+                          👩‍💼 Partner: ₹{s.beauticianShare}
+                        </span>
+                        <span className="bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded font-medium" title="Cosmetic Product Cost (₹0 if own products)">
+                          🧴 Cosmetic: ₹{s.cosmeticProductCost}
+                        </span>
+                        <span className="bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-medium" title="Safety Kit & PPE">
+                          🛡️ Kit: ₹{s.additionalCharges}
+                        </span>
+                      </div>
+                    </div>
+                  </td>
 
                   {/* Varanasi Price Range */}
                   <td className="py-3.5 px-6 font-medium text-purple-700">
                     {s.varanasiPriceRange ? `₹${s.varanasiPriceRange}` : `₹${s.price}`}
                   </td>
 
-                  {/* Selling Price & MRP */}
-                  <td className="py-3.5 px-6">
-                    <span className="font-bold text-brand-primary">₹{s.price}</span>
-                    <span className="text-gray-400 line-through text-[10px] block">₹{s.originalPrice}</span>
-                  </td>
-
                   {/* Duration */}
                   <td className="py-3.5 px-6 text-gray-500">
                     {s.durationString || `${s.duration} mins`}
-                  </td>
-
-                  {/* Commission */}
-                  <td className="py-3.5 px-6">
-                    <span className="font-semibold text-emerald-600">
-                      {s.beauticianCommissionPercent ? `${s.beauticianCommissionPercent}% expert` : '50%'}
-                    </span>
-                    {s.estimatedBusinessNet !== undefined && (
-                      <span className="text-[10px] text-gray-400 block">Net: ₹{s.estimatedBusinessNet}</span>
-                    )}
                   </td>
 
                   {/* Offers & Promo Codes Badge */}
@@ -650,7 +879,14 @@ export default function ServicesPage() {
                       </label>
                       <select
                         value={editCat}
-                        onChange={(e) => setEditCat(e.target.value)}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setEditCat(val);
+                          const matched = SERVICE_CATEGORIES.find((c) => c.name === val);
+                          if (matched && matched.subcategories && matched.subcategories.length > 0) {
+                            setEditSubcat(matched.subcategories[0]);
+                          }
+                        }}
                         className="w-full px-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-brand-primary focus:bg-white font-medium"
                       >
                         {SERVICE_CATEGORIES.map((cat) => (
@@ -665,12 +901,211 @@ export default function ServicesPage() {
                       <label className="block text-xs font-bold text-gray-700 mb-1">
                         Subcategory
                       </label>
-                      <input
-                        type="text"
-                        value={editSubcat}
-                        onChange={(e) => setEditSubcat(e.target.value)}
-                        className="w-full px-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-brand-primary focus:bg-white"
-                      />
+                      {(() => {
+                        const currentCatObj = SERVICE_CATEGORIES.find((c) => c.name === editCat);
+                        const subcats = currentCatObj?.subcategories || [];
+                        return subcats.length > 0 ? (
+                          <select
+                            value={editSubcat}
+                            onChange={(e) => setEditSubcat(e.target.value)}
+                            className="w-full px-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-brand-primary focus:bg-white font-medium"
+                          >
+                            {subcats.map((sc) => (
+                              <option key={sc} value={sc}>
+                                {sc}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            type="text"
+                            value={editSubcat}
+                            onChange={(e) => setEditSubcat(e.target.value)}
+                            className="w-full px-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-brand-primary focus:bg-white"
+                          />
+                        );
+                      })()}
+                    </div>
+                  </div>
+
+                  {/* Dynamic Pricing Formula Breakdown Panel */}
+                  <div className="bg-gradient-to-br from-pink-50/70 via-purple-50/50 to-amber-50/40 p-3.5 rounded-2xl border border-pink-200/80 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <Calculator className="w-4 h-4 text-brand-primary" />
+                        <span className="text-xs font-bold text-gray-900">Dynamic Pricing Formula Breakdown</span>
+                      </div>
+                      <span className="text-[10px] font-semibold bg-brand-primary/10 text-brand-primary px-2 py-0.5 rounded-full border border-pink-200">
+                        Dynamic Formula Engine
+                      </span>
+                    </div>
+
+                    <p className="text-[11px] text-gray-600 bg-white/80 p-2 rounded-xl border border-pink-100 leading-relaxed">
+                      <strong>Pricing Formula:</strong> Final Price = Base Labor + Beautician Cut + Cosmetic Cost + Travel Allowance + Safety/Hygiene Kit
+                    </p>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                      {/* 1. Basic Labor Cost */}
+                      <div className="bg-white p-2.5 rounded-xl border border-gray-200 shadow-2xs">
+                        <label className="block text-[10px] font-bold text-gray-700 uppercase mb-1">
+                          1. Base Labor (₹)
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={editBaseLabor}
+                          onChange={(e) => {
+                            const val = Number(e.target.value) || 0;
+                            handleEditFormulaChange(val, editBeauticianCut, editCosmeticCost, editDistanceCharge, editAdditionalCharges);
+                          }}
+                          className="w-full px-2 py-1 text-xs font-bold bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-brand-primary"
+                        />
+                        <span className="text-[9px] text-gray-400 block mt-0.5">Core service work</span>
+                      </div>
+
+                      {/* 2. Beautician Tier Cut */}
+                      <div className="bg-white p-2.5 rounded-xl border border-gray-200 shadow-2xs">
+                        <label className="block text-[10px] font-bold text-purple-700 uppercase mb-1">
+                          2. Beautician Cut (₹)
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={editBeauticianCut}
+                          onChange={(e) => {
+                            const val = Number(e.target.value) || 0;
+                            handleEditFormulaChange(editBaseLabor, val, editCosmeticCost, editDistanceCharge, editAdditionalCharges);
+                          }}
+                          className="w-full px-2 py-1 text-xs font-bold text-purple-700 bg-purple-50/40 border border-purple-200 rounded-lg outline-none focus:border-brand-primary"
+                        />
+                        <div className="flex gap-1 mt-1">
+                          {[15, 20, 25, 30].map((pct) => (
+                            <button
+                              key={pct}
+                              type="button"
+                              onClick={() => {
+                                const cut = Math.round((Number(editPrice) || 500) * (pct / 100));
+                                handleEditFormulaChange(editBaseLabor, cut, editCosmeticCost, editDistanceCharge, editAdditionalCharges);
+                              }}
+                              className="text-[9px] px-1 py-0.5 bg-purple-100 text-purple-700 rounded hover:bg-purple-200 font-semibold"
+                            >
+                              {pct}%
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* 3. Cosmetic Product Cost */}
+                      <div className="bg-white p-2.5 rounded-xl border border-gray-200 shadow-2xs">
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="block text-[10px] font-bold text-pink-700 uppercase">
+                            3. Cosmetics (₹)
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newCost = editCosmeticCost === 0 ? 150 : 0;
+                              handleEditFormulaChange(editBaseLabor, editBeauticianCut, newCost, editDistanceCharge, editAdditionalCharges);
+                            }}
+                            className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                              editCosmeticCost === 0
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                            title="Toggle customer own cosmetics waiver"
+                          >
+                            {editCosmeticCost === 0 ? 'Own (₹0)' : 'Waive'}
+                          </button>
+                        </div>
+                        <input
+                          type="number"
+                          min="0"
+                          value={editCosmeticCost}
+                          onChange={(e) => {
+                            const val = Number(e.target.value) || 0;
+                            handleEditFormulaChange(editBaseLabor, editBeauticianCut, val, editDistanceCharge, editAdditionalCharges);
+                          }}
+                          className="w-full px-2 py-1 text-xs font-bold text-pink-700 bg-pink-50/40 border border-pink-200 rounded-lg outline-none focus:border-brand-primary"
+                        />
+                        <span className="text-[9px] text-gray-400 block mt-0.5">₹0 if own products</span>
+                      </div>
+
+                      {/* 4. Distance / Travel Allowance */}
+                      <div className="bg-white p-2.5 rounded-xl border border-gray-200 shadow-2xs">
+                        <label className="block text-[10px] font-bold text-blue-700 uppercase mb-1">
+                          4. Travel / Dist (₹)
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={editDistanceCharge}
+                          onChange={(e) => {
+                            const val = Number(e.target.value) || 0;
+                            handleEditFormulaChange(editBaseLabor, editBeauticianCut, editCosmeticCost, val, editAdditionalCharges);
+                          }}
+                          className="w-full px-2 py-1 text-xs font-bold text-blue-700 bg-blue-50/40 border border-blue-200 rounded-lg outline-none focus:border-brand-primary"
+                        />
+                        <div className="flex gap-1 mt-1">
+                          {[0, 49, 99].map((amt) => (
+                            <button
+                              key={amt}
+                              type="button"
+                              onClick={() => handleEditFormulaChange(editBaseLabor, editBeauticianCut, editCosmeticCost, amt, editAdditionalCharges)}
+                              className="text-[9px] px-1 py-0.5 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 font-semibold"
+                            >
+                              ₹{amt}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* 5. Safety Kit & Additional Charges */}
+                      <div className="bg-white p-2.5 rounded-xl border border-gray-200 shadow-2xs">
+                        <label className="block text-[10px] font-bold text-amber-700 uppercase mb-1">
+                          5. Safety Kit (₹)
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={editAdditionalCharges}
+                          onChange={(e) => {
+                            const val = Number(e.target.value) || 0;
+                            handleEditFormulaChange(editBaseLabor, editBeauticianCut, editCosmeticCost, editDistanceCharge, val);
+                          }}
+                          className="w-full px-2 py-1 text-xs font-bold text-amber-700 bg-amber-50/40 border border-amber-200 rounded-lg outline-none focus:border-brand-primary"
+                        />
+                        <span className="text-[9px] text-gray-400 block mt-0.5">Hygiene & sanitized kit</span>
+                      </div>
+
+                      {/* Computed Equation Total */}
+                      <div className="bg-brand-primary/10 p-2.5 rounded-xl border border-brand-primary/30 flex flex-col justify-center">
+                        <span className="text-[9px] font-bold uppercase text-brand-primary">Calculated Total</span>
+                        <div className="text-base font-black text-brand-primary">
+                          ₹{editBaseLabor + editBeauticianCut + editCosmeticCost + editDistanceCharge + editAdditionalCharges}
+                        </div>
+                        <span className="text-[9px] text-gray-500">Live formula sum</span>
+                      </div>
+                    </div>
+
+                    {/* Live Calculation Strip */}
+                    <div className="bg-white p-2 rounded-xl border border-gray-200 flex flex-wrap items-center justify-between gap-1 text-[11px] font-mono">
+                      <div className="flex items-center gap-1">
+                        <span className="font-semibold text-gray-700">₹{editBaseLabor}</span>
+                        <span className="text-gray-400">+</span>
+                        <span className="font-semibold text-purple-700">₹{editBeauticianCut}</span>
+                        <span className="text-gray-400">+</span>
+                        <span className="font-semibold text-pink-700">₹{editCosmeticCost}</span>
+                        <span className="text-gray-400">+</span>
+                        <span className="font-semibold text-blue-700">₹{editDistanceCharge}</span>
+                        <span className="text-gray-400">+</span>
+                        <span className="font-semibold text-amber-700">₹{editAdditionalCharges}</span>
+                      </div>
+                      <div className="font-bold text-brand-primary flex items-center gap-1">
+                        <span>=</span>
+                        <span className="text-xs bg-brand-primary text-white px-2 py-0.5 rounded-md">
+                          ₹{editBaseLabor + editBeauticianCut + editCosmeticCost + editDistanceCharge + editAdditionalCharges}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
@@ -678,7 +1113,7 @@ export default function ServicesPage() {
                   <div className="grid grid-cols-3 gap-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Selling Price (₹) *
+                        Final Selling Price (₹) *
                       </label>
                       <input
                         type="number"
@@ -882,7 +1317,14 @@ export default function ServicesPage() {
                   </label>
                   <select
                     value={newCat}
-                    onChange={(e) => setNewCat(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setNewCat(val);
+                      const matched = SERVICE_CATEGORIES.find((c) => c.name === val);
+                      if (matched && matched.subcategories && matched.subcategories.length > 0) {
+                        setNewSubcat(matched.subcategories[0]);
+                      }
+                    }}
                     className="w-full px-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-brand-primary font-medium focus:bg-white"
                   >
                     {SERVICE_CATEGORIES.map((cat) => (
@@ -897,13 +1339,212 @@ export default function ServicesPage() {
                   <label className="block text-xs font-bold text-gray-700 mb-1">
                     Subcategory
                   </label>
-                  <input
-                    type="text"
-                    value={newSubcat}
-                    onChange={(e) => setNewSubcat(e.target.value)}
-                    placeholder="e.g. Premium Glow"
-                    className="w-full px-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-brand-primary focus:bg-white"
-                  />
+                  {(() => {
+                    const currentCatObj = SERVICE_CATEGORIES.find((c) => c.name === newCat);
+                    const subcats = currentCatObj?.subcategories || [];
+                    return subcats.length > 0 ? (
+                      <select
+                        value={newSubcat}
+                        onChange={(e) => setNewSubcat(e.target.value)}
+                        className="w-full px-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-brand-primary font-medium focus:bg-white"
+                      >
+                        {subcats.map((sc) => (
+                          <option key={sc} value={sc}>
+                            {sc}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        value={newSubcat}
+                        onChange={(e) => setNewSubcat(e.target.value)}
+                        placeholder="e.g. Premium Glow"
+                        className="w-full px-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-brand-primary focus:bg-white"
+                      />
+                    );
+                  })()}
+                </div>
+              </div>
+
+              {/* Dynamic Pricing Formula Breakdown Panel */}
+              <div className="bg-gradient-to-br from-pink-50/70 via-purple-50/50 to-amber-50/40 p-3.5 rounded-2xl border border-pink-200/80 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <Calculator className="w-4 h-4 text-brand-primary" />
+                    <span className="text-xs font-bold text-gray-900">Dynamic Pricing Formula Breakdown</span>
+                  </div>
+                  <span className="text-[10px] font-semibold bg-brand-primary/10 text-brand-primary px-2 py-0.5 rounded-full border border-pink-200">
+                    Dynamic Formula Engine
+                  </span>
+                </div>
+
+                <p className="text-[11px] text-gray-600 bg-white/80 p-2 rounded-xl border border-pink-100 leading-relaxed">
+                  <strong>Pricing Formula:</strong> Final Price = Base Labor + Beautician Cut + Cosmetic Cost + Travel Allowance + Safety/Hygiene Kit
+                </p>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                  {/* 1. Basic Labor Cost */}
+                  <div className="bg-white p-2.5 rounded-xl border border-gray-200 shadow-2xs">
+                    <label className="block text-[10px] font-bold text-gray-700 uppercase mb-1">
+                      1. Base Labor (₹)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={newBaseLabor}
+                      onChange={(e) => {
+                        const val = Number(e.target.value) || 0;
+                        handleAddFormulaChange(val, newBeauticianCut, newCosmeticCost, newDistanceCharge, newAdditionalCharges);
+                      }}
+                      className="w-full px-2 py-1 text-xs font-bold bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-brand-primary"
+                    />
+                    <span className="text-[9px] text-gray-400 block mt-0.5">Core service work</span>
+                  </div>
+
+                  {/* 2. Beautician Tier Cut */}
+                  <div className="bg-white p-2.5 rounded-xl border border-gray-200 shadow-2xs">
+                    <label className="block text-[10px] font-bold text-purple-700 uppercase mb-1">
+                      2. Beautician Cut (₹)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={newBeauticianCut}
+                      onChange={(e) => {
+                        const val = Number(e.target.value) || 0;
+                        handleAddFormulaChange(newBaseLabor, val, newCosmeticCost, newDistanceCharge, newAdditionalCharges);
+                      }}
+                      className="w-full px-2 py-1 text-xs font-bold text-purple-700 bg-purple-50/40 border border-purple-200 rounded-lg outline-none focus:border-brand-primary"
+                    />
+                    <div className="flex gap-1 mt-1">
+                      {[15, 20, 25, 30].map((pct) => (
+                        <button
+                          key={pct}
+                          type="button"
+                          onClick={() => {
+                            const cut = Math.round((Number(newPrice) || 500) * (pct / 100));
+                            handleAddFormulaChange(newBaseLabor, cut, newCosmeticCost, newDistanceCharge, newAdditionalCharges);
+                          }}
+                          className="text-[9px] px-1 py-0.5 bg-purple-100 text-purple-700 rounded hover:bg-purple-200 font-semibold"
+                        >
+                          {pct}%
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 3. Cosmetic Product Cost */}
+                  <div className="bg-white p-2.5 rounded-xl border border-gray-200 shadow-2xs">
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-[10px] font-bold text-pink-700 uppercase">
+                        3. Cosmetics (₹)
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newCost = newCosmeticCost === 0 ? 150 : 0;
+                          handleAddFormulaChange(newBaseLabor, newBeauticianCut, newCost, newDistanceCharge, newAdditionalCharges);
+                        }}
+                        className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                          newCosmeticCost === 0
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                        title="Toggle customer own cosmetics waiver"
+                      >
+                        {newCosmeticCost === 0 ? 'Own (₹0)' : 'Waive'}
+                      </button>
+                    </div>
+                    <input
+                      type="number"
+                      min="0"
+                      value={newCosmeticCost}
+                      onChange={(e) => {
+                        const val = Number(e.target.value) || 0;
+                        handleAddFormulaChange(newBaseLabor, newBeauticianCut, val, newDistanceCharge, newAdditionalCharges);
+                      }}
+                      className="w-full px-2 py-1 text-xs font-bold text-pink-700 bg-pink-50/40 border border-pink-200 rounded-lg outline-none focus:border-brand-primary"
+                    />
+                    <span className="text-[9px] text-gray-400 block mt-0.5">₹0 if own products</span>
+                  </div>
+
+                  {/* 4. Distance / Travel Allowance */}
+                  <div className="bg-white p-2.5 rounded-xl border border-gray-200 shadow-2xs">
+                    <label className="block text-[10px] font-bold text-blue-700 uppercase mb-1">
+                      4. Travel / Dist (₹)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={newDistanceCharge}
+                      onChange={(e) => {
+                        const val = Number(e.target.value) || 0;
+                        handleAddFormulaChange(newBaseLabor, newBeauticianCut, newCosmeticCost, val, newAdditionalCharges);
+                      }}
+                      className="w-full px-2 py-1 text-xs font-bold text-blue-700 bg-blue-50/40 border border-blue-200 rounded-lg outline-none focus:border-brand-primary"
+                    />
+                    <div className="flex gap-1 mt-1">
+                      {[0, 49, 99].map((amt) => (
+                        <button
+                          key={amt}
+                          type="button"
+                          onClick={() => handleAddFormulaChange(newBaseLabor, newBeauticianCut, newCosmeticCost, amt, newAdditionalCharges)}
+                          className="text-[9px] px-1 py-0.5 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 font-semibold"
+                        >
+                          ₹{amt}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 5. Safety Kit & Additional Charges */}
+                  <div className="bg-white p-2.5 rounded-xl border border-gray-200 shadow-2xs">
+                    <label className="block text-[10px] font-bold text-amber-700 uppercase mb-1">
+                      5. Safety Kit (₹)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={newAdditionalCharges}
+                      onChange={(e) => {
+                        const val = Number(e.target.value) || 0;
+                        handleAddFormulaChange(newBaseLabor, newBeauticianCut, newCosmeticCost, newDistanceCharge, val);
+                      }}
+                      className="w-full px-2 py-1 text-xs font-bold text-amber-700 bg-amber-50/40 border border-amber-200 rounded-lg outline-none focus:border-brand-primary"
+                    />
+                    <span className="text-[9px] text-gray-400 block mt-0.5">Hygiene & sanitized kit</span>
+                  </div>
+
+                  {/* Computed Equation Total */}
+                  <div className="bg-brand-primary/10 p-2.5 rounded-xl border border-brand-primary/30 flex flex-col justify-center">
+                    <span className="text-[9px] font-bold uppercase text-brand-primary">Calculated Total</span>
+                    <div className="text-base font-black text-brand-primary">
+                      ₹{newBaseLabor + newBeauticianCut + newCosmeticCost + newDistanceCharge + newAdditionalCharges}
+                    </div>
+                    <span className="text-[9px] text-gray-500">Live formula sum</span>
+                  </div>
+                </div>
+
+                {/* Live Calculation Strip */}
+                <div className="bg-white p-2 rounded-xl border border-gray-200 flex flex-wrap items-center justify-between gap-1 text-[11px] font-mono">
+                  <div className="flex items-center gap-1">
+                    <span className="font-semibold text-gray-700">₹{newBaseLabor}</span>
+                    <span className="text-gray-400">+</span>
+                    <span className="font-semibold text-purple-700">₹{newBeauticianCut}</span>
+                    <span className="text-gray-400">+</span>
+                    <span className="font-semibold text-pink-700">₹{newCosmeticCost}</span>
+                    <span className="text-gray-400">+</span>
+                    <span className="font-semibold text-blue-700">₹{newDistanceCharge}</span>
+                    <span className="text-gray-400">+</span>
+                    <span className="font-semibold text-amber-700">₹{newAdditionalCharges}</span>
+                  </div>
+                  <div className="font-bold text-brand-primary flex items-center gap-1">
+                    <span>=</span>
+                    <span className="text-xs bg-brand-primary text-white px-2 py-0.5 rounded-md">
+                      ₹{newBaseLabor + newBeauticianCut + newCosmeticCost + newDistanceCharge + newAdditionalCharges}
+                    </span>
+                  </div>
                 </div>
               </div>
 

@@ -40,6 +40,7 @@ export interface ServiceCategory {
   name: string;
   slug: string;
   count: number;
+  subcategories: string[];
   icon: string;
   image: string;
 }
