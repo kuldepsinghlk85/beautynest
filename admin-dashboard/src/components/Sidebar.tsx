@@ -23,6 +23,8 @@ import {
   Headphones,
   Gift,
   Sliders,
+  BookOpen,
+  ChevronRight,
 } from 'lucide-react';
 import { UserRole } from './Header';
 
@@ -94,6 +96,7 @@ export default function Sidebar({
     {
       groupTitle: 'SYSTEM',
       items: [
+        { id: 'docs', label: 'Master Documentation', icon: BookOpen, badge: 'Full' },
         { id: 'tiers', label: 'Partner Tiers & %', icon: Award },
         { id: 'distance', label: 'Distance Rules', icon: Compass },
         { id: 'audit', label: 'Audit Logs', icon: History },
@@ -214,6 +217,23 @@ export default function Sidebar({
             </div>
           ))}
         </nav>
+      </div>
+
+      {/* Master Documentation Quick Link Card */}
+      <div className="p-3 border-t border-gray-100 bg-purple-50/50">
+        <button
+          onClick={() => onSelectTab('docs')}
+          className="w-full p-2.5 bg-gradient-to-r from-purple-900 to-slate-900 text-white rounded-xl text-left shadow-xs hover:shadow-md transition-all flex items-center justify-between group"
+        >
+          <div className="flex items-center gap-2">
+            <BookOpen className="w-4 h-4 text-pink-400 group-hover:scale-110 transition-transform" />
+            <div>
+              <span className="font-bold text-xs block text-white">Master Docs &amp; Guide</span>
+              <span className="text-[10px] text-pink-200">View Full Handbook</span>
+            </div>
+          </div>
+          <ChevronRight className="w-3.5 h-3.5 text-pink-300 group-hover:translate-x-0.5 transition-transform" />
+        </button>
       </div>
 
       {/* Footer info */}

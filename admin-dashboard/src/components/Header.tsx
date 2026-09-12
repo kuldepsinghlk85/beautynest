@@ -9,6 +9,7 @@ import {
   Headphones,
   Sparkles,
   ChevronDown,
+  BookOpen,
 } from 'lucide-react';
 
 export type UserRole = 'ADMIN' | 'WORKER' | 'OPERATOR';
@@ -18,6 +19,7 @@ interface HeaderProps {
   currentRole: UserRole;
   onRoleChange: (role: UserRole) => void;
   onRefresh?: () => void;
+  onOpenDocs?: () => void;
 }
 
 export default function Header({
@@ -25,6 +27,7 @@ export default function Header({
   currentRole,
   onRoleChange,
   onRefresh,
+  onOpenDocs,
 }: HeaderProps) {
   return (
     <header className="h-16 bg-white border-b border-gray-100 px-6 flex items-center justify-between flex-shrink-0 select-none z-10">
@@ -85,6 +88,18 @@ export default function Header({
             className="w-full pl-9 pr-4 py-1.5 text-xs bg-gray-50/90 border border-gray-200/90 rounded-xl outline-none focus:border-[#0071E3] focus:bg-white text-gray-800"
           />
         </div>
+
+        {/* Master System Documentation Button */}
+        {onOpenDocs && (
+          <button
+            onClick={onOpenDocs}
+            className="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all shadow-xs"
+            title="Open Master System Documentation & Control Guide"
+          >
+            <BookOpen className="w-3.5 h-3.5 text-purple-600" />
+            <span className="hidden sm:inline">Master Docs</span>
+          </button>
+        )}
 
         {/* Theme Toggle Icon */}
         <button

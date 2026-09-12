@@ -20,6 +20,7 @@ import CouponsPage from './pages/CouponsPage';
 import SliderManagerPage from './pages/SliderManagerPage';
 import PackagesPage from './pages/PackagesPage';
 import OffersPage from './pages/OffersPage';
+import DocumentationPage from './pages/DocumentationPage';
 
 export default function App() {
   const [currentRole, setCurrentRole] = useState<UserRole>('ADMIN');
@@ -98,6 +99,9 @@ export default function App() {
       case 'notifications':
       case 'audit':
         return <ReportsPage />;
+      case 'docs':
+      case 'documentation':
+        return <DocumentationPage onNavigateTab={setCurrentTab} />;
       case 'settings':
         return <SettingsPage />;
       default:
@@ -121,6 +125,7 @@ export default function App() {
           title={currentTab}
           currentRole={currentRole}
           onRoleChange={handleRoleChange}
+          onOpenDocs={() => setCurrentTab('docs')}
           onRefresh={() => {
             const tab = currentTab;
             setCurrentTab('dashboard');
