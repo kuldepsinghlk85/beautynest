@@ -40,23 +40,34 @@ const DEFAULT_SLIDES: HeroSlide[] = [
   },
   {
     id: 'hs-2',
-    title: 'Bridal & Festive Elegance',
+    title: 'Silky Hair Spa & Styling',
     subtitle: 'Pre-wedding & Party Glow Rituals at Your Doorstep',
-    badge: 'Flat ₹1000 OFF with BRIDAL1000',
-    scriptText: 'Royal Bridal Rituals 🌸',
+    badge: 'Trending Care 💇‍♀️',
+    scriptText: 'Silky Smooth Hair 🌸',
     imageUrl: '/slider/slide2.png',
-    ctaText: 'Explore Bridal Packages',
-    ctaLink: '/offers',
+    ctaText: 'Explore Hair Care',
+    ctaLink: '/services',
     isActive: true,
   },
   {
     id: 'hs-3',
-    title: 'Korean Glass Skin Ritual',
-    subtitle: 'Deep Pore Hydration & Ultrasonic Skin Pampering',
-    badge: 'Trending in Varanasi',
-    scriptText: 'Pure Glass Skin 💧',
+    title: 'Bridal & Party Glamour',
+    subtitle: 'Sterile kits, premium cosmetics & personalized salon touch',
+    badge: 'Special Occasions ✨',
+    scriptText: 'Flawless Glamour 💄',
     imageUrl: '/slider/slide3.png',
-    ctaText: 'Book Korean Ritual',
+    ctaText: 'View Glam Packages',
+    ctaLink: '/offers',
+    isActive: true,
+  },
+  {
+    id: 'hs-4',
+    title: 'Aroma Spa & Relaxation',
+    subtitle: 'Full body unwinding and herbal skin therapies in Varanasi',
+    badge: '100% Organic Products',
+    scriptText: 'Pure Serenity 🌿',
+    imageUrl: '/slider/slide4.png',
+    ctaText: 'Book Spa Ritual',
     ctaLink: '/services',
     isActive: true,
   },
@@ -66,8 +77,38 @@ export default function Hero() {
   const [slides, setSlides] = useState<HeroSlide[]>(DEFAULT_SLIDES);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
-  // Load from localStorage if admin has customized slides
-  useEffect(() => {
+  const fetchSliders = async () => {
+    try {
+      const res = await fetch('http://localhost:4200/api/sliders/active', {
+        headers: { 'Cache-Control': 'no-cache' },
+      }).catch(() => fetch('http://localhost:4200/sliders/active'));
+
+      if (res && res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped = data.map((item: any) => ({
+            id: item.id || `hs-${Math.random()}`,
+            title: item.title || '',
+            subtitle: item.subtitle || item.description || '',
+            badge: item.badge || '',
+            scriptText: item.scriptText || '',
+            imageUrl: item.imageUrl || item.bannerImage || '/slider/slide1.png',
+            ctaText: item.ctaText || item.buttonText || '',
+            ctaLink: item.ctaLink || item.redirectPage || '/services',
+            isActive: item.isActive !== false && item.status !== 'INACTIVE',
+          }));
+          const activeOnly = mapped.filter((s: HeroSlide) => s.isActive);
+          if (activeOnly.length > 0) {
+            setSlides(activeOnly);
+            return;
+          }
+        }
+      }
+    } catch (e) {
+      // ignore backend error, fallback
+    }
+
+    // Local fallback
     try {
       const saved = localStorage.getItem('beautynest_hero_slides');
       if (saved) {
@@ -76,12 +117,25 @@ export default function Hero() {
           const activeOnes = parsed.filter((s: HeroSlide) => s.isActive !== false);
           if (activeOnes.length > 0) {
             setSlides(activeOnes);
+            return;
           }
         }
       }
-    } catch (e) {
-      console.error(e);
-    }
+    } catch (e) {}
+
+    setSlides(DEFAULT_SLIDES);
+  };
+
+  useEffect(() => {
+    fetchSliders();
+    window.addEventListener('focus', fetchSliders);
+    // Periodic refresh every 15s to keep in sync with admin updates
+    const pollInterval = setInterval(fetchSliders, 15000);
+
+    return () => {
+      window.removeEventListener('focus', fetchSliders);
+      clearInterval(pollInterval);
+    };
   }, []);
 
   // Auto-advance carousel
@@ -196,31 +250,42 @@ export default function Hero() {
                   className="w-full h-full object-cover transition-all duration-700 ease-in-out scale-100 group-hover:scale-105"
                 />
                 
-                {/* Overlay Vignette & Script Text */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-6">
-                  <div className="space-y-1">
-                    <span className="inline-block bg-pink-600/90 backdrop-blur-xs text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
-                      {currentSlide.badge}
-                    </span>
-                    <h3 className="text-xl sm:text-2xl font-serif font-bold text-white leading-tight drop-shadow-md">
-                      {currentSlide.title}
-                    </h3>
-                    <p className="font-script text-2xl text-pink-200 drop-shadow-md">
-                      {currentSlide.scriptText}
-                    </p>
-                  </div>
+                {/* Overlay Vignette & Script Text (Clean & Conditional) */}
+                {(currentSlide.title || currentSlide.badge || currentSlide.scriptText || currentSlide.ctaText) ? (
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent flex flex-col justify-end p-6">
+                    <div className="space-y-1.5">
+                      {currentSlide.badge ? (
+                        <span className="inline-block bg-pink-600/90 backdrop-blur-xs text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
+                          {currentSlide.badge}
+                        </span>
+                      ) : null}
+                      {currentSlide.title ? (
+                        <h3 className="text-xl sm:text-2xl font-serif font-bold text-white leading-tight drop-shadow-md">
+                          {currentSlide.title}
+                        </h3>
+                      ) : null}
+                      {currentSlide.scriptText ? (
+                        <p className="font-script text-2xl text-pink-200 drop-shadow-md">
+                          {currentSlide.scriptText}
+                        </p>
+                      ) : null}
+                    </div>
 
-                  {/* Slide Action Button */}
-                  <div className="pt-3">
-                    <Link
-                      href={currentSlide.ctaLink || '/services'}
-                      className="inline-flex items-center gap-1.5 bg-white/95 hover:bg-white text-brand-primary text-xs font-bold px-4 py-2 rounded-full shadow-lg transition-all hover:scale-105"
-                    >
-                      <span>{currentSlide.ctaText || 'Explore Services'}</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
+                    {/* Slide Action Button */}
+                    {currentSlide.ctaText ? (
+                      <div className="pt-3">
+                        <Link
+                          href={currentSlide.ctaLink || '/services'}
+                          className="inline-flex items-center gap-1.5 bg-white/95 hover:bg-white text-brand-primary text-xs font-bold px-4 py-2 rounded-full shadow-lg transition-all hover:scale-105"
+                        >
+                          <span>{currentSlide.ctaText}</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
+                      </div>
+                    ) : null}
                   </div>
-                </div>
+                ) : null}
+
 
                 {/* Left & Right Slide Controls */}
                 {slides.length > 1 && (

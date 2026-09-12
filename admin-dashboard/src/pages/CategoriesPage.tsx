@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   FolderTree,
   ListTree,
@@ -15,8 +15,18 @@ import {
   Upload,
   Check,
   Filter,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { SERVICE_CATEGORIES, type ServiceCategory } from '../lib/allServices';
+
+export const CATEGORY_PRESETS = [
+  { name: 'Facial & Cleanup', url: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&q=80' },
+  { name: 'Bridal & Makeup', url: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80' },
+  { name: 'Hair Care & Spa', url: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&q=80' },
+  { name: 'Waxing & Body', url: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80' },
+  { name: 'Manicure & Pedicure', url: 'https://images.unsplash.com/photo-1632345031435-8727f6897d53?w=600&q=80' },
+  { name: 'Skincare Glow', url: 'https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=600&q=80' },
+];
 
 interface CategoriesPageProps {
   initialView?: 'categories' | 'subcategories';
@@ -41,6 +51,23 @@ export default function CategoriesPage({
   const [formSlug, setFormSlug] = useState('');
   const [formImage, setFormImage] = useState('');
   const [formSubcats, setFormSubcats] = useState('');
+
+  const addFileInputRef = useRef<HTMLInputElement>(null);
+  const editFileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          setFormImage(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
 
   // Total metrics
   const totalCategories = categories.length;
@@ -425,16 +452,84 @@ export default function CategoriesPage({
                 />
               </div>
 
-              <div>
-                <label className="block font-bold text-gray-700 mb-1">Category Image URL</label>
-                <input
-                  type="text"
-                  placeholder="https://images.unsplash.com/..."
-                  value={formImage}
-                  onChange={(e) => setFormImage(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-[#0071E3] focus:bg-white"
-                />
+              {/* Category Photo Image Uploader */}
+              <div className="bg-pink-50/60 p-3.5 rounded-2xl border border-pink-100 space-y-2.5">
+                <label className="block font-bold text-gray-800 flex items-center gap-1.5">
+                  <Upload className="w-4 h-4 text-brand-primary" />
+                  <span>Category Photo &amp; Image Uploader *</span>
+                </label>
+
+                <div className="flex items-center gap-3">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-white border-2 border-brand-primary shrink-0 shadow-sm flex items-center justify-center">
+                    {formImage ? (
+                      <img src={formImage} alt="Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="text-[10px] text-gray-400 font-semibold">No Image</div>
+                    )}
+                  </div>
+
+                  <div className="flex-1 space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <input
+                        ref={addFileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageFileUpload}
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => addFileInputRef.current?.click()}
+                        className="inline-flex items-center gap-1.5 bg-white hover:bg-pink-50 text-brand-primary border border-pink-200 text-xs font-bold px-3 py-1.5 rounded-xl transition-colors shadow-xs"
+                      >
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Upload Image from Device</span>
+                      </button>
+                      {formImage && (
+                        <button
+                          type="button"
+                          onClick={() => setFormImage('')}
+                          className="text-[11px] text-gray-400 hover:text-rose-500 font-semibold"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+                    <input
+                      type="text"
+                      value={formImage}
+                      onChange={(e) => setFormImage(e.target.value)}
+                      placeholder="Or paste direct image URL (https://...)"
+                      className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-xl outline-none focus:border-brand-primary text-xs"
+                    />
+                  </div>
+                </div>
+
+                {/* Quick Presets */}
+                <div className="pt-2 border-t border-pink-100">
+                  <span className="block text-[10px] font-bold text-gray-500 mb-1.5">
+                    Or Quick Select Preset Photo:
+                  </span>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {CATEGORY_PRESETS.map((p, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setFormImage(p.url)}
+                        className={`text-left p-1 rounded-lg border transition-all flex items-center gap-1.5 ${
+                          formImage === p.url
+                            ? 'border-brand-primary bg-pink-100/60 font-bold text-brand-primary'
+                            : 'border-gray-200 hover:border-pink-200 bg-white text-gray-700'
+                        }`}
+                      >
+                        <img src={p.url} alt={p.name} className="w-6 h-6 rounded object-cover shrink-0" />
+                        <span className="text-[10px] truncate">{p.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
+
 
               <div>
                 <label className="block font-bold text-gray-700 mb-1">
@@ -513,15 +608,84 @@ export default function CategoriesPage({
                 />
               </div>
 
-              <div>
-                <label className="block font-bold text-gray-700 mb-1">Category Image URL</label>
-                <input
-                  type="text"
-                  value={formImage}
-                  onChange={(e) => setFormImage(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-[#0071E3] focus:bg-white"
-                />
+              {/* Category Photo Image Uploader */}
+              <div className="bg-pink-50/60 p-3.5 rounded-2xl border border-pink-100 space-y-2.5">
+                <label className="block font-bold text-gray-800 flex items-center gap-1.5">
+                  <Upload className="w-4 h-4 text-brand-primary" />
+                  <span>Category Photo &amp; Image Uploader *</span>
+                </label>
+
+                <div className="flex items-center gap-3">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-white border-2 border-brand-primary shrink-0 shadow-sm flex items-center justify-center">
+                    {formImage ? (
+                      <img src={formImage} alt="Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="text-[10px] text-gray-400 font-semibold">No Image</div>
+                    )}
+                  </div>
+
+                  <div className="flex-1 space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <input
+                        ref={editFileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageFileUpload}
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => editFileInputRef.current?.click()}
+                        className="inline-flex items-center gap-1.5 bg-white hover:bg-pink-50 text-brand-primary border border-pink-200 text-xs font-bold px-3 py-1.5 rounded-xl transition-colors shadow-xs"
+                      >
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Upload Image from Device</span>
+                      </button>
+                      {formImage && (
+                        <button
+                          type="button"
+                          onClick={() => setFormImage('')}
+                          className="text-[11px] text-gray-400 hover:text-rose-500 font-semibold"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+                    <input
+                      type="text"
+                      value={formImage}
+                      onChange={(e) => setFormImage(e.target.value)}
+                      placeholder="Or paste direct image URL (https://...)"
+                      className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-xl outline-none focus:border-brand-primary text-xs"
+                    />
+                  </div>
+                </div>
+
+                {/* Quick Presets */}
+                <div className="pt-2 border-t border-pink-100">
+                  <span className="block text-[10px] font-bold text-gray-500 mb-1.5">
+                    Or Quick Select Preset Photo:
+                  </span>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {CATEGORY_PRESETS.map((p, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setFormImage(p.url)}
+                        className={`text-left p-1 rounded-lg border transition-all flex items-center gap-1.5 ${
+                          formImage === p.url
+                            ? 'border-brand-primary bg-pink-100/60 font-bold text-brand-primary'
+                            : 'border-gray-200 hover:border-pink-200 bg-white text-gray-700'
+                        }`}
+                      >
+                        <img src={p.url} alt={p.name} className="w-6 h-6 rounded object-cover shrink-0" />
+                        <span className="text-[10px] truncate">{p.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
+
 
               <div>
                 <label className="block font-bold text-gray-700 mb-1">

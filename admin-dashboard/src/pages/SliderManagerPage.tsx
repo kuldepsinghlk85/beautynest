@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Image,
   Upload,
@@ -13,7 +13,10 @@ import {
   MoveDown,
   ExternalLink,
   ArrowRight,
+  RotateCcw,
+  RefreshCw,
 } from 'lucide-react';
+
 
 export interface HeroSlideItem {
   id: string;
@@ -28,11 +31,62 @@ export interface HeroSlideItem {
   isActive: boolean;
 }
 
+export const BEAUTY_PRESETS = [
+  {
+    name: 'Gold Facial & Cleanup',
+    url: '/slider/slide1.png',
+    title: 'Glow Like Never Before',
+    subtitle: 'Varanasi Top Doorstep Facial & Cleanup Treatments',
+    badge: '★ 4.9 (11,500+ Reviews)',
+    script: 'Glow Like Never Before ✨',
+  },
+  {
+    name: 'Silky Hair Spa',
+    url: '/slider/slide2.png',
+    title: 'Silky Hair Spa & Styling',
+    subtitle: 'Nourishing hair rituals & festive blowout right at your home',
+    badge: 'Trending Care 💇‍♀️',
+    script: 'Silky Smooth Hair 🌸',
+  },
+  {
+    name: 'Bridal & Party Glamour',
+    url: '/slider/slide3.png',
+    title: 'Bridal & Party Glamour',
+    subtitle: 'Sterile kits, premium cosmetics & personalized salon touch',
+    badge: 'Special Occasions ✨',
+    script: 'Flawless Glamour 💄',
+  },
+  {
+    name: 'Aroma Spa & Relaxation',
+    url: '/slider/slide4.png',
+    title: 'Aroma Spa & Relaxation',
+    subtitle: 'Full body unwinding and herbal skin therapies in Varanasi',
+    badge: '100% Organic Products',
+    script: 'Pure Serenity 🌿',
+  },
+  {
+    name: 'Korean Glass Skin',
+    url: 'https://images.unsplash.com/photo-1512290900672-1f41444e2fc1?w=800&q=80',
+    title: 'Korean Glass Skin Ritual',
+    subtitle: 'Deep pore hydration & ultrasonic skin pampering with organic ampoules',
+    badge: 'Trending in Varanasi',
+    script: 'Pure Glass Skin 💧',
+  },
+  {
+    name: 'Luxury Manicure & Pedicure',
+    url: 'https://images.unsplash.com/photo-1632345031435-8727f6897d53?w=800&q=80',
+    title: 'Luxury Mani-Pedi Treatment',
+    subtitle: 'Gentle cuticle exfoliation, scrub & soothing hand-foot massage',
+    badge: 'Pampered Hands & Feet 💅',
+    script: 'Salon Luxe at Home ✨',
+  },
+];
+
 export const DEFAULT_HERO_SLIDES: HeroSlideItem[] = [
   {
     id: 'hs-1',
     title: 'Glow Like Never Before',
-    subtitle: 'Varanasi Top Doorstep Facial & Cleanup Treatments',
+    subtitle: 'Varanasi Top Doorstep Facial & Cleanup Treatments with certified beauticians.',
     badge: '★ 4.9 (11,500+ Reviews)',
     scriptText: 'Glow Like Never Before ✨',
     imageUrl: '/slider/slide1.png',
@@ -43,36 +97,36 @@ export const DEFAULT_HERO_SLIDES: HeroSlideItem[] = [
   },
   {
     id: 'hs-2',
-    title: 'Bridal & Festive Elegance',
-    subtitle: 'Pre-wedding & Party Glow Rituals at Your Doorstep',
-    badge: 'Flat ₹1000 OFF with BRIDAL1000',
-    scriptText: 'Royal Bridal Rituals 🌸',
+    title: 'Silky Hair Spa & Styling',
+    subtitle: 'Nourishing hair rituals & festive blowout right at your home.',
+    badge: 'Trending Care 💇‍♀️',
+    scriptText: 'Silky Smooth Hair 🌸',
     imageUrl: '/slider/slide2.png',
-    ctaText: 'Explore Bridal Packages',
-    ctaLink: '/offers',
+    ctaText: 'Explore Hair Care',
+    ctaLink: '/services',
     order: 2,
     isActive: true,
   },
   {
     id: 'hs-3',
-    title: 'Korean Glass Skin Ritual',
-    subtitle: 'Deep Pore Hydration & Ultrasonic Skin Pampering',
-    badge: 'Trending in Varanasi',
-    scriptText: 'Pure Glass Skin 💧',
+    title: 'Bridal & Party Glamour',
+    subtitle: 'Sterile kits, premium cosmetics & personalized salon touch.',
+    badge: 'Special Occasions ✨',
+    scriptText: 'Flawless Glamour 💄',
     imageUrl: '/slider/slide3.png',
-    ctaText: 'Book Korean Ritual',
-    ctaLink: '/services',
+    ctaText: 'View Glam Packages',
+    ctaLink: '/offers',
     order: 3,
     isActive: true,
   },
   {
     id: 'hs-4',
-    title: 'Rica Waxing & Full Body Care',
-    subtitle: '100% Painless Cartridge Waxing with Sterile Strips',
-    badge: '100% Hygienic Kits',
-    scriptText: 'Silky Smooth Care 🍯',
-    imageUrl: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800&q=80',
-    ctaText: 'Book Body Care',
+    title: 'Aroma Spa & Relaxation',
+    subtitle: 'Full body unwinding and herbal skin therapies in Varanasi.',
+    badge: '100% Organic Products',
+    scriptText: 'Pure Serenity 🌿',
+    imageUrl: '/slider/slide4.png',
+    ctaText: 'Book Spa Ritual',
     ctaLink: '/services',
     order: 4,
     isActive: true,
@@ -93,6 +147,32 @@ export default function SliderManagerPage() {
   });
 
   const [activePreviewIndex, setActivePreviewIndex] = useState(0);
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'synced' | 'error'>('idle');
+
+  // Load from backend on mount
+  useEffect(() => {
+    fetch('http://localhost:4200/api/sliders')
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped = data.map((d: any, idx: number) => ({
+            id: d.id,
+            title: d.title || '',
+            subtitle: d.subtitle || d.description || '',
+            badge: d.badge || '',
+            scriptText: d.scriptText || '',
+            imageUrl: d.imageUrl || d.bannerImage || '/slider/slide1.png',
+            ctaText: d.ctaText || d.buttonText || 'Book Now',
+            ctaLink: d.ctaLink || d.redirectPage || '/services',
+            order: d.order !== undefined ? d.order : idx + 1,
+            isActive: d.isActive !== false && d.status !== 'INACTIVE',
+          }));
+          setSlides(mapped);
+          localStorage.setItem('beautynest_hero_slides', JSON.stringify(mapped));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Modal States
   const [showAddModal, setShowAddModal] = useState(false);
@@ -110,10 +190,40 @@ export default function SliderManagerPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editFileInputRef = useRef<HTMLInputElement>(null);
 
-  const saveSlides = (newSlides: HeroSlideItem[]) => {
+  const saveSlides = async (newSlides: HeroSlideItem[]) => {
     setSlides(newSlides);
     if (typeof window !== 'undefined') {
       localStorage.setItem('beautynest_hero_slides', JSON.stringify(newSlides));
+    }
+    setSyncStatus('syncing');
+    try {
+      await fetch('http://localhost:4200/api/sliders/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newSlides),
+      }).catch(() =>
+        fetch('http://localhost:4200/sliders/batch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newSlides),
+        })
+      );
+      setSyncStatus('synced');
+      setTimeout(() => setSyncStatus('idle'), 3500);
+    } catch (e) {
+      setSyncStatus('error');
+    }
+  };
+
+  const handleResetDefaults = async () => {
+    if (confirm('Reset all hero sliders to the high-resolution salon beauty defaults?')) {
+      setSyncStatus('syncing');
+      try {
+        await fetch('http://localhost:4200/api/sliders/reset', { method: 'POST' }).catch(() =>
+          fetch('http://localhost:4200/sliders/reset', { method: 'POST' })
+        );
+      } catch (e) {}
+      saveSlides(DEFAULT_HERO_SLIDES);
     }
   };
 
@@ -158,9 +268,9 @@ export default function SliderManagerPage() {
       id: `hs-${Date.now()}`,
       title: formTitle,
       subtitle: formSubtitle,
-      badge: formBadge || 'Doorstep Salon 🌸',
-      scriptText: formScriptText || 'Glow in Varanasi ✨',
-      imageUrl: formImageUrl || 'https://images.unsplash.com/photo-1512290900672-1f41444e2fc1?w=800&q=80',
+      badge: formBadge,
+      scriptText: formScriptText,
+      imageUrl: formImageUrl || '/slider/slide1.png',
       ctaText: formCtaText || 'Book Now',
       ctaLink: formCtaLink || '/services',
       order: slides.length + 1,
@@ -208,6 +318,7 @@ export default function SliderManagerPage() {
   const activeSlides = slides.filter((s) => s.isActive);
   const currentPreviewSlide = activeSlides[activePreviewIndex] || slides[0];
 
+
   return (
     <div className="p-8 space-y-6 overflow-y-auto h-[calc(100vh-64px)] bg-[#F8F9FA]">
       
@@ -225,20 +336,60 @@ export default function SliderManagerPage() {
           </p>
         </div>
 
-        <button
-          onClick={() => {
-            setFormTitle('');
-            setFormSubtitle('');
-            setFormBadge('Special Offer');
-            setFormScriptText('Pamper at Home ✨');
-            setFormImageUrl('https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800&q=80');
-            setShowAddModal(true);
-          }}
-          className="inline-flex items-center gap-2 bg-gradient-to-r from-brand-primary to-pink-600 hover:from-brand-primaryDark hover:to-brand-primary text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-pink-soft hover:shadow-pink-hover transition-all"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Upload New Slider Photo</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Sync status indicator */}
+          {syncStatus === 'syncing' && (
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200 animate-pulse">
+              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+              <span>Syncing with Website...</span>
+            </span>
+          )}
+          {syncStatus === 'synced' && (
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <span>Live Synced with Website!</span>
+            </span>
+          )}
+          {syncStatus === 'idle' && (
+            <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 bg-white px-3 py-1.5 rounded-xl border border-gray-200 shadow-xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Live Website Linked</span>
+            </span>
+          )}
+
+          <button
+            onClick={() => saveSlides([...slides])}
+            className="inline-flex items-center gap-1.5 bg-white hover:bg-pink-50 text-brand-primary border border-pink-200 text-xs font-bold px-3 py-2 rounded-xl transition-all shadow-xs"
+            title="Force re-sync all current slider data to Customer Website"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Sync to Website</span>
+          </button>
+
+          <button
+            onClick={handleResetDefaults}
+            className="inline-flex items-center gap-1.5 bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 text-xs font-semibold px-3 py-2 rounded-xl transition-all shadow-xs"
+            title="Reset to 4 high-definition beauty presets"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Reset Defaults</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setFormTitle('');
+              setFormSubtitle('');
+              setFormBadge('Special Offer');
+              setFormScriptText('Pamper at Home ✨');
+              setFormImageUrl('/slider/slide1.png');
+              setShowAddModal(true);
+            }}
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-brand-primary to-pink-600 hover:from-brand-primaryDark hover:to-brand-primary text-white text-xs font-bold px-4 py-2 rounded-xl shadow-pink-soft hover:shadow-pink-hover transition-all"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Upload New Slider Photo</span>
+          </button>
+        </div>
       </div>
 
       {/* Live Preview of Home Page Right-Hand Carousel */}
@@ -456,7 +607,41 @@ export default function SliderManagerPage() {
                     />
                   </div>
                 </div>
+
+                {/* Preset Quick Chooser */}
+                <div className="pt-2 border-t border-pink-100/80">
+                  <span className="block text-[11px] font-bold text-gray-700 mb-1.5 flex items-center gap-1">
+                    <Sparkles className="w-3 h-3 text-brand-primary" />
+                    <span>Or Pick Curated High-Res Salon Preset:</span>
+                  </span>
+                  <div className="grid grid-cols-3 gap-2">
+                    {BEAUTY_PRESETS.map((preset, pIdx) => (
+                      <button
+                        key={pIdx}
+                        type="button"
+                        onClick={() => {
+                          setFormImageUrl(preset.url);
+                          if (!formTitle) setFormTitle(preset.title);
+                          if (!formSubtitle) setFormSubtitle(preset.subtitle);
+                          if (!formBadge) setFormBadge(preset.badge);
+                          if (!formScriptText) setFormScriptText(preset.script);
+                        }}
+                        className={`text-left p-1.5 rounded-xl border transition-all flex flex-col gap-1 ${
+                          formImageUrl === preset.url
+                            ? 'border-brand-primary bg-pink-100/60 font-bold'
+                            : 'border-gray-200 hover:border-pink-200 bg-white'
+                        }`}
+                      >
+                        <div className="w-full h-10 rounded-lg overflow-hidden bg-gray-100">
+                          <img src={preset.url} alt={preset.name} className="w-full h-full object-cover" />
+                        </div>
+                        <span className="text-[10px] truncate text-gray-800">{preset.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
+
 
               <div>
                 <label className="block font-bold text-gray-700 mb-1">
@@ -618,7 +803,41 @@ export default function SliderManagerPage() {
                     />
                   </div>
                 </div>
+
+                {/* Preset Quick Chooser */}
+                <div className="pt-2 border-t border-pink-100/80">
+                  <span className="block text-[11px] font-bold text-gray-700 mb-1.5 flex items-center gap-1">
+                    <Sparkles className="w-3 h-3 text-brand-primary" />
+                    <span>Or Pick Curated High-Res Salon Preset:</span>
+                  </span>
+                  <div className="grid grid-cols-3 gap-2">
+                    {BEAUTY_PRESETS.map((preset, pIdx) => (
+                      <button
+                        key={pIdx}
+                        type="button"
+                        onClick={() => {
+                          setFormImageUrl(preset.url);
+                          if (!formTitle) setFormTitle(preset.title);
+                          if (!formSubtitle) setFormSubtitle(preset.subtitle);
+                          if (!formBadge) setFormBadge(preset.badge);
+                          if (!formScriptText) setFormScriptText(preset.script);
+                        }}
+                        className={`text-left p-1.5 rounded-xl border transition-all flex flex-col gap-1 ${
+                          formImageUrl === preset.url
+                            ? 'border-brand-primary bg-pink-100/60 font-bold'
+                            : 'border-gray-200 hover:border-pink-200 bg-white'
+                        }`}
+                      >
+                        <div className="w-full h-10 rounded-lg overflow-hidden bg-gray-100">
+                          <img src={preset.url} alt={preset.name} className="w-full h-full object-cover" />
+                        </div>
+                        <span className="text-[10px] truncate text-gray-800">{preset.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
+
 
               <div>
                 <label className="block font-bold text-gray-700 mb-1">
