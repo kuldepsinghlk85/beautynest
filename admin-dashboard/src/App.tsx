@@ -19,6 +19,7 @@ import CategoriesPage from './pages/CategoriesPage';
 import CouponsPage from './pages/CouponsPage';
 import SliderManagerPage from './pages/SliderManagerPage';
 import PackagesPage from './pages/PackagesPage';
+import OffersPage from './pages/OffersPage';
 
 export default function App() {
   const [currentRole, setCurrentRole] = useState<UserRole>('ADMIN');
@@ -89,8 +90,9 @@ export default function App() {
       case 'sliders':
         return <SliderManagerPage />;
       case 'packages':
-      case 'offers':
         return <PackagesPage />;
+      case 'offers':
+        return <OffersPage />;
       case 'reports':
       case 'reviews':
       case 'notifications':

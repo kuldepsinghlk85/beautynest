@@ -69,7 +69,8 @@ export default function Sidebar({
         { id: 'categories', label: 'Categories', icon: FolderTree },
         { id: 'subcategories', label: 'Subcategories', icon: ListTree },
         { id: 'services', label: 'Services', icon: Scissors, badge: '132' },
-        { id: 'packages', label: 'Offers & Packages', icon: Gift, badge: 'Deals' },
+        { id: 'packages', label: 'Package Builder', icon: Gift, badge: 'Bundles' },
+        { id: 'offers', label: 'Offer Management', icon: Sparkles, badge: 'Festive' },
       ],
     },
     {

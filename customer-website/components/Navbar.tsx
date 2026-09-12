@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
-import { MapPin, ShoppingBag, Sparkles, Menu, X, User, CheckCircle2, Heart, Camera, Upload, Shield, ChevronRight, LocateFixed, Navigation, Bike } from 'lucide-react';
+import { MapPin, ShoppingBag, Sparkles, Menu, X, User, CheckCircle2, Heart, Camera, Upload, Shield, ChevronRight, LocateFixed, Navigation, Bike, Smartphone } from 'lucide-react';
 import { VARANASI_AREAS } from '../lib/data';
 import { INITIAL_CITIES } from '../lib/masterConfig';
 
@@ -77,12 +77,21 @@ export default function Navbar() {
         </div>
         <div className="flex items-center gap-2">
           <Link
+            href="/beautician-mobile"
+            className="text-pink-200 hover:text-white font-bold transition-colors flex items-center gap-1.5 text-[11px] bg-pink-500/20 px-2.5 py-0.5 rounded-full border border-pink-400/30"
+            title="Beautician Mobile Web App PWA"
+          >
+            <Smartphone className="w-3.5 h-3.5 text-pink-300" />
+            <span>📱 Beautician App</span>
+          </Link>
+
+          <Link
             href="/beautician-portal"
             className="text-amber-300 hover:text-white font-bold transition-colors flex items-center gap-1.5 text-[11px] bg-amber-400/20 px-2.5 py-0.5 rounded-full border border-amber-300/30"
             title="Beautician Doorstep Navigation Portal"
           >
             <Bike className="w-3.5 h-3.5 text-amber-300" />
-            <span>Beautician Portal (ब्यूटीशियन लॉगिन)</span>
+            <span>Beautician Portal</span>
           </Link>
 
           <a

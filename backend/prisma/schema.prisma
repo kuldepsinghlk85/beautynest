@@ -622,3 +622,112 @@ model Report {
   generatedBy String
   createdAt   DateTime @default(now())
 }
+
+// ----------------------------------------------------
+// 1. Packages & PackageServices Module
+// ----------------------------------------------------
+
+model Package {
+  id                String           @id @default(uuid())
+  name              String
+  image             String?
+  description       String           @db.Text
+  originalPrice     Decimal          @db.Decimal(10, 2)
+  customSellingPrice Decimal         @db.Decimal(10, 2)
+  discountPercent   Int              @default(0)
+  validity          String           @default("365 Days")
+  isActive          Boolean          @default(true)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  services          PackageService[]
+}
+
+model PackageService {
+  id         String   @id @default(uuid())
+  packageId  String
+  package    Package  @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  serviceId  String
+  service    Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([packageId, serviceId])
+}
+
+// ----------------------------------------------------
+// 2. Home Slider Management Module
+// ----------------------------------------------------
+
+model HomeSlider {
+  id           String   @id @default(uuid())
+  bannerImage  String
+  title        String
+  description  String   @db.Text
+  buttonText   String   @default("Book Now")
+  redirectPage String   @default("/services")
+  priority     Int      @default(1)
+  status       String   @default("ACTIVE") // ACTIVE, INACTIVE
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ----------------------------------------------------
+// 3. Offer Management Module
+// ----------------------------------------------------
+
+model Offer {
+  id                 String   @id @default(uuid())
+  offerName          String
+  offerType          String   // SERVICE, PACKAGE, FESTIVAL, SEASONAL
+  discountType       String   // FIXED, PERCENTAGE
+  discountValue      Decimal  @db.Decimal(10, 2)
+  applicableServices Json?    // Array of service IDs
+  applicablePackages Json?    // Array of package IDs
+  startDate          DateTime
+  endDate            DateTime
+  status             String   @default("ACTIVE") // ACTIVE, INACTIVE, EXPIRED
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+// ----------------------------------------------------
+// 4. Beautician Web Orders & Live Navigation Tracking
+// ----------------------------------------------------
+
+model BeauticianWebOrder {
+  id               String   @id @default(uuid())
+  orderNumber      String   @unique
+  beauticianId     String
+  customerName     String
+  customerPhone    String
+  serviceName      String
+  bookingDate      String
+  bookingTime      String
+  customerLocation String
+  customerLat      Float    @default(25.3176)
+  customerLng      Float    @default(82.9739)
+  distanceKm       Float    @default(2.5)
+  status           String   @default("NEW") // NEW, ACCEPTED, REJECTED, NAVIGATING, ARRIVED, IN_PROGRESS, COMPLETED
+  orderAmount      Decimal  @db.Decimal(10, 2)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  tracking         NavigationTracking?
+}
+
+model NavigationTracking {
+  id                  String             @id @default(uuid())
+  orderId             String             @unique
+  order               BeauticianWebOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  beauticianId        String
+  currentLat          Float
+  currentLng          Float
+  customerLat         Float
+  customerLng         Float
+  routePolyline       String?            @db.Text
+  distanceRemainingKm Float
+  estimatedTimeMin    Int
+  status              String             @default("NAVIGATING") // NAVIGATING, ARRIVED, COMPLETED
+  updatedAt           DateTime           @updatedAt
+}
+
