@@ -64,7 +64,8 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-brand-border shadow-sm">
+    <>
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-brand-border shadow-sm">
       {/* Top Bar for Multi-City Announcement & Portals Switcher */}
       <div className="bg-slate-900 text-slate-300 text-xs py-1.5 px-4 sm:px-6 flex flex-wrap justify-between items-center gap-2">
         <div className="flex items-center gap-2">
@@ -298,18 +299,19 @@ export default function Navbar() {
           </div>
         </div>
       )}
+    </header>
 
-      {/* Customer Registration Modal */}
-      {showAuthModal && (
-        <div
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setShowAuthModal(false);
-          }}
-          className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm p-4 sm:p-6 flex items-start justify-center pt-8 sm:pt-12 pb-12"
-        >
-          <div className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-pink-100 max-h-[85vh] flex flex-col overflow-hidden my-0 animate-in fade-in zoom-in-95 duration-200 shrink-0">
-            {/* Modal Fixed Header (ALWAYS visible, never cut off) */}
-            <div className="p-5 sm:p-6 pb-3 border-b border-pink-50 relative shrink-0 bg-white">
+    {/* Customer Registration / Login Modal (Rendered outside sticky header to avoid backdrop-blur clipping) */}
+    {showAuthModal && (
+      <div
+        onClick={(e) => {
+          if (e.target === e.currentTarget) setShowAuthModal(false);
+        }}
+        className="fixed inset-0 z-[9999] overflow-y-auto bg-black/60 backdrop-blur-sm p-4 sm:p-6 flex items-center justify-center min-h-screen py-6 sm:py-10"
+      >
+        <div className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-pink-100 max-h-[90vh] flex flex-col overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200">
+          {/* Modal Fixed Header */}
+          <div className="p-5 sm:p-6 pb-3 border-b border-pink-50 relative shrink-0 bg-white">
               <button
                 type="button"
                 onClick={() => setShowAuthModal(false)}
@@ -326,18 +328,27 @@ export default function Navbar() {
                 <div>
                   <div className="flex items-center gap-1.5 text-brand-primary">
                     <Heart className="w-3.5 h-3.5 fill-brand-primary" />
-                    <span className="text-[11px] font-bold uppercase tracking-wider">Ladies Doorstep Salon • Varanasi</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider">Ladies Doorstep Salon</span>
                   </div>
                   <h3 className="text-lg sm:text-xl font-bold font-serif text-gray-900">
                     {authMode === 'register' ? 'New Customer Registration' : 'Customer Login'}
                   </h3>
                 </div>
               </div>
-              <p className="text-xs text-gray-500 mt-0.5">
-                {authMode === 'register'
-                  ? 'Register with your photo & address for safe, 100% hygienic doorstep salon services'
-                  : 'Sign in to your registered BeautyNest account'}
-              </p>
+              <div className="flex items-center justify-between mt-1">
+                <p className="text-xs text-gray-500">
+                  {authMode === 'register'
+                    ? 'Register with photo & address for safe doorstep salon services'
+                    : 'Sign in to your registered BeautyNest account'}
+                </p>
+                <Link
+                  href="/register"
+                  onClick={() => setShowAuthModal(false)}
+                  className="text-[11px] text-brand-primary hover:underline font-bold shrink-0 ml-2"
+                >
+                  Full Page ↗
+                </Link>
+              </div>
 
               {/* Tabs */}
               <div className="flex rounded-xl bg-pink-50 p-1 mt-3">
@@ -597,6 +608,6 @@ export default function Navbar() {
           </div>
         </div>
       )}
-    </header>
+    </>
   );
 }
