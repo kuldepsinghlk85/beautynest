@@ -1,6 +1,5 @@
 'use client';
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Calendar,
@@ -28,6 +27,7 @@ import {
 } from 'lucide-react';
 import { Service, BEAUTICIANS } from '@/lib/data';
 import { DEFAULT_DISTANCE_RULES } from '@/lib/masterConfig';
+import { getCurrentUser, saveNewBooking, type BookingRecord } from '@/lib/userStore';
 
 interface VaranasiLocationHub {
   area: string;
@@ -250,9 +250,62 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
     setAddress(`${flat}, ${street}, ${landmark}, ${area}, Varanasi, UP - 221010`);
   };
 
+  // Auto pre-fill from logged-in customer profile
+  useEffect(() => {
+    if (isOpen) {
+      const user = getCurrentUser();
+      if (user) {
+        if (user.area) {
+          const matchHub = VARANASI_LOCATION_HUBS.find(
+            (h) => h.area.toLowerCase() === user.area.toLowerCase()
+          );
+          if (matchHub) {
+            setSelectedVaranasiArea(matchHub.area);
+            setNearbyLandmark(matchHub.landmark);
+            setGpsCoords({ lat: matchHub.lat, lng: matchHub.lng });
+            setTravelDistanceKm(matchHub.distanceKm);
+          }
+        }
+        if (user.address) {
+          setAddress(user.address);
+          setFlatNumber(user.address.split(',')[0] || 'House 42');
+        }
+      }
+    }
+  }, [isOpen]);
+
   const handleConfirm = () => {
     const randomId = `BK-${Math.floor(1000 + Math.random() * 9000)}`;
     setBookingId(randomId);
+
+    const user = getCurrentUser();
+    const newBooking: BookingRecord = {
+      id: randomId,
+      bookingNumber: randomId,
+      customerName: user?.fullName || 'Priya Sharma',
+      customerPhone: user?.phone || '9876543210',
+      customerAddress: address,
+      area: selectedVaranasiArea,
+      serviceName: service.name,
+      serviceCategory: service.category,
+      servicePrice: service.price,
+      beauticianName: matchedBeautician.name,
+      beauticianPhone: '+91 98390 12001',
+      beauticianTier: (matchedBeautician as any).tier || 'Gold Tier',
+      scheduledDate: `${selectedDate} 2026`,
+      scheduledTime: selectedTime,
+      hasOwnProducts,
+      distanceKm: travelDistanceKm,
+      distanceFee: distanceCharge,
+      totalAmount: total,
+      status: 'CONFIRMED',
+      paymentMethod,
+      bookingDate: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
+      createdAt: new Date().toISOString(),
+      consentSigned: true,
+    };
+
+    saveNewBooking(newBooking);
     setStep(6); // Confirmed
   };
 
@@ -1099,6 +1152,15 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
                 </div>
                 <div className="flex justify-between items-center bg-white p-2 rounded-xl border border-pink-100 text-[11px]">
                   <span className="text-gray-600 flex items-center gap-1 font-semibold">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-brand-primary" />
+                    <span>Customer Details</span>
+                  </span>
+                  <span className="font-bold text-gray-800">
+                    {getCurrentUser()?.fullName || 'Priya Sharma'} (+91 {getCurrentUser()?.phone || '9876543210'})
+                  </span>
+                </div>
+                <div className="flex justify-between items-center bg-white p-2 rounded-xl border border-pink-100 text-[11px]">
+                  <span className="text-gray-600 flex items-center gap-1 font-semibold">
                     <FileCheck className="w-3.5 h-3.5 text-emerald-600" />
                     <span>Health &amp; Allergy Form</span>
                   </span>
@@ -1112,10 +1174,14 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
 
               <div className="flex flex-col gap-2">
                 <button
-                  onClick={onClose}
-                  className="w-full bg-brand-primary hover:bg-brand-primaryDark text-white py-3.5 rounded-full font-bold shadow-pink-soft transition-all"
+                  onClick={() => {
+                    onClose();
+                    window.dispatchEvent(new Event('beautynest_booking_created'));
+                    window.dispatchEvent(new Event('beautynest_user_change'));
+                  }}
+                  className="w-full bg-brand-primary hover:bg-brand-primaryDark text-white py-3.5 rounded-full font-bold shadow-pink-soft transition-all text-xs uppercase tracking-wider"
                 >
-                  Done
+                  Done • View in My Bookings
                 </button>
               </div>
             </div>

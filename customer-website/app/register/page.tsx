@@ -4,6 +4,7 @@ import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import { MapPin, Sparkles, ShieldCheck, CheckCircle2, User, Phone, Mail, Home, ArrowLeft, Camera, Upload } from 'lucide-react';
 import { VARANASI_AREAS } from '../../lib/data';
+import { setCurrentUser, type CustomerProfile } from '../../lib/userStore';
 
 export default function CustomerRegistrationPage() {
   const [fullName, setFullName] = useState('');
@@ -34,6 +35,18 @@ export default function CustomerRegistrationPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const newCustomer: CustomerProfile = {
+      id: `CUST-${Date.now().toString().slice(-5)}`,
+      fullName: fullName.trim() || 'Priya Sharma',
+      phone: phone.replace(/\D/g, '') || '9876543210',
+      email: email.trim() || 'priya@example.com',
+      area,
+      address: `${houseAddress}${landmark ? ', Near ' + landmark : ''}, ${area}, Varanasi - ${pincode}`,
+      photoUrl,
+      walletBalance: 200,
+      registeredAt: new Date().toISOString(),
+    };
+    setCurrentUser(newCustomer);
     setSubmitted(true);
   };
 

@@ -24,6 +24,8 @@ export class ServicesService {
   private serviceOverrides: Record<string, any> = {};
   private categoriesOverridesFilePath = path.resolve(process.cwd(), 'data', 'categories_overrides.json');
   private categoryOverrides: Record<string, any> = {};
+  private bookingsFilePath = path.resolve(process.cwd(), 'data', 'bookings.json');
+  private customersFilePath = path.resolve(process.cwd(), 'data', 'customers.json');
 
   constructor(private prisma: PrismaService) {
     this.loadOverrides();
@@ -258,6 +260,64 @@ export class ServicesService {
     this.serviceOverrides[key] = { ...(this.serviceOverrides[key] || {}), isActive: false };
     this.saveOverrides();
     return { success: true, message: `Service ${id} deactivated` };
+  }
+
+  async getBookings() {
+    try {
+      if (fs.existsSync(this.bookingsFilePath)) {
+        return JSON.parse(fs.readFileSync(this.bookingsFilePath, 'utf8'));
+      }
+    } catch (e: any) {
+      this.logger.error(`Error reading bookings: ${e.message}`);
+    }
+    return [];
+  }
+
+  async saveBooking(booking: any) {
+    try {
+      const list = await this.getBookings();
+      const newBooking = {
+        ...booking,
+        id: booking.id || booking.bookingNumber || `BK-${Date.now().toString().slice(-4)}`,
+        createdAt: booking.createdAt || new Date().toISOString(),
+      };
+      list.unshift(newBooking);
+      fs.writeFileSync(this.bookingsFilePath, JSON.stringify(list, null, 2), 'utf8');
+      this.logger.log(`Saved new booking: ${newBooking.id}`);
+      return { success: true, booking: newBooking };
+    } catch (e: any) {
+      this.logger.error(`Error saving booking: ${e.message}`);
+      return { success: false, error: e.message };
+    }
+  }
+
+  async getCustomers() {
+    try {
+      if (fs.existsSync(this.customersFilePath)) {
+        return JSON.parse(fs.readFileSync(this.customersFilePath, 'utf8'));
+      }
+    } catch (e: any) {
+      this.logger.error(`Error reading customers: ${e.message}`);
+    }
+    return [];
+  }
+
+  async saveCustomer(customer: any) {
+    try {
+      const list = await this.getCustomers();
+      const idx = list.findIndex((c: any) => c.phone === customer.phone || c.id === customer.id);
+      if (idx >= 0) {
+        list[idx] = { ...list[idx], ...customer };
+      } else {
+        list.unshift({ ...customer, registeredAt: customer.registeredAt || new Date().toISOString() });
+      }
+      fs.writeFileSync(this.customersFilePath, JSON.stringify(list, null, 2), 'utf8');
+      this.logger.log(`Saved customer: ${customer.fullName || customer.phone}`);
+      return { success: true, customer };
+    } catch (e: any) {
+      this.logger.error(`Error saving customer: ${e.message}`);
+      return { success: false, error: e.message };
+    }
   }
 }
 

@@ -62,6 +62,30 @@ export class ServicesController {
     return this.servicesService.resetOverrides();
   }
 
+  @Get('bookings')
+  @ApiOperation({ summary: 'Get all public bookings' })
+  async getBookings() {
+    return this.servicesService.getBookings();
+  }
+
+  @Post('bookings')
+  @ApiOperation({ summary: 'Create a new public booking' })
+  async saveBooking(@Body() body: any) {
+    return this.servicesService.saveBooking(body);
+  }
+
+  @Get('customers')
+  @ApiOperation({ summary: 'Get all public customers' })
+  async getCustomers() {
+    return this.servicesService.getCustomers();
+  }
+
+  @Post('customers')
+  @ApiOperation({ summary: 'Save or register customer' })
+  async saveCustomer(@Body() body: any) {
+    return this.servicesService.saveCustomer(body);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get service details by ID or Slug' })
   async getServiceById(@Param('id') id: string) {

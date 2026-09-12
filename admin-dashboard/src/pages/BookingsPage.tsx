@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Search, Filter, Calendar, MapPin, UserCheck, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Filter, Calendar, MapPin, UserCheck, X, RefreshCw } from 'lucide-react';
 import { RECENT_BOOKINGS, BEAUTICIANS_LIST, AdminBooking } from '../lib/mockAdminData';
 
 export default function BookingsPage() {
@@ -7,6 +7,87 @@ export default function BookingsPage() {
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [assignModalBooking, setAssignModalBooking] = useState<AdminBooking | null>(null);
+
+  const loadLiveBookings = async () => {
+    let liveBookings: AdminBooking[] = [];
+    // 1. Check localStorage
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('beautynest_all_bookings');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) {
+            liveBookings = parsed.map((b: any) => ({
+              id: b.id || b.bookingNumber,
+              bookingNumber: b.bookingNumber || b.id,
+              customerName: b.customerName || 'Priya Sharma',
+              customerPhone: b.customerPhone || '+91 98765 43210',
+              serviceName: b.serviceName,
+              area: b.area ? `${b.area}, Varanasi` : 'Sigra, Varanasi',
+              beauticianName: b.beauticianName || 'Sunita Sharma',
+              timeSlot: b.scheduledTime || '11:30 AM',
+              date: b.scheduledDate || 'Today, 12 Sep 2026',
+              amount: b.totalAmount || b.servicePrice || 1299,
+              status: (b.status === 'CONFIRMED' ? 'Confirmed' : b.status || 'Confirmed') as any,
+            }));
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // 2. Fetch from Backend API
+    try {
+      const res = await fetch('http://localhost:4200/api/services/bookings');
+      if (res.ok) {
+        const apiBookings = await res.json();
+        if (Array.isArray(apiBookings)) {
+          const mappedApi = apiBookings.map((b: any) => ({
+            id: b.id || b.bookingNumber,
+            bookingNumber: b.bookingNumber || b.id,
+            customerName: b.customerName || 'Priya Sharma',
+            customerPhone: b.customerPhone || '+91 98765 43210',
+            serviceName: b.serviceName,
+            area: b.area ? `${b.area}, Varanasi` : 'Sigra, Varanasi',
+            beauticianName: b.beauticianName || 'Sunita Sharma',
+            timeSlot: b.scheduledTime || '11:30 AM',
+            date: b.scheduledDate || 'Today, 12 Sep 2026',
+            amount: b.totalAmount || b.servicePrice || 1299,
+            status: (b.status === 'CONFIRMED' ? 'Confirmed' : b.status || 'Confirmed') as any,
+          }));
+          // Combine and deduplicate
+          mappedApi.forEach((item) => {
+            if (!liveBookings.some((x) => x.id === item.id)) {
+              liveBookings.unshift(item);
+            }
+          });
+        }
+      }
+    } catch (e) {
+      console.warn('Backend bookings fetch skipped, using storage data:', e);
+    }
+
+    // Merge live bookings before mock bookings
+    const combined = [...liveBookings];
+    RECENT_BOOKINGS.forEach((mock) => {
+      if (!combined.some((c) => c.bookingNumber === mock.bookingNumber)) {
+        combined.push(mock);
+      }
+    });
+    setBookings(combined);
+  };
+
+  useEffect(() => {
+    loadLiveBookings();
+    const handleStorageChange = () => loadLiveBookings();
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('focus', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focus', handleStorageChange);
+    };
+  }, []);
 
   const filtered = bookings.filter((b) => {
     const matchStatus = selectedStatus === 'ALL' || b.status.toUpperCase() === selectedStatus;
