@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Filter, Sparkles } from 'lucide-react';
 import { SERVICES, CATEGORIES, Service } from '@/lib/data';
 import ServiceCard from '@/components/ServiceCard';
@@ -11,16 +11,53 @@ export default function ServicesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeService, setActiveService] = useState<Service | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [servicesList, setServicesList] = useState<Service[]>(SERVICES);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const res = await fetch('http://localhost:4200/api/services');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setServicesList((prev) =>
+              prev.map((s) => {
+                const remote = data.find((d: any) => d.serviceId === s.serviceId || d.id === s.id);
+                if (remote) {
+                  return {
+                    ...s,
+                    name: remote.name || s.name,
+                    price: remote.price || s.price,
+                    originalPrice: remote.originalPrice || s.originalPrice,
+                    imageUrl: remote.imageUrl || s.imageUrl,
+                    durationMinutes: remote.durationMinutes || s.durationMinutes,
+                    isBestseller: remote.isBestseller !== undefined ? remote.isBestseller : s.isBestseller,
+                  };
+                }
+                return s;
+              })
+            );
+          }
+        }
+      } catch {
+        // default fallback to static
+      }
+    };
+
+    fetchServices();
+    window.addEventListener('focus', fetchServices);
+    return () => window.removeEventListener('focus', fetchServices);
+  }, []);
 
   const filteredServices = useMemo(() => {
-    return SERVICES.filter((s) => {
+    return servicesList.filter((s) => {
       const matchesCategory = selectedCategory === 'all' || s.category === selectedCategory;
       const matchesSearch =
         s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         s.shortDesc.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     });
-  }, [selectedCategory, searchQuery]);
+  }, [servicesList, selectedCategory, searchQuery]);
 
   const handleBook = (srv: Service) => {
     setActiveService(srv);

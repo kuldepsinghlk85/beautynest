@@ -36,7 +36,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 36,
     "suggestedAddonPrice": 50,
     "suggestedPackagePrice": 250,
-    "imageUrl": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80",
     "rating": 4.86,
     "reviewCount": 592,
     "isBestseller": true
@@ -72,7 +72,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 54,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 400,
-    "imageUrl": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1556760544-74068565f05c?w=600&q=80",
     "rating": 4.89,
     "reviewCount": 1551,
     "isBestseller": false
@@ -108,7 +108,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 60,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 450,
-    "imageUrl": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=600&q=80",
     "rating": 4.85,
     "reviewCount": 1903,
     "isBestseller": false
@@ -180,7 +180,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 126,
     "suggestedAddonPrice": 200,
     "suggestedPackagePrice": 950,
-    "imageUrl": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&q=80",
     "rating": 4.84,
     "reviewCount": 2644,
     "isBestseller": true
@@ -216,7 +216,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 144,
     "suggestedAddonPrice": 250,
     "suggestedPackagePrice": 1100,
-    "imageUrl": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80",
     "rating": 4.96,
     "reviewCount": 1793,
     "isBestseller": false
@@ -252,7 +252,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 120,
     "suggestedAddonPrice": 200,
     "suggestedPackagePrice": 900,
-    "imageUrl": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=600&q=80",
     "rating": 4.9,
     "reviewCount": 973,
     "isBestseller": false
@@ -288,7 +288,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 96,
     "suggestedAddonPrice": 150,
     "suggestedPackagePrice": 700,
-    "imageUrl": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1556760544-74068565f05c?w=600&q=80",
     "rating": 4.95,
     "reviewCount": 1558,
     "isBestseller": false
@@ -360,7 +360,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 162,
     "suggestedAddonPrice": 250,
     "suggestedPackagePrice": 1200,
-    "imageUrl": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1512290900672-1f41444e2fc1?w=600&q=80",
     "rating": 4.99,
     "reviewCount": 1364,
     "isBestseller": false
@@ -396,7 +396,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 126,
     "suggestedAddonPrice": 200,
     "suggestedPackagePrice": 950,
-    "imageUrl": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=600&q=80",
     "rating": 4.89,
     "reviewCount": 2174,
     "isBestseller": false
@@ -432,7 +432,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 96,
     "suggestedAddonPrice": 150,
     "suggestedPackagePrice": 700,
-    "imageUrl": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=600&q=80",
     "rating": 4.84,
     "reviewCount": 925,
     "isBestseller": false
@@ -468,7 +468,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 240,
     "suggestedAddonPrice": 400,
     "suggestedPackagePrice": 1800,
-    "imageUrl": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=600&q=80",
     "rating": 4.95,
     "reviewCount": 289,
     "isBestseller": true
@@ -504,7 +504,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 192,
     "suggestedAddonPrice": 300,
     "suggestedPackagePrice": 1450,
-    "imageUrl": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1512290900672-1f41444e2fc1?w=600&q=80",
     "rating": 4.94,
     "reviewCount": 652,
     "isBestseller": false
@@ -540,7 +540,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 162,
     "suggestedAddonPrice": 250,
     "suggestedPackagePrice": 1200,
-    "imageUrl": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=600&q=80",
     "rating": 4.84,
     "reviewCount": 1302,
     "isBestseller": false
@@ -576,7 +576,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 192,
     "suggestedAddonPrice": 300,
     "suggestedPackagePrice": 1450,
-    "imageUrl": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1556760544-74068565f05c?w=600&q=80",
     "rating": 4.85,
     "reviewCount": 1449,
     "isBestseller": false
@@ -648,7 +648,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 144,
     "suggestedAddonPrice": 250,
     "suggestedPackagePrice": 1100,
-    "imageUrl": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=600&q=80",
     "rating": 4.83,
     "reviewCount": 1618,
     "isBestseller": false
@@ -684,7 +684,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 36,
     "suggestedAddonPrice": 50,
     "suggestedPackagePrice": 250,
-    "imageUrl": "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1526045612212-70caf35c14df?w=600&q=80",
     "rating": 4.98,
     "reviewCount": 2554,
     "isBestseller": false
@@ -756,7 +756,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 48,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 350,
-    "imageUrl": "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=600&q=80",
     "rating": 4.94,
     "reviewCount": 786,
     "isBestseller": false
@@ -792,7 +792,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 36,
     "suggestedAddonPrice": 50,
     "suggestedPackagePrice": 250,
-    "imageUrl": "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1526045612212-70caf35c14df?w=600&q=80",
     "rating": 4.93,
     "reviewCount": 258,
     "isBestseller": false
@@ -864,7 +864,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 72,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 550,
-    "imageUrl": "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=600&q=80",
     "rating": 4.99,
     "reviewCount": 588,
     "isBestseller": false
@@ -900,7 +900,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 48,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 350,
-    "imageUrl": "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=600&q=80",
     "rating": 4.98,
     "reviewCount": 2550,
     "isBestseller": true
@@ -936,7 +936,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 36,
     "suggestedAddonPrice": 50,
     "suggestedPackagePrice": 250,
-    "imageUrl": "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=600&q=80",
     "rating": 4.92,
     "reviewCount": 714,
     "isBestseller": false
@@ -972,7 +972,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 36,
     "suggestedAddonPrice": 50,
     "suggestedPackagePrice": 250,
-    "imageUrl": "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=600&q=80",
     "rating": 4.84,
     "reviewCount": 871,
     "isBestseller": false
@@ -1008,7 +1008,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 60,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 450,
-    "imageUrl": "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=600&q=80",
     "rating": 4.93,
     "reviewCount": 241,
     "isBestseller": false
@@ -1044,7 +1044,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 78,
     "suggestedAddonPrice": 150,
     "suggestedPackagePrice": 600,
-    "imageUrl": "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=600&q=80",
     "rating": 4.88,
     "reviewCount": 1030,
     "isBestseller": false
@@ -1080,7 +1080,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 78,
     "suggestedAddonPrice": 150,
     "suggestedPackagePrice": 600,
-    "imageUrl": "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=600&q=80",
     "rating": 4.9,
     "reviewCount": 651,
     "isBestseller": false
@@ -1116,7 +1116,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 192,
     "suggestedAddonPrice": 300,
     "suggestedPackagePrice": 1450,
-    "imageUrl": "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=600&q=80",
     "rating": 4.98,
     "reviewCount": 729,
     "isBestseller": true
@@ -1368,7 +1368,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 36,
     "suggestedAddonPrice": 50,
     "suggestedPackagePrice": 250,
-    "imageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=600&q=80",
     "rating": 4.87,
     "reviewCount": 524,
     "isBestseller": false
@@ -1404,7 +1404,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 48,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 350,
-    "imageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80",
     "rating": 4.92,
     "reviewCount": 682,
     "isBestseller": true
@@ -1440,7 +1440,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 36,
     "suggestedAddonPrice": 50,
     "suggestedPackagePrice": 250,
-    "imageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&q=80",
     "rating": 4.95,
     "reviewCount": 297,
     "isBestseller": false
@@ -1476,7 +1476,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 60,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 450,
-    "imageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=600&q=80",
     "rating": 4.86,
     "reviewCount": 1678,
     "isBestseller": false
@@ -1512,7 +1512,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 24,
     "suggestedAddonPrice": 50,
     "suggestedPackagePrice": 200,
-    "imageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80",
     "rating": 4.97,
     "reviewCount": 2081,
     "isBestseller": false
@@ -1548,7 +1548,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 48,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 350,
-    "imageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&q=80",
     "rating": 4.91,
     "reviewCount": 1370,
     "isBestseller": false
@@ -1584,7 +1584,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 144,
     "suggestedAddonPrice": 250,
     "suggestedPackagePrice": 1100,
-    "imageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=600&q=80",
     "rating": 4.85,
     "reviewCount": 555,
     "isBestseller": true
@@ -1620,7 +1620,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 72,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 550,
-    "imageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80",
     "rating": 4.85,
     "reviewCount": 1056,
     "isBestseller": true
@@ -1656,7 +1656,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 96,
     "suggestedAddonPrice": 150,
     "suggestedPackagePrice": 700,
-    "imageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&q=80",
     "rating": 4.92,
     "reviewCount": 1348,
     "isBestseller": false
@@ -1692,7 +1692,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 36,
     "suggestedAddonPrice": 50,
     "suggestedPackagePrice": 250,
-    "imageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=600&q=80",
     "rating": 4.91,
     "reviewCount": 987,
     "isBestseller": false
@@ -1728,7 +1728,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 60,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 450,
-    "imageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80",
     "rating": 4.83,
     "reviewCount": 402,
     "isBestseller": false
@@ -1764,7 +1764,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 222,
     "suggestedAddonPrice": 350,
     "suggestedPackagePrice": 1650,
-    "imageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&q=80",
     "rating": 4.97,
     "reviewCount": 957,
     "isBestseller": true
@@ -1800,7 +1800,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 54,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 400,
-    "imageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=600&q=80",
     "rating": 4.96,
     "reviewCount": 1824,
     "isBestseller": false
@@ -1836,7 +1836,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 78,
     "suggestedAddonPrice": 150,
     "suggestedPackagePrice": 600,
-    "imageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80",
     "rating": 4.83,
     "reviewCount": 1435,
     "isBestseller": false
@@ -1872,7 +1872,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 36,
     "suggestedAddonPrice": 50,
     "suggestedPackagePrice": 250,
-    "imageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&q=80",
     "rating": 4.89,
     "reviewCount": 1689,
     "isBestseller": false
@@ -1908,7 +1908,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 60,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 450,
-    "imageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=600&q=80",
     "rating": 4.83,
     "reviewCount": 463,
     "isBestseller": false
@@ -1944,7 +1944,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 84,
     "suggestedAddonPrice": 150,
     "suggestedPackagePrice": 650,
-    "imageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80",
     "rating": 4.93,
     "reviewCount": 1746,
     "isBestseller": false
@@ -1980,7 +1980,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 192,
     "suggestedAddonPrice": 300,
     "suggestedPackagePrice": 1450,
-    "imageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&q=80",
     "rating": 4.97,
     "reviewCount": 2351,
     "isBestseller": false
@@ -2016,7 +2016,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 48,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 350,
-    "imageUrl": "https://images.unsplash.com/photo-1632345031435-8727f6897d53?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1519415510236-718bdfcd89c8?w=600&q=80",
     "rating": 4.97,
     "reviewCount": 2642,
     "isBestseller": true
@@ -2088,7 +2088,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 90,
     "suggestedAddonPrice": 150,
     "suggestedPackagePrice": 700,
-    "imageUrl": "https://images.unsplash.com/photo-1632345031435-8727f6897d53?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=600&q=80",
     "rating": 4.92,
     "reviewCount": 1136,
     "isBestseller": false
@@ -2160,7 +2160,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 78,
     "suggestedAddonPrice": 150,
     "suggestedPackagePrice": 600,
-    "imageUrl": "https://images.unsplash.com/photo-1632345031435-8727f6897d53?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1519415510236-718bdfcd89c8?w=600&q=80",
     "rating": 4.9,
     "reviewCount": 2293,
     "isBestseller": false
@@ -2232,7 +2232,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 60,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 450,
-    "imageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1519415510236-718bdfcd89c8?w=600&q=80",
     "rating": 4.89,
     "reviewCount": 1495,
     "isBestseller": true
@@ -2268,7 +2268,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 90,
     "suggestedAddonPrice": 150,
     "suggestedPackagePrice": 700,
-    "imageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1632345031435-8727f6897d53?w=600&q=80",
     "rating": 4.83,
     "reviewCount": 1907,
     "isBestseller": false
@@ -2304,7 +2304,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 108,
     "suggestedAddonPrice": 200,
     "suggestedPackagePrice": 800,
-    "imageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&q=80",
     "rating": 4.87,
     "reviewCount": 551,
     "isBestseller": false
@@ -2340,7 +2340,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 78,
     "suggestedAddonPrice": 150,
     "suggestedPackagePrice": 600,
-    "imageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1632345031435-8727f6897d53?w=600&q=80",
     "rating": 4.86,
     "reviewCount": 1548,
     "isBestseller": false
@@ -2376,7 +2376,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 84,
     "suggestedAddonPrice": 150,
     "suggestedPackagePrice": 650,
-    "imageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1519415510236-718bdfcd89c8?w=600&q=80",
     "rating": 4.84,
     "reviewCount": 2303,
     "isBestseller": false
@@ -2412,7 +2412,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 114,
     "suggestedAddonPrice": 200,
     "suggestedPackagePrice": 850,
-    "imageUrl": "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600&q=80",
     "rating": 4.87,
     "reviewCount": 1565,
     "isBestseller": false
@@ -2448,7 +2448,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 60,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 450,
-    "imageUrl": "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80",
     "rating": 4.87,
     "reviewCount": 1018,
     "isBestseller": false
@@ -2484,7 +2484,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 36,
     "suggestedAddonPrice": 50,
     "suggestedPackagePrice": 250,
-    "imageUrl": "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600&q=80",
     "rating": 4.94,
     "reviewCount": 2268,
     "isBestseller": false
@@ -2520,7 +2520,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 48,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 350,
-    "imageUrl": "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80",
     "rating": 4.81,
     "reviewCount": 1217,
     "isBestseller": false
@@ -2556,7 +2556,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 144,
     "suggestedAddonPrice": 250,
     "suggestedPackagePrice": 1100,
-    "imageUrl": "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600&q=80",
     "rating": 4.93,
     "reviewCount": 642,
     "isBestseller": false
@@ -2592,7 +2592,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 72,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 550,
-    "imageUrl": "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80",
     "rating": 4.98,
     "reviewCount": 2644,
     "isBestseller": false
@@ -2628,7 +2628,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 60,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 450,
-    "imageUrl": "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600&q=80",
     "rating": 4.94,
     "reviewCount": 157,
     "isBestseller": false
@@ -2664,7 +2664,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 66,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 500,
-    "imageUrl": "https://images.unsplash.com/photo-1560869713-7d0a29430803?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=600&q=80",
     "rating": 4.9,
     "reviewCount": 972,
     "isBestseller": true
@@ -2700,7 +2700,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 114,
     "suggestedAddonPrice": 200,
     "suggestedPackagePrice": 850,
-    "imageUrl": "https://images.unsplash.com/photo-1560869713-7d0a29430803?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=600&q=80",
     "rating": 4.9,
     "reviewCount": 1796,
     "isBestseller": false
@@ -2736,7 +2736,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 42,
     "suggestedAddonPrice": 50,
     "suggestedPackagePrice": 300,
-    "imageUrl": "https://images.unsplash.com/photo-1560869713-7d0a29430803?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&q=80",
     "rating": 4.81,
     "reviewCount": 576,
     "isBestseller": false
@@ -2808,7 +2808,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 24,
     "suggestedAddonPrice": 50,
     "suggestedPackagePrice": 200,
-    "imageUrl": "https://images.unsplash.com/photo-1560869713-7d0a29430803?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=600&q=80",
     "rating": 4.82,
     "reviewCount": 1395,
     "isBestseller": false
@@ -2844,7 +2844,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 48,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 350,
-    "imageUrl": "https://images.unsplash.com/photo-1560869713-7d0a29430803?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=600&q=80",
     "rating": 4.84,
     "reviewCount": 1843,
     "isBestseller": false
@@ -2880,7 +2880,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 84,
     "suggestedAddonPrice": 150,
     "suggestedPackagePrice": 650,
-    "imageUrl": "https://images.unsplash.com/photo-1560869713-7d0a29430803?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&q=80",
     "rating": 4.92,
     "reviewCount": 1853,
     "isBestseller": false
@@ -2952,7 +2952,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 114,
     "suggestedAddonPrice": 200,
     "suggestedPackagePrice": 850,
-    "imageUrl": "https://images.unsplash.com/photo-1560869713-7d0a29430803?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=600&q=80",
     "rating": 4.89,
     "reviewCount": 842,
     "isBestseller": true
@@ -2988,7 +2988,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 270,
     "suggestedAddonPrice": 450,
     "suggestedPackagePrice": 2000,
-    "imageUrl": "https://images.unsplash.com/photo-1560869713-7d0a29430803?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=600&q=80",
     "rating": 4.91,
     "reviewCount": 480,
     "isBestseller": false
@@ -3024,7 +3024,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 360,
     "suggestedAddonPrice": 600,
     "suggestedPackagePrice": 2700,
-    "imageUrl": "https://images.unsplash.com/photo-1560869713-7d0a29430803?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&q=80",
     "rating": 4.84,
     "reviewCount": 1738,
     "isBestseller": false
@@ -3096,7 +3096,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 450,
     "suggestedAddonPrice": 750,
     "suggestedPackagePrice": 3400,
-    "imageUrl": "https://images.unsplash.com/photo-1560869713-7d0a29430803?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=600&q=80",
     "rating": 4.95,
     "reviewCount": 1962,
     "isBestseller": false
@@ -3132,7 +3132,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 114,
     "suggestedAddonPrice": 200,
     "suggestedPackagePrice": 850,
-    "imageUrl": "https://images.unsplash.com/photo-1560869713-7d0a29430803?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=600&q=80",
     "rating": 4.9,
     "reviewCount": 2649,
     "isBestseller": true
@@ -3168,7 +3168,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 168,
     "suggestedAddonPrice": 300,
     "suggestedPackagePrice": 1250,
-    "imageUrl": "https://images.unsplash.com/photo-1560869713-7d0a29430803?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&q=80",
     "rating": 4.94,
     "reviewCount": 2193,
     "isBestseller": false
@@ -3240,7 +3240,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 144,
     "suggestedAddonPrice": 250,
     "suggestedPackagePrice": 1100,
-    "imageUrl": "https://images.unsplash.com/photo-1560869713-7d0a29430803?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=600&q=80",
     "rating": 4.89,
     "reviewCount": 1462,
     "isBestseller": false
@@ -3276,7 +3276,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 114,
     "suggestedAddonPrice": 200,
     "suggestedPackagePrice": 850,
-    "imageUrl": "https://images.unsplash.com/photo-1560869713-7d0a29430803?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=600&q=80",
     "rating": 4.98,
     "reviewCount": 1250,
     "isBestseller": false
@@ -3312,7 +3312,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 480,
     "suggestedAddonPrice": 800,
     "suggestedPackagePrice": 3600,
-    "imageUrl": "https://images.unsplash.com/photo-1560869713-7d0a29430803?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&q=80",
     "rating": 4.88,
     "reviewCount": 2244,
     "isBestseller": true
@@ -3348,7 +3348,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 42,
     "suggestedAddonPrice": 50,
     "suggestedPackagePrice": 300,
-    "imageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600&q=80",
     "rating": 4.89,
     "reviewCount": 892,
     "isBestseller": false
@@ -3420,7 +3420,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 66,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 500,
-    "imageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600&q=80",
     "rating": 4.86,
     "reviewCount": 1345,
     "isBestseller": false
@@ -3492,7 +3492,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 162,
     "suggestedAddonPrice": 250,
     "suggestedPackagePrice": 1200,
-    "imageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600&q=80",
     "rating": 4.87,
     "reviewCount": 2527,
     "isBestseller": false
@@ -3564,7 +3564,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 162,
     "suggestedAddonPrice": 250,
     "suggestedPackagePrice": 1200,
-    "imageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600&q=80",
     "rating": 4.97,
     "reviewCount": 474,
     "isBestseller": false
@@ -3636,7 +3636,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 210,
     "suggestedAddonPrice": 350,
     "suggestedPackagePrice": 1600,
-    "imageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1560869713-7d0a29430803?w=600&q=80",
     "rating": 4.85,
     "reviewCount": 440,
     "isBestseller": false
@@ -3672,7 +3672,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 84,
     "suggestedAddonPrice": 150,
     "suggestedPackagePrice": 650,
-    "imageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=600&q=80",
     "rating": 4.97,
     "reviewCount": 2336,
     "isBestseller": false
@@ -3744,7 +3744,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 540,
     "suggestedAddonPrice": 900,
     "suggestedPackagePrice": 4050,
-    "imageUrl": "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1595959183082-7b570b7e08e2?w=600&q=80",
     "rating": 4.86,
     "reviewCount": 1360,
     "isBestseller": false
@@ -3780,7 +3780,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 1320,
     "suggestedAddonPrice": 2200,
     "suggestedPackagePrice": 9900,
-    "imageUrl": "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80",
     "rating": 4.81,
     "reviewCount": 1895,
     "isBestseller": true
@@ -3852,7 +3852,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 300,
     "suggestedAddonPrice": 500,
     "suggestedPackagePrice": 2250,
-    "imageUrl": "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=600&q=80",
     "rating": 4.8,
     "reviewCount": 1596,
     "isBestseller": false
@@ -3888,7 +3888,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 54,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 400,
-    "imageUrl": "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80",
     "rating": 4.84,
     "reviewCount": 1640,
     "isBestseller": false
@@ -3996,7 +3996,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 420,
     "suggestedAddonPrice": 700,
     "suggestedPackagePrice": 3150,
-    "imageUrl": "https://images.unsplash.com/photo-1595959183082-7b570b7e08e2?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80",
     "rating": 4.81,
     "reviewCount": 1537,
     "isBestseller": true
@@ -4032,7 +4032,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 780,
     "suggestedAddonPrice": 1300,
     "suggestedPackagePrice": 5850,
-    "imageUrl": "https://images.unsplash.com/photo-1595959183082-7b570b7e08e2?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=600&q=80",
     "rating": 4.99,
     "reviewCount": 311,
     "isBestseller": false
@@ -4104,7 +4104,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 96,
     "suggestedAddonPrice": 150,
     "suggestedPackagePrice": 700,
-    "imageUrl": "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=600&q=80",
     "rating": 4.85,
     "reviewCount": 1471,
     "isBestseller": false
@@ -4140,7 +4140,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 60,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 450,
-    "imageUrl": "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&q=80",
     "rating": 4.97,
     "reviewCount": 2510,
     "isBestseller": false
@@ -4176,7 +4176,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 78,
     "suggestedAddonPrice": 150,
     "suggestedPackagePrice": 600,
-    "imageUrl": "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=600&q=80",
     "rating": 4.86,
     "reviewCount": 224,
     "isBestseller": false
@@ -4212,7 +4212,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 72,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 550,
-    "imageUrl": "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80",
     "rating": 4.91,
     "reviewCount": 2475,
     "isBestseller": false
@@ -4248,7 +4248,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 72,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 550,
-    "imageUrl": "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&q=80",
     "rating": 4.82,
     "reviewCount": 914,
     "isBestseller": false
@@ -4284,7 +4284,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 108,
     "suggestedAddonPrice": 200,
     "suggestedPackagePrice": 800,
-    "imageUrl": "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=600&q=80",
     "rating": 4.81,
     "reviewCount": 695,
     "isBestseller": false
@@ -4320,7 +4320,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 84,
     "suggestedAddonPrice": 150,
     "suggestedPackagePrice": 650,
-    "imageUrl": "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&q=80",
     "rating": 4.91,
     "reviewCount": 925,
     "isBestseller": false
@@ -4356,7 +4356,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 42,
     "suggestedAddonPrice": 50,
     "suggestedPackagePrice": 300,
-    "imageUrl": "https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1560869713-7d0a29430803?w=600&q=80",
     "rating": 4.99,
     "reviewCount": 2560,
     "isBestseller": false
@@ -4392,7 +4392,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 48,
     "suggestedAddonPrice": 100,
     "suggestedPackagePrice": 350,
-    "imageUrl": "https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=600&q=80",
     "rating": 4.92,
     "reviewCount": 2323,
     "isBestseller": false
@@ -4428,7 +4428,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 24,
     "suggestedAddonPrice": 50,
     "suggestedPackagePrice": 200,
-    "imageUrl": "https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600&q=80",
     "rating": 4.88,
     "reviewCount": 1973,
     "isBestseller": false
@@ -4464,7 +4464,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 24,
     "suggestedAddonPrice": 50,
     "suggestedPackagePrice": 200,
-    "imageUrl": "https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1519415510236-718bdfcd89c8?w=600&q=80",
     "rating": 4.84,
     "reviewCount": 1980,
     "isBestseller": false
@@ -4536,7 +4536,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 114,
     "suggestedAddonPrice": 200,
     "suggestedPackagePrice": 850,
-    "imageUrl": "https://images.unsplash.com/photo-1595959183082-7b570b7e08e2?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=600&q=80",
     "rating": 4.81,
     "reviewCount": 1110,
     "isBestseller": false
@@ -4572,7 +4572,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 192,
     "suggestedAddonPrice": 300,
     "suggestedPackagePrice": 1450,
-    "imageUrl": "https://images.unsplash.com/photo-1595959183082-7b570b7e08e2?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&q=80",
     "rating": 4.82,
     "reviewCount": 2257,
     "isBestseller": false
@@ -4608,7 +4608,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 144,
     "suggestedAddonPrice": 250,
     "suggestedPackagePrice": 1100,
-    "imageUrl": "https://images.unsplash.com/photo-1595959183082-7b570b7e08e2?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1519415510236-718bdfcd89c8?w=600&q=80",
     "rating": 4.93,
     "reviewCount": 817,
     "isBestseller": false
@@ -4644,7 +4644,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 570,
     "suggestedAddonPrice": 950,
     "suggestedPackagePrice": 4300,
-    "imageUrl": "https://images.unsplash.com/photo-1595959183082-7b570b7e08e2?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80",
     "rating": 4.84,
     "reviewCount": 1404,
     "isBestseller": true
@@ -4680,7 +4680,7 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 960,
     "suggestedAddonPrice": 1600,
     "suggestedPackagePrice": 7200,
-    "imageUrl": "https://images.unsplash.com/photo-1595959183082-7b570b7e08e2?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=600&q=80",
     "rating": 4.97,
     "reviewCount": 158,
     "isBestseller": true
@@ -4752,14 +4752,13 @@ const BEAUTYNEST_SERVICES = [
     "estimatedProfit": 660,
     "suggestedAddonPrice": 1100,
     "suggestedPackagePrice": 4950,
-    "imageUrl": "https://images.unsplash.com/photo-1595959183082-7b570b7e08e2?w=600&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80",
     "rating": 4.81,
     "reviewCount": 447,
     "isBestseller": false
   }
 ];
 
-// Unique Categories
 const SERVICE_CATEGORIES = [
   "Facial & Cleanup",
   "Bleach & De-Tan",

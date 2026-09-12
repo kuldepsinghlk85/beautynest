@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Hero from '@/components/Hero';
 import CategoryGrid from '@/components/CategoryGrid';
 import KoreanBanner from '@/components/KoreanBanner';
@@ -17,6 +17,43 @@ import { ArrowRight, Sparkles } from 'lucide-react';
 export default function HomePage() {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [servicesList, setServicesList] = useState<Service[]>(SERVICES);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const res = await fetch('http://localhost:4200/api/services');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setServicesList((prev) =>
+              prev.map((s) => {
+                const remote = data.find((d: any) => d.serviceId === s.serviceId || d.id === s.id);
+                if (remote) {
+                  return {
+                    ...s,
+                    name: remote.name || s.name,
+                    price: remote.price || s.price,
+                    originalPrice: remote.originalPrice || s.originalPrice,
+                    imageUrl: remote.imageUrl || s.imageUrl,
+                    durationMinutes: remote.durationMinutes || s.durationMinutes,
+                    isBestseller: remote.isBestseller !== undefined ? remote.isBestseller : s.isBestseller,
+                  };
+                }
+                return s;
+              })
+            );
+          }
+        }
+      } catch {
+        // use default static services
+      }
+    };
+
+    fetchServices();
+    window.addEventListener('focus', fetchServices);
+    return () => window.removeEventListener('focus', fetchServices);
+  }, []);
 
   const handleBookService = (service: Service) => {
     setSelectedService(service);
@@ -56,7 +93,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {SERVICES.slice(0, 6).map((service) => (
+            {servicesList.slice(0, 6).map((service) => (
               <ServiceCard
                 key={service.id}
                 service={service}

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Plus,
   Edit,
@@ -21,6 +21,8 @@ import {
   Package,
   Layers,
   HelpCircle,
+  RefreshCw,
+  Globe,
 } from 'lucide-react';
 import { BEAUTYNEST_SERVICES, SERVICE_CATEGORIES, type BeautyService, type ServiceCategory } from '../lib/allServices';
 
@@ -178,6 +180,45 @@ export default function ServicesPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
+  // Live Backend & Customer Website Sync State
+  const [backendOnline, setBackendOnline] = useState(true);
+  const [syncLoading, setSyncLoading] = useState(false);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const res = await fetch('http://localhost:4200/api/services');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setBackendOnline(true);
+            setServices((prev) =>
+              prev.map((local) => {
+                const remote = data.find((d: any) => d.serviceId === local.serviceId || d.id === local.id);
+                if (remote) {
+                  return {
+                    ...local,
+                    ...remote,
+                    price: remote.price || local.price,
+                    imageUrl: remote.imageUrl || local.imageUrl,
+                    name: remote.name || local.name,
+                    category: remote.category || local.category,
+                    durationString: remote.durationString || `${remote.duration || local.duration} mins`,
+                  };
+                }
+                return local;
+              })
+            );
+          }
+        }
+      } catch {
+        setBackendOnline(false);
+      }
+    };
+    fetchServices();
+  }, []);
+
   // Top Formula Simulator State
   const [simBase, setSimBase] = useState(300);
   const [simTierPercent, setSimTierPercent] = useState(20);
@@ -318,46 +359,84 @@ export default function ServicesPage() {
     setEditSuccess(false);
   };
 
-  // Save Edit Service
-  const handleSaveServiceEdit = (e: React.FormEvent) => {
+  // Save Edit Service with Instant Backend & Customer Website Sync
+  const handleSaveServiceEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingService) return;
 
     const finalCalculatedPrice = Number(editPrice) || (editBaseLabor + editBeauticianCut + editCosmeticCost + editDistanceCharge + editAdditionalCharges);
 
+    const updatedItem: ServiceItem = {
+      ...editingService,
+      name: editName,
+      category: editCat,
+      subcategory: editSubcat,
+      price: finalCalculatedPrice,
+      originalPrice: Number(editOriginalPrice) || editingService.originalPrice,
+      varanasiPriceRange: editVaranasiRange,
+      duration: Number(editDuration) || editingService.duration,
+      durationString: `${editDuration} mins`,
+      description: editDesc,
+      imageUrl: editImageUrl,
+      isBestseller: editIsBestseller,
+      offerCode: editOfferCode || undefined,
+      offerTag: editOfferTag || undefined,
+      discountPercent: Number(editDiscountPercent) || undefined,
+      baseLaborPrice: editBaseLabor,
+      beauticianShare: editBeauticianCut,
+      cosmeticProductCost: editCosmeticCost,
+      distanceCharge: editDistanceCharge,
+      additionalCharges: editAdditionalCharges,
+    };
+
     setServices((prev) =>
-      prev.map((item) =>
-        item.id === editingService.id
-          ? {
-              ...item,
-              name: editName,
-              category: editCat,
-              subcategory: editSubcat,
-              price: finalCalculatedPrice,
-              originalPrice: Number(editOriginalPrice) || item.originalPrice,
-              varanasiPriceRange: editVaranasiRange,
-              duration: Number(editDuration) || item.duration,
-              durationString: `${editDuration} mins`,
-              description: editDesc,
-              imageUrl: editImageUrl,
-              isBestseller: editIsBestseller,
-              offerCode: editOfferCode || undefined,
-              offerTag: editOfferTag || undefined,
-              discountPercent: Number(editDiscountPercent) || undefined,
-              baseLaborPrice: editBaseLabor,
-              beauticianShare: editBeauticianCut,
-              cosmeticProductCost: editCosmeticCost,
-              distanceCharge: editDistanceCharge,
-              additionalCharges: editAdditionalCharges,
-            }
-          : item
-      )
+      prev.map((item) => (item.id === editingService.id ? updatedItem : item))
     );
+
+    // Sync directly to backend API
+    try {
+      const sId = editingService.serviceId || editingService.id;
+      const res = await fetch(`http://localhost:4200/api/services/${encodeURIComponent(sId)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedItem),
+      });
+      if (res.ok) {
+        setBackendOnline(true);
+      }
+    } catch (err) {
+      console.warn('Backend sync failed:', err);
+    }
+
     setEditSuccess(true);
     setTimeout(() => {
       setEditSuccess(false);
       setEditingService(null);
     }, 1200);
+  };
+
+  // Sync All Services to Customer Website in 1 click
+  const handleSyncAllToWebsite = async () => {
+    setSyncLoading(true);
+    try {
+      const res = await fetch('http://localhost:4200/api/services/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(services),
+      });
+      if (res.ok) {
+        setBackendOnline(true);
+        setSyncMessage('All 132 services synced with Customer Website & Backend!');
+        setTimeout(() => setSyncMessage(null), 3500);
+      } else {
+        throw new Error('Sync returned ' + res.status);
+      }
+    } catch (e: any) {
+      setSyncMessage('Failed to sync. Please ensure backend is running.');
+      setTimeout(() => setSyncMessage(null), 3500);
+    } finally {
+      setSyncLoading(false);
+    }
   };
 
   // Add Service Submit
@@ -427,20 +506,55 @@ export default function ServicesPage() {
             <span className="bg-pink-100 text-brand-primary text-xs font-bold px-2.5 py-0.5 rounded-full">
               {services.length} Services Live
             </span>
+            <span
+              className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
+                backendOnline
+                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                  : 'bg-amber-50 text-amber-700 border border-amber-200'
+              }`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${backendOnline ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+              <span>{backendOnline ? 'Live Website Sync Active' : 'Offline Mode'}</span>
+            </span>
           </div>
           <p className="text-xs text-gray-500 mt-0.5">
             Full 132-service production catalog (BS-001 to BS-132) with live price editing, photo uploader, and promo code offers
           </p>
         </div>
 
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="inline-flex items-center gap-1.5 bg-gradient-to-r from-brand-primary to-pink-500 hover:from-brand-primaryDark hover:to-brand-primary text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-pink-soft transition-all shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add New Service</span>
-        </button>
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={handleSyncAllToWebsite}
+            disabled={syncLoading}
+            className="inline-flex items-center gap-1.5 bg-white hover:bg-pink-50 text-brand-primary border border-pink-200 text-xs font-bold px-3.5 py-2 rounded-xl transition-all shadow-xs disabled:opacity-60"
+            title="Push all services catalog and custom images to Customer Website"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${syncLoading ? 'animate-spin' : ''}`} />
+            <span>{syncLoading ? 'Syncing...' : 'Sync All with Website'}</span>
+          </button>
+
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="inline-flex items-center gap-1.5 bg-gradient-to-r from-brand-primary to-pink-500 hover:from-brand-primaryDark hover:to-brand-primary text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-pink-soft transition-all shrink-0"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add New Service</span>
+          </button>
+        </div>
       </div>
+
+      {/* Sync notification banner */}
+      {syncMessage && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold px-4 py-2.5 rounded-xl flex items-center justify-between shadow-xs animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <span>{syncMessage}</span>
+          </div>
+          <button onClick={() => setSyncMessage(null)} className="text-emerald-600 hover:text-emerald-900">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* DYNAMIC PRICING FORMULA & TARIFF SIMULATOR BANNER */}
       <div className="bg-white rounded-2xl p-5 border border-blue-100 shadow-xs space-y-4">
