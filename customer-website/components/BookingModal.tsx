@@ -17,9 +17,41 @@ import {
   Car,
   FileCheck,
   AlertCircle,
+  Navigation,
+  Crosshair,
+  Map,
+  Compass,
+  LocateFixed,
+  Radio,
+  Building,
+  Home,
 } from 'lucide-react';
 import { Service, BEAUTICIANS } from '@/lib/data';
 import { DEFAULT_DISTANCE_RULES } from '@/lib/masterConfig';
+
+interface VaranasiLocationHub {
+  area: string;
+  landmark: string;
+  distanceKm: number;
+  lat: number;
+  lng: number;
+  zoneDesc: string;
+}
+
+export const VARANASI_LOCATION_HUBS: VaranasiLocationHub[] = [
+  { area: 'Sigra', landmark: 'Near Sigra Stadium & IP Mall', distanceKm: 1.2, lat: 25.3176, lng: 82.9739, zoneDesc: 'Central Salon Hub • 1.2 KM (Free)' },
+  { area: 'Mahmoorganj', landmark: 'Near Shivaji Park & Akashvani', distanceKm: 1.9, lat: 25.3142, lng: 82.9654, zoneDesc: 'West Hub • 1.9 KM (Free)' },
+  { area: 'Assi Ghat', landmark: 'Near Subah-e-Banaras Ghat Stage', distanceKm: 2.5, lat: 25.2937, lng: 83.0039, zoneDesc: 'South Riverside Hub • 2.5 KM (Free)' },
+  { area: 'Bhelupur', landmark: 'Near Kamachha & Water Works', distanceKm: 2.1, lat: 25.3056, lng: 82.9892, zoneDesc: 'Central-South Hub • 2.1 KM (Free)' },
+  { area: 'Lanka (BHU)', landmark: 'Near BHU Main Gate & Malviya Bhavan', distanceKm: 3.8, lat: 25.2818, lng: 82.9996, zoneDesc: 'University Campus • 3.8 KM (+₹40 Travel)' },
+  { area: 'Godowlia', landmark: 'Near Dashashwamedh Ghat Chauraha', distanceKm: 3.2, lat: 25.3109, lng: 83.0107, zoneDesc: 'Heritage Kashi • 3.2 KM (+₹10 Travel)' },
+  { area: 'Durgakund', landmark: 'Near Durga Temple & Anand Park', distanceKm: 2.7, lat: 25.2901, lng: 82.9961, zoneDesc: 'Temple Zone • 2.7 KM (Free)' },
+  { area: 'Cantonment (Cantt)', landmark: 'Near Varanasi Junction & Mall Road', distanceKm: 3.5, lat: 25.3284, lng: 82.9866, zoneDesc: 'Station & Cantt • 3.5 KM (+₹25 Travel)' },
+  { area: 'Pandeypur', landmark: 'Near Pandeypur Chauraha', distanceKm: 4.8, lat: 25.3431, lng: 82.9991, zoneDesc: 'North-East Hub • 4.8 KM (+₹90 Travel)' },
+  { area: 'Shivpur', landmark: 'Near Central Jail Road & GT Road', distanceKm: 6.5, lat: 25.3582, lng: 82.9551, zoneDesc: 'Outer North Zone • 6.5 KM (+₹175 Travel)' },
+  { area: 'Sarnath', landmark: 'Near Dhamek Stupa & Museum', distanceKm: 7.2, lat: 25.3811, lng: 83.0214, zoneDesc: 'Heritage Sarnath • 7.2 KM (+₹210 Travel)' },
+  { area: 'Chetganj / Maldahiya', landmark: 'Near Lahurabir & Englishia Line', distanceKm: 1.8, lat: 25.3195, lng: 82.9912, zoneDesc: 'Commercial Hub • 1.8 KM (Free)' },
+];
 
 interface BookingModalProps {
   service: Service | null;
@@ -32,11 +64,22 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
   const [step, setStep] = useState<1 | 2 | 3 | 4 | 5 | 6>(1);
   const [selectedDate, setSelectedDate] = useState('Mon, 03 Aug');
   const [selectedTime, setSelectedTime] = useState('11:30 AM - 12:30 PM');
-  const [address, setAddress] = useState('House 42, Anand Nagar Colony, Near Sigra Stadium, Varanasi');
+  
+  // Structured Location Demo State
+  const [selectedVaranasiArea, setSelectedVaranasiArea] = useState('Sigra');
+  const [flatNumber, setFlatNumber] = useState('House 42, 2nd Floor');
+  const [streetName, setStreetName] = useState('Anand Nagar Colony, Lane 3');
+  const [nearbyLandmark, setNearbyLandmark] = useState('Opposite Sigra Sports Stadium');
+  const [addressType, setAddressType] = useState<'HOME' | 'OFFICE' | 'OTHER'>('HOME');
+  const [isGpsLocating, setIsGpsLocating] = useState(false);
+  const [gpsLocked, setGpsLocked] = useState(true);
+  const [gpsCoords, setGpsCoords] = useState({ lat: 25.3176, lng: 82.9739 });
+
+  const [address, setAddress] = useState('House 42, 2nd Floor, Anand Nagar Colony, Opposite Sigra Sports Stadium, Sigra, Varanasi');
   
   // Customization: Own Products & Distance Charge
   const [hasOwnProducts, setHasOwnProducts] = useState(false);
-  const [travelDistanceKm, setTravelDistanceKm] = useState<number>(2.5); // Default 2.5 KM (within 3km free tier)
+  const [travelDistanceKm, setTravelDistanceKm] = useState<number>(1.2); // Default 1.2 KM (Sigra Hub free tier)
   
   // Pre-service Consent Form State
   const [allergyChoice, setAllergyChoice] = useState<'NONE' | 'AMMONIA' | 'WAX' | 'OTHER'>('NONE');
@@ -80,23 +123,52 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
   const baseServiceCost = service.price - normalCosmeticProductCost; // pure salon labor
   const safetyKitFee = 49;
 
+  // Dynamic Coupon Engine (reads from Admin coupons or defaults)
+  const getAvailableCoupons = () => {
+    const defaultCoupons = [
+      { code: 'VARANASI50', discountType: 'FLAT', discountValue: 50, minOrderValue: 299, maxDiscount: 50, isActive: true },
+      { code: 'GLOW30', discountType: 'PERCENTAGE', discountValue: 30, minOrderValue: 799, maxDiscount: 500, isActive: true },
+      { code: 'BRIDAL1000', discountType: 'FLAT', discountValue: 1000, minOrderValue: 1999, maxDiscount: 1000, isActive: true },
+      { code: 'FESTIVE25', discountType: 'PERCENTAGE', discountValue: 25, minOrderValue: 699, maxDiscount: 400, isActive: true },
+      { code: 'WELCOME200', discountType: 'FLAT', discountValue: 200, minOrderValue: 799, maxDiscount: 200, isActive: true },
+      { code: 'WELCOME50', discountType: 'FLAT', discountValue: 50, minOrderValue: 299, maxDiscount: 50, isActive: true },
+    ];
+
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('beautynest_coupons');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed.filter((c: any) => c.isActive !== false);
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return defaultCoupons;
+  };
+
   // Calculate discount based on applied code
   const calculateDiscount = () => {
     if (!appliedCoupon) return 0;
     const code = appliedCoupon.toUpperCase().trim();
-    if (code === 'VARANASI50' || code === 'WELCOME50') {
-      return Math.min(50, service.price);
+    const allCoupons = getAvailableCoupons();
+    const found = allCoupons.find((c: any) => c.code.toUpperCase() === code);
+
+    if (!found) {
+      // Fallback
+      return 50;
     }
-    if (code === 'GLOW30') {
-      return Math.min(Math.round(service.price * 0.3), 500);
+
+    if (found.discountType === 'PERCENTAGE') {
+      const calculated = Math.round(service.price * (Number(found.discountValue) / 100));
+      return found.maxDiscount ? Math.min(calculated, Number(found.maxDiscount)) : calculated;
+    } else {
+      // FLAT discount
+      return Math.min(Number(found.discountValue) || 50, service.price);
     }
-    if (code === 'BRIDAL1000') {
-      return service.price >= 1500 ? 1000 : 300;
-    }
-    if (code === 'FESTIVE25') {
-      return Math.min(Math.round(service.price * 0.25), 400);
-    }
-    return Math.min(Math.round(service.price * 0.1), 100);
   };
 
   const discount = calculateDiscount();
@@ -107,14 +179,34 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
 
   const handleApplyCoupon = (codeToApply?: string) => {
     const code = (codeToApply || couponCode).toUpperCase().trim();
-    const validCodes = ['VARANASI50', 'GLOW30', 'WELCOME50', 'BRIDAL1000', 'FESTIVE25'];
-    if (validCodes.includes(code)) {
-      setAppliedCoupon(code);
-      setCouponCode(code);
-      setCouponError(null);
-    } else {
-      setCouponError('Invalid coupon code. Try VARANASI50, GLOW30, or BRIDAL1000');
+    if (!code) {
+      setCouponError('Please enter a coupon code.');
+      return;
     }
+
+    const allCoupons = getAvailableCoupons();
+    const found = allCoupons.find((c: any) => c.code.toUpperCase() === code);
+
+    if (!found) {
+      setCouponError(`Coupon '${code}' is invalid or expired. Try VARANASI50 or GLOW30`);
+      return;
+    }
+
+    const minOrder = Number(found.minOrderValue) || 0;
+    if (service.price < minOrder) {
+      setCouponError(`Min. booking value for '${code}' is ₹${minOrder}. Current service is ₹${service.price}.`);
+      return;
+    }
+
+    setAppliedCoupon(code);
+    setCouponCode(code);
+    setCouponError(null);
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode('');
+    setCouponError(null);
   };
 
   const matchedBeautician = BEAUTICIANS[0]; // Ananya Sharma (Gold Tier 20%)
@@ -128,6 +220,36 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
     setStep(5);
   };
 
+  const handleDetectLocation = () => {
+    setIsGpsLocating(true);
+    setTimeout(() => {
+      setIsGpsLocating(false);
+      setGpsLocked(true);
+      const sigraHub = VARANASI_LOCATION_HUBS[0];
+      setSelectedVaranasiArea(sigraHub.area);
+      setTravelDistanceKm(sigraHub.distanceKm);
+      setNearbyLandmark(sigraHub.landmark);
+      setGpsCoords({ lat: sigraHub.lat, lng: sigraHub.lng });
+      setAddress(`${flatNumber}, ${streetName}, ${sigraHub.landmark}, ${sigraHub.area}, Varanasi, UP - 221010`);
+    }, 850);
+  };
+
+  const handleSelectArea = (hub: VaranasiLocationHub) => {
+    setSelectedVaranasiArea(hub.area);
+    setTravelDistanceKm(hub.distanceKm);
+    setNearbyLandmark(hub.landmark);
+    setGpsCoords({ lat: hub.lat, lng: hub.lng });
+    setGpsLocked(true);
+    setAddress(`${flatNumber}, ${streetName}, ${hub.landmark}, ${hub.area}, Varanasi, UP - 221010`);
+  };
+
+  const handleUpdateAddress = (flat: string, street: string, landmark: string, area: string) => {
+    setFlatNumber(flat);
+    setStreetName(street);
+    setNearbyLandmark(landmark);
+    setAddress(`${flat}, ${street}, ${landmark}, ${area}, Varanasi, UP - 221010`);
+  };
+
   const handleConfirm = () => {
     const randomId = `BK-${Math.floor(1000 + Math.random() * 9000)}`;
     setBookingId(randomId);
@@ -135,11 +257,11 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-pink-100 animate-in fade-in zoom-in duration-200">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-start justify-center p-3 sm:p-4 pt-6 sm:pt-10 pb-10">
+      <div className="relative bg-white w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden border border-pink-100 max-h-[88vh] flex flex-col my-0 animate-in fade-in zoom-in duration-200 shrink-0">
         
         {/* Header */}
-        <div className="bg-gradient-to-r from-brand-primary to-pink-500 text-white p-5 flex items-center justify-between">
+        <div className="bg-gradient-to-r from-brand-primary to-pink-500 text-white p-5 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
             {step > 1 && step < 6 && (
               <button
@@ -155,7 +277,7 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
               </span>
               <h3 className="text-lg font-serif font-bold leading-tight">
                 {step === 1 && 'Select Date & Time'}
-                {step === 2 && 'Address & Product Option'}
+                {step === 2 && 'Varanasi Location & Doorstep Address'}
                 {step === 3 && 'Assigned Beautician'}
                 {step === 4 && 'Pre-Service Health & Consent Form'}
                 {step === 5 && 'Itemized Bill & Payment'}
@@ -172,7 +294,7 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 max-h-[75vh] overflow-y-auto">
+        <div className="p-5 sm:p-6 overflow-y-auto flex-1">
           
           {/* STEP 1: Date & Time Picker */}
           {step === 1 && (
@@ -286,69 +408,256 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
             </div>
           )}
 
-          {/* STEP 2: Address Selection, Distance & Customer Product Option */}
+          {/* STEP 2: Interactive Varanasi Location Demo, GPS & Map Simulator */}
           {step === 2 && (
-            <div className="space-y-5">
-              <div className="p-4 rounded-2xl border-2 border-brand-primary bg-pink-50/60">
-                <div className="flex items-center gap-2 text-xs font-bold text-brand-primary uppercase">
-                  <MapPin className="w-4 h-4" />
-                  <span>Doorstep Delivery Address</span>
+            <div className="space-y-4">
+              {/* GPS Auto-Detect & Satellite Simulator */}
+              <div className="bg-gradient-to-r from-pink-50 via-purple-50 to-blue-50 p-4 rounded-2xl border border-pink-200 shadow-2xs space-y-2.5">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-xs font-bold text-gray-900">
+                    <Crosshair className="w-4 h-4 text-brand-primary animate-spin-slow" />
+                    <span>Varanasi GPS Location Demo Engine</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleDetectLocation}
+                    disabled={isGpsLocating}
+                    className="inline-flex items-center gap-1.5 bg-brand-primary hover:bg-brand-primaryDark text-white text-[11px] font-bold px-3 py-1.5 rounded-xl shadow-xs transition-all disabled:opacity-60"
+                  >
+                    <LocateFixed className="w-3.5 h-3.5" />
+                    <span>{isGpsLocating ? 'Detecting via Varanasi Satellites...' : '📍 Auto-Detect Location (GPS)'}</span>
+                  </button>
                 </div>
-                <textarea
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  rows={2}
-                  className="w-full mt-2 p-3 text-xs bg-white rounded-xl border border-pink-200 focus:outline-brand-primary text-gray-800"
-                />
+
+                <div className="flex flex-wrap items-center justify-between gap-1 text-[11px] text-gray-600 bg-white/80 p-2 rounded-xl border border-pink-100 font-mono">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                    <span className="text-emerald-700 font-bold">GPS SIGNAL LOCKED</span>
+                    <span className="text-gray-400">|</span>
+                    <span>Lat: {gpsCoords.lat.toFixed(4)}° N, Lng: {gpsCoords.lng.toFixed(4)}° E</span>
+                  </div>
+                  <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">
+                    ±4m Precision • {selectedVaranasiArea} Hub
+                  </span>
+                </div>
+              </div>
+
+              {/* Interactive Visual Varanasi Map Preview Canvas */}
+              <div className="relative bg-slate-900 rounded-2xl p-4 overflow-hidden text-white border border-slate-700 shadow-md">
+                {/* Simulated Street Grid Background */}
+                <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
+
+                {/* Simulated Ganga River Curve SVG Background */}
+                <svg className="absolute right-0 top-0 bottom-0 w-32 h-full opacity-20 pointer-events-none" viewBox="0 0 100 200">
+                  <path d="M70,0 Q30,100 80,200" fill="none" stroke="#38bdf8" strokeWidth="24" strokeLinecap="round" />
+                  <text x="50" y="100" fill="#38bdf8" fontSize="8" transform="rotate(75 50,100)" opacity="0.8">
+                    GANGA RIVER
+                  </text>
+                </svg>
+
+                <div className="relative z-10 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-pink-300">
+                      <Map className="w-3.5 h-3.5" />
+                      <span>Live Doorstep Navigation Route • Varanasi (Kashi)</span>
+                    </div>
+                    <span className="text-[10px] bg-slate-800 text-pink-300 border border-pink-500/30 px-2 py-0.5 rounded-full font-mono">
+                      Hub Distance: {travelDistanceKm} KM
+                    </span>
+                  </div>
+
+                  {/* Route Visualizer */}
+                  <div className="bg-slate-800/90 backdrop-blur-sm p-3 rounded-xl border border-slate-700/80 flex items-center justify-between text-xs">
+                    {/* Salon Hub Point */}
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-pink-500 text-white flex items-center justify-center font-bold text-xs shadow-pink-soft">
+                        🏰
+                      </div>
+                      <div>
+                        <span className="font-bold text-[11px] block text-white">Sigra Central Hub</span>
+                        <span className="text-[10px] text-slate-400">Main Varanasi Depot</span>
+                      </div>
+                    </div>
+
+                    {/* Dotted Connecting Route */}
+                    <div className="flex-1 mx-3 flex flex-col items-center">
+                      <div className="w-full flex items-center justify-center gap-1">
+                        <div className="h-[2px] flex-1 bg-gradient-to-r from-pink-500 via-purple-400 to-emerald-400 border-dashed" />
+                        <span className="text-[9px] font-mono font-bold text-amber-300 px-1 bg-slate-900 rounded">
+                          {travelDistanceKm} KM
+                        </span>
+                        <div className="h-[2px] flex-1 bg-gradient-to-r from-purple-400 to-emerald-400" />
+                      </div>
+                      <span className="text-[9px] text-slate-400 mt-0.5">
+                        ~{Math.round(travelDistanceKm * 4 + 6)} mins doorstep transit
+                      </span>
+                    </div>
+
+                    {/* Customer Destination Pin */}
+                    <div className="flex items-center gap-2 text-right">
+                      <div>
+                        <span className="font-bold text-[11px] block text-emerald-400">{selectedVaranasiArea}</span>
+                        <span className="text-[10px] text-slate-400">Customer Doorstep</span>
+                      </div>
+                      <div className="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shadow-sm ring-4 ring-emerald-500/20 animate-pulse">
+                        📍
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-[10px] text-slate-300 flex items-center gap-1">
+                    <Navigation className="w-3 h-3 text-pink-400" />
+                    <span>Verified Doorstep Coverage: Verified female beautician dispatched from nearest Varanasi hub.</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Varanasi Area Quick Chips (Major Localities) */}
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1.5 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-brand-primary" />
+                    <span>Select Varanasi Area / Locality *</span>
+                  </span>
+                  <span className="text-[10px] text-brand-primary font-bold">12 Serviceable Hubs</span>
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {VARANASI_LOCATION_HUBS.map((hub) => {
+                    const isSelected = selectedVaranasiArea === hub.area;
+                    return (
+                      <button
+                        key={hub.area}
+                        type="button"
+                        onClick={() => handleSelectArea(hub)}
+                        className={`p-2 rounded-xl text-left border transition-all text-xs ${
+                          isSelected
+                            ? 'bg-pink-50/90 border-brand-primary text-brand-primary shadow-xs ring-1 ring-brand-primary'
+                            : 'bg-white border-gray-200 text-gray-700 hover:bg-pink-50/40'
+                        }`}
+                      >
+                        <div className="font-bold text-[11px] truncate flex items-center justify-between">
+                          <span>{hub.area}</span>
+                          {hub.distanceKm <= freeKm && (
+                            <span className="text-[8px] bg-emerald-100 text-emerald-700 px-1 py-0.2 rounded font-semibold">
+                              FREE
+                            </span>
+                          )}
+                        </div>
+                        <span className="block text-[10px] text-gray-500 truncate mt-0.5">
+                          {hub.distanceKm} KM • {hub.distanceKm <= freeKm ? 'Free delivery' : `+₹${Math.round((hub.distanceKm - freeKm) * perKm)}`}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Detailed Doorstep Address Inputs */}
+              <div className="p-4 rounded-2xl border border-pink-200 bg-pink-50/40 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-800 uppercase tracking-wider">
+                    Doorstep Delivery Address
+                  </span>
+                  {/* Address Type Selector */}
+                  <div className="flex gap-1">
+                    {(['HOME', 'OFFICE', 'OTHER'] as const).map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setAddressType(type)}
+                        className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-colors ${
+                          addressType === type
+                            ? 'bg-brand-primary text-white'
+                            : 'bg-white text-gray-600 border border-pink-100'
+                        }`}
+                      >
+                        {type === 'HOME' ? '🏠 Home' : type === 'OFFICE' ? '🏢 Office' : '📍 Other'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="block text-[11px] font-bold text-gray-700 mb-0.5">
+                      House / Flat / Floor No. *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={flatNumber}
+                      onChange={(e) => handleUpdateAddress(e.target.value, streetName, nearbyLandmark, selectedVaranasiArea)}
+                      placeholder="e.g. Flat 302, 3rd Floor"
+                      className="w-full px-3 py-1.5 text-xs bg-white border border-gray-200 rounded-xl outline-none focus:border-brand-primary"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-gray-700 mb-0.5">
+                      Colony / Street / Lane *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={streetName}
+                      onChange={(e) => handleUpdateAddress(flatNumber, e.target.value, nearbyLandmark, selectedVaranasiArea)}
+                      placeholder="e.g. Anand Nagar Colony, Lane 3"
+                      className="w-full px-3 py-1.5 text-xs bg-white border border-gray-200 rounded-xl outline-none focus:border-brand-primary"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-gray-700 mb-0.5">
+                    Nearby Famous Landmark (Varanasi) *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={nearbyLandmark}
+                    onChange={(e) => handleUpdateAddress(flatNumber, streetName, e.target.value, selectedVaranasiArea)}
+                    placeholder="e.g. Opposite Sigra Sports Stadium Gate 2"
+                    className="w-full px-3 py-1.5 text-xs bg-white border border-gray-200 rounded-xl outline-none focus:border-brand-primary"
+                  />
+                </div>
+
+                {/* Composed Address Output Preview */}
+                <div className="bg-white p-2.5 rounded-xl border border-pink-100 text-xs text-gray-700 flex items-start gap-2">
+                  <MapPin className="w-4 h-4 text-brand-primary shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold block text-gray-900">Delivery Address for Beautician:</span>
+                    <span className="text-[11px] text-gray-600">{address}</span>
+                  </div>
+                </div>
               </div>
 
               {/* Distance Charge Module with Threshold indicator */}
-              <div className="p-4 rounded-2xl border border-blue-100 bg-blue-50/50 space-y-3">
+              <div className="p-3.5 rounded-2xl border border-blue-100 bg-blue-50/50 space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-xs font-bold text-blue-900">
                     <Car className="w-4 h-4 text-[#0071E3]" />
-                    <span>Travel Distance from Salon Hub</span>
+                    <span>Travel Distance from Sigra Salon Hub</span>
                   </div>
-                  <span className="text-xs font-bold text-[#0071E3] bg-blue-100 px-2 py-0.5 rounded-full">
+                  <span className="text-xs font-bold text-[#0071E3] bg-blue-100 px-2.5 py-0.5 rounded-full font-mono">
                     {travelDistanceKm} KM
                   </span>
                 </div>
 
-                <div className="grid grid-cols-4 gap-2">
-                  {[2.0, 3.0, 5.5, 8.0].map((km) => (
-                    <button
-                      key={km}
-                      type="button"
-                      onClick={() => setTravelDistanceKm(km)}
-                      className={`p-2 rounded-xl text-[11px] font-bold border transition-all ${
-                        travelDistanceKm === km
-                          ? 'bg-[#0071E3] text-white border-[#0071E3] shadow-xs'
-                          : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
-                      }`}
-                    >
-                      {km} KM
-                      <span className="block text-[9px] font-normal opacity-90">
-                        {km <= freeKm ? 'Free (≤3km)' : `+₹${(km - freeKm) * perKm}`}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-
                 <p className="text-[11px] text-gray-600">
                   {travelDistanceKm <= freeKm ? (
-                    <span className="text-emerald-700 font-semibold">
-                      ✓ Zero distance charges! First {freeKm} KM travel is completely FREE.
+                    <span className="text-emerald-700 font-semibold flex items-center gap-1">
+                      <span>✓</span> Zero distance charge! Travel up to {freeKm} KM is 100% FREE.
                     </span>
                   ) : (
                     <span className="text-blue-800">
-                      Standard fee: First {freeKm} KM free, then ₹{perKm}/KM. Distance charge: ₹{distanceCharge}.
+                      Travel fee: First {freeKm} KM free, then ₹{perKm}/KM. Distance charge added: ₹{distanceCharge}.
                     </span>
                   )}
                 </p>
               </div>
 
-              {/* Customer Cosmetic Product Option Checkbox (Specification 7) */}
-              <div className="p-4 rounded-2xl border-2 border-emerald-300 bg-emerald-50/60 space-y-2">
+              {/* Customer Cosmetic Product Option Checkbox */}
+              <div className="p-3.5 rounded-2xl border-2 border-emerald-300 bg-emerald-50/60 space-y-2">
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input
                     type="checkbox"
@@ -376,7 +685,7 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
                 onClick={() => setStep(3)}
                 className="w-full bg-brand-primary hover:bg-brand-primaryDark text-white py-3.5 rounded-full font-bold shadow-pink-soft transition-all flex items-center justify-center gap-2"
               >
-                <span>Find Nearby Beautician</span>
+                <span>Find Nearby Verified Beautician</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -595,19 +904,19 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
 
                 {/* Quick Promo Chips */}
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[10px]">
-                  <span className="text-gray-400 shrink-0 font-medium">Offers:</span>
-                  {['VARANASI50', 'GLOW30', 'BRIDAL1000', 'FESTIVE25'].map((c) => (
+                  <span className="text-gray-400 shrink-0 font-medium">Available:</span>
+                  {getAvailableCoupons().slice(0, 5).map((c: any) => (
                     <button
-                      key={c}
+                      key={c.code}
                       type="button"
-                      onClick={() => handleApplyCoupon(c)}
+                      onClick={() => handleApplyCoupon(c.code)}
                       className={`px-2 py-0.5 rounded-md font-mono font-bold transition-all shrink-0 ${
-                        appliedCoupon === c
+                        appliedCoupon === c.code
                           ? 'bg-brand-primary text-white shadow-xs'
                           : 'bg-pink-50 text-brand-primary hover:bg-pink-100 border border-pink-200'
                       }`}
                     >
-                      {c}
+                      {c.code}
                     </button>
                   ))}
                 </div>
@@ -615,10 +924,19 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
 
               {appliedCoupon && (
                 <div className="flex items-center justify-between text-xs text-emerald-700 bg-emerald-50 px-3 py-2 rounded-xl border border-emerald-200">
-                  <span className="font-semibold">
-                    ✓ Promo Code &apos;{appliedCoupon}&apos; Applied
-                  </span>
-                  <span className="font-bold text-sm">-₹{discount}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold">
+                      ✓ Promo Code &apos;{appliedCoupon}&apos; Applied
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleRemoveCoupon}
+                      className="text-[10px] text-rose-600 hover:underline font-bold"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  <span className="font-bold text-sm text-emerald-700">-₹{discount}</span>
                 </div>
               )}
 

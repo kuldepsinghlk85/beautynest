@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
-import { MapPin, ShoppingBag, Sparkles, Menu, X, User, CheckCircle2, Heart, Camera, Upload, Shield, ChevronRight } from 'lucide-react';
+import { MapPin, ShoppingBag, Sparkles, Menu, X, User, CheckCircle2, Heart, Camera, Upload, Shield, ChevronRight, LocateFixed, Navigation, Bike } from 'lucide-react';
 import { VARANASI_AREAS } from '../lib/data';
 import { INITIAL_CITIES } from '../lib/masterConfig';
 
@@ -28,6 +28,7 @@ export default function Navbar() {
   const [doorstepAddress, setDoorstepAddress] = useState('');
   const [customerPhotoUrl, setCustomerPhotoUrl] = useState<string>(PRESET_USER_AVATARS[0]);
   const [regSuccess, setRegSuccess] = useState(false);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
 
   const customerFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -44,6 +45,15 @@ export default function Navbar() {
     }
   };
 
+  const handleAutoFillVaranasiLocation = () => {
+    setIsDetectingLocation(true);
+    setTimeout(() => {
+      setIsDetectingLocation(false);
+      setRegArea('Sigra');
+      setDoorstepAddress('House 42, 2nd Floor, Anand Nagar Colony, Opposite Sigra Sports Stadium, Sigra, Varanasi');
+    }, 700);
+  };
+
   const handleRegisterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setRegSuccess(true);
@@ -56,7 +66,7 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-brand-border shadow-sm">
       {/* Top Bar for Multi-City Announcement & Portals Switcher */}
-      <div className="bg-slate-900 text-slate-300 text-xs py-1.5 px-4 sm:px-6 flex justify-between items-center">
+      <div className="bg-slate-900 text-slate-300 text-xs py-1.5 px-4 sm:px-6 flex flex-wrap justify-between items-center gap-2">
         <div className="flex items-center gap-2">
           <span className="bg-emerald-500/20 text-emerald-400 font-bold px-2 py-0.5 rounded text-[10px]">
             ONLINE
@@ -65,15 +75,24 @@ export default function Navbar() {
             Ladies Doorstep Salon • Certified Beauticians in <strong className="text-white">{selectedCity}</strong>
           </span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <Link
+            href="/beautician-portal"
+            className="text-amber-300 hover:text-white font-bold transition-colors flex items-center gap-1.5 text-[11px] bg-amber-400/20 px-2.5 py-0.5 rounded-full border border-amber-300/30"
+            title="Beautician Doorstep Navigation Portal"
+          >
+            <Bike className="w-3.5 h-3.5 text-amber-300" />
+            <span>Beautician Portal (ब्यूटीशियन लॉगिन)</span>
+          </Link>
+
           <a
             href="http://localhost:5175"
             target="_blank"
             rel="noreferrer"
-            className="text-pink-300 hover:text-white font-bold transition-colors flex items-center gap-1.5 text-[11px] bg-white/10 px-2.5 py-0.5 rounded-full"
+            className="text-pink-300 hover:text-white font-bold transition-colors flex items-center gap-1 text-[11px] bg-white/10 px-2.5 py-0.5 rounded-full"
           >
             <Shield className="w-3 h-3 text-brand-primary" />
-            <span>Portals: Admin | Worker | Operator</span>
+            <span>Admin</span>
             <ChevronRight className="w-3 h-3" />
           </a>
         </div>
@@ -274,9 +293,9 @@ export default function Navbar() {
           onClick={(e) => {
             if (e.target === e.currentTarget) setShowAuthModal(false);
           }}
-          className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm p-3 sm:p-4 flex items-center justify-center"
+          className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm p-4 sm:p-6 flex items-start justify-center pt-8 sm:pt-12 pb-12"
         >
-          <div className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-pink-100 my-auto max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-pink-100 max-h-[85vh] flex flex-col overflow-hidden my-0 animate-in fade-in zoom-in-95 duration-200 shrink-0">
             {/* Modal Fixed Header (ALWAYS visible, never cut off) */}
             <div className="p-5 sm:p-6 pb-3 border-b border-pink-50 relative shrink-0 bg-white">
               <button
@@ -462,9 +481,20 @@ export default function Navbar() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1">
-                      Select Varanasi Major Area *
-                    </label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-xs font-bold text-gray-700">
+                        Select Varanasi Major Area *
+                      </label>
+                      <button
+                        type="button"
+                        onClick={handleAutoFillVaranasiLocation}
+                        disabled={isDetectingLocation}
+                        className="text-[10px] font-bold text-brand-primary hover:text-brand-primaryDark bg-pink-50 hover:bg-pink-100 px-2 py-0.5 rounded-md border border-pink-200 transition-colors flex items-center gap-1"
+                      >
+                        <LocateFixed className="w-3 h-3" />
+                        <span>{isDetectingLocation ? 'Scanning GPS...' : '📍 Auto-Detect (Varanasi GPS)'}</span>
+                      </button>
+                    </div>
                     <div className="relative">
                       <select
                         value={regArea}

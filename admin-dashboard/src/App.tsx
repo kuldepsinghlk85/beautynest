@@ -15,8 +15,10 @@ import OperatorPortalPage from './pages/OperatorPortalPage';
 import BeauticianTiersPage from './pages/BeauticianTiersPage';
 import ConsentFormsPage from './pages/ConsentFormsPage';
 import DistanceRulesPage from './pages/DistanceRulesPage';
-
 import CategoriesPage from './pages/CategoriesPage';
+import CouponsPage from './pages/CouponsPage';
+import SliderManagerPage from './pages/SliderManagerPage';
+import PackagesPage from './pages/PackagesPage';
 
 export default function App() {
   const [currentRole, setCurrentRole] = useState<UserRole>('ADMIN');
@@ -81,10 +83,17 @@ export default function App() {
         return <ServicesPage />;
       case 'payments':
         return <PaymentsPage />;
+      case 'coupons':
+        return <CouponsPage />;
+      case 'slider':
+      case 'sliders':
+        return <SliderManagerPage />;
+      case 'packages':
+      case 'offers':
+        return <PackagesPage />;
       case 'reports':
       case 'reviews':
       case 'notifications':
-      case 'coupons':
       case 'audit':
         return <ReportsPage />;
       case 'settings':

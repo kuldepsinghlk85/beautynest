@@ -21,6 +21,8 @@ import {
   LogOut,
   Briefcase,
   Headphones,
+  Gift,
+  Sliders,
 } from 'lucide-react';
 import { UserRole } from './Header';
 
@@ -67,6 +69,7 @@ export default function Sidebar({
         { id: 'categories', label: 'Categories', icon: FolderTree },
         { id: 'subcategories', label: 'Subcategories', icon: ListTree },
         { id: 'services', label: 'Services', icon: Scissors, badge: '132' },
+        { id: 'packages', label: 'Offers & Packages', icon: Gift, badge: 'Deals' },
       ],
     },
     {
@@ -75,7 +78,8 @@ export default function Sidebar({
         { id: 'cities', label: 'Cities', icon: Building2, badge: '7' }, // Screenshot 2 Serviceable Cities!
         { id: 'bookings', label: 'Bookings', icon: CalendarCheck, badge: '5 New' },
         { id: 'payments', label: 'Payments', icon: CreditCard },
-        { id: 'coupons', label: 'Coupons', icon: Tag },
+        { id: 'coupons', label: 'Coupons & Promos', icon: Tag },
+        { id: 'slider', label: 'Hero Sliders', icon: Sliders },
       ],
     },
     {

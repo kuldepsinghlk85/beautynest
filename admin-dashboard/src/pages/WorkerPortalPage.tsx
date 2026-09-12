@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Users,
   UserCheck,
@@ -21,6 +21,12 @@ import {
   Phone,
   Search,
   Check,
+  Bike,
+  Navigation,
+  ExternalLink,
+  KeyRound,
+  Compass,
+  MessageSquare,
 } from 'lucide-react';
 import {
   AreaChart,
@@ -87,6 +93,38 @@ export default function WorkerPortalPage() {
   const [consentForms, setConsentForms] = useState<CustomerConsentForm[]>(INITIAL_CONSENT_FORMS);
   const [selectedConsent, setSelectedConsent] = useState<CustomerConsentForm | null>(null);
   const [selectedBookingForExtra, setSelectedBookingForExtra] = useState<WorkerBookingItem | null>(null);
+
+  // Live Doorstep Trip & Navigation Mode State
+  const [doorstepTripOpen, setDoorstepTripOpen] = useState(true);
+  const [tripStep, setTripStep] = useState<'ON_THE_WAY' | 'ARRIVED' | 'IN_PROGRESS' | 'COMPLETED'>('ON_THE_WAY');
+  const [tripEnteredOtp, setTripEnteredOtp] = useState('');
+  const [tripOtpError, setTripOtpError] = useState<string | null>(null);
+  const [sessionTimer, setSessionTimer] = useState(0);
+
+  // Live Timer during Service In Progress
+  useEffect(() => {
+    let interval: any;
+    if (tripStep === 'IN_PROGRESS') {
+      interval = setInterval(() => {
+        setSessionTimer((prev) => prev + 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [tripStep]);
+
+  // Next Scheduled Booking Information
+  const nextScheduledBooking = {
+    bookingId: 'BK-69012',
+    date: '20 Sep 2026 (Tomorrow / कल)',
+    timeSlot: '11:30 AM - 01:00 PM',
+    customerName: 'Pooja Verma',
+    customerPhone: '+91 98390 55123',
+    customerArea: 'Assi Ghat, Varanasi',
+    serviceName: 'O3+ Bridal Glow Facial & Hair Spa',
+    price: 1899,
+    partnerCut: 380,
+    bufferNotice: 'Next job in 18 hrs 45 mins',
+  };
 
   // Extra product form state
   const [extraProdName, setExtraProdName] = useState('');
@@ -225,7 +263,20 @@ export default function WorkerPortalPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            onClick={() => setDoorstepTripOpen(!doorstepTripOpen)}
+            className={`inline-flex items-center gap-1.5 text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs transition-all ${
+              doorstepTripOpen
+                ? 'bg-gradient-to-r from-pink-600 to-brand-primary text-white shadow-pink-soft ring-2 ring-pink-300'
+                : 'bg-white border border-pink-200 text-brand-primary hover:bg-pink-50'
+            }`}
+          >
+            <Bike className="w-4 h-4" />
+            <span>🛵 Live Doorstep Trip &amp; Address Mode</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+          </button>
+
           <button
             onClick={() => alert('Viewing worker schedule & booked time slots')}
             className="inline-flex items-center gap-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs transition-all"
@@ -314,6 +365,265 @@ export default function WorkerPortalPage() {
           </div>
         </div>
       </div>
+
+      {/* ============================================================ */}
+      {/* LIVE DOORSTEP TRIP & PERSISTENT CUSTOMER ADDRESS CARD */}
+      {/* (ब्यूटीशियन कस्टमर के घर जाएगी - बुकिंग आईडी, कब पहुंचना है, कस्टमर एड्रेस, अगली बुकिंग आईडी व तारीख) */}
+      {/* ============================================================ */}
+      {doorstepTripOpen && (
+        <div className="bg-slate-900 rounded-3xl p-6 border-2 border-brand-primary shadow-2xl text-white space-y-5 animate-in fade-in">
+          
+          {/* Header Bar: Current Booking ID & Scheduled Arrival Countdown */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-brand-primary to-pink-600 p-4 rounded-2xl">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-pink-200">
+                  CURRENT ACTIVE DOORSTEP TRIP (वर्तमान बुकिंग)
+                </span>
+                <span className="w-2 h-2 rounded-full bg-emerald-300 animate-ping" />
+              </div>
+              <div className="flex items-center gap-3 mt-1">
+                <h3 className="text-2xl font-black font-mono tracking-tight text-white">
+                  Booking #{bookings[0]?.bookingNumber || 'BK-69006'}
+                </h3>
+                <span className="text-xs bg-white text-brand-primary font-bold px-3 py-1 rounded-full shadow-sm">
+                  {tripStep === 'ON_THE_WAY' && '🛵 On the Way (रास्ते में हैं)'}
+                  {tripStep === 'ARRIVED' && '📍 Arrived at Doorstep'}
+                  {tripStep === 'IN_PROGRESS' && '⏳ Service in Progress'}
+                  {tripStep === 'COMPLETED' && '✓ Completed'}
+                </span>
+              </div>
+              <p className="text-xs text-pink-100 mt-0.5">
+                Service: <strong>{bookings[0]?.serviceName}</strong> (60 mins) • Payout: <strong className="text-amber-200">₹{Math.round((bookings[0]?.totalAmount || 899) * 0.20)}</strong> (20% Gold Tier)
+              </p>
+            </div>
+
+            {/* Scheduled Arrival Time & Countdown Display */}
+            <div className="bg-black/35 backdrop-blur-sm px-4 py-2.5 rounded-2xl border border-white/20 text-left md:text-right">
+              <span className="text-[10px] text-pink-200 block font-medium">
+                Scheduled Arrival Time (पहुंचने का समय):
+              </span>
+              <div className="flex items-center gap-1.5 md:justify-end">
+                <Clock className="w-4 h-4 text-amber-300" />
+                <span className="text-base font-extrabold text-white">
+                  Today 03:30 PM
+                </span>
+              </div>
+              <div className="text-xs font-bold text-amber-300 mt-0.5">
+                {tripStep === 'ON_THE_WAY'
+                  ? '⏱️ 22 Mins Remaining • Distance: 2.8 KM'
+                  : tripStep === 'ARRIVED'
+                  ? '✓ Beautician at Doorstep'
+                  : tripStep === 'IN_PROGRESS'
+                  ? `⏱️ Session Timer: ${Math.floor(sessionTimer / 60)}m ${sessionTimer % 60}s`
+                  : 'Booking Finished'}
+              </div>
+            </div>
+          </div>
+
+          {/* Persistent Customer Address & Map Navigation (Always Visible) */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            
+            {/* Customer Details & Persistent Address (2 cols) */}
+            <div className="lg:col-span-2 bg-slate-800/90 rounded-2xl p-4 border border-slate-700 space-y-3">
+              <div className="flex items-center justify-between border-b border-slate-700 pb-2.5">
+                <div className="flex items-center gap-2 text-pink-400 font-bold text-xs uppercase tracking-wider">
+                  <MapPin className="w-4 h-4 text-brand-primary animate-bounce" />
+                  <span>Persistent Customer Address (कस्टमर का पता - हमेशा दिखाई देगा)</span>
+                </div>
+                <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-bold">
+                  Sigra Hub • 2.8 KM
+                </span>
+              </div>
+
+              {/* Customer Contact & Call Buttons */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900/80 p-3 rounded-xl border border-slate-700/80">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-primary to-pink-500 flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0">
+                    {bookings[0]?.customerName.slice(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
+                      <span>{bookings[0]?.customerName}</span>
+                      <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.2 rounded font-semibold">
+                        Verified Client
+                      </span>
+                    </h4>
+                    <p className="text-xs text-slate-400 font-mono">
+                      {bookings[0]?.customerPhone}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <a
+                    href={`tel:${bookings[0]?.customerPhone.replace(/\s+/g, '')}`}
+                    className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition-all shadow-sm"
+                  >
+                    <Phone className="w-3.5 h-3.5" />
+                    <span>Call</span>
+                  </a>
+                  <a
+                    href={`https://wa.me/919839012001?text=Hello%20${bookings[0]?.customerName},%20I%20am%20Priya,%20your%20BeautyNest%20beautician%20on%20the%20way%20to%20your%20home.`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 bg-[#25D366] hover:bg-[#20bd5a] text-slate-950 text-xs font-bold px-3 py-1.5 rounded-xl transition-all shadow-sm"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    <span>WhatsApp</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Exact Address Box */}
+              <div className="bg-slate-900/60 p-3.5 rounded-xl border border-slate-700/80 space-y-1.5">
+                <span className="text-[10px] font-bold uppercase text-slate-400 block">
+                  Exact Doorstep Destination:
+                </span>
+                <p className="text-xs font-semibold text-white leading-relaxed">
+                  House 42, 2nd Floor, Anand Nagar Colony, Opposite Sigra Sports Stadium Gate 2, Sigra, Varanasi, UP - 221010
+                </p>
+                <div className="flex items-center gap-1.5 text-xs text-amber-300 pt-1">
+                  <Compass className="w-3.5 h-3.5 shrink-0" />
+                  <span><strong>Landmark:</strong> Opposite Stadium Gate No. 2, Green Gate, Bell on right</span>
+                </div>
+              </div>
+
+              {/* Turn-by-Turn GPS Navigation Button */}
+              <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                <a
+                  href="https://maps.google.com/?q=25.3176,82.9739"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex-1 inline-flex items-center justify-center gap-2 bg-[#0071E3] hover:bg-[#005bb5] text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow-sm"
+                >
+                  <Navigation className="w-3.5 h-3.5" />
+                  <span>Open in Google Maps (Turn-by-Turn GPS Navigation)</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+
+                {tripStep === 'ON_THE_WAY' && (
+                  <button
+                    type="button"
+                    onClick={() => setTripStep('ARRIVED')}
+                    className="inline-flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-all shadow-sm"
+                  >
+                    <CheckCircle className="w-3.5 h-3.5" />
+                    <span>I Have Arrived (पहुँच गए)</span>
+                  </button>
+                )}
+              </div>
+
+              {/* OTP Verification Prompt when Arrived */}
+              {tripStep === 'ARRIVED' && (
+                <div className="bg-amber-500/10 border border-amber-500/50 p-3 rounded-xl space-y-2">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-400">
+                    <KeyRound className="w-4 h-4" />
+                    <span>Enter Customer Start OTP (e.g. 1234)</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      maxLength={4}
+                      value={tripEnteredOtp}
+                      onChange={(e) => setTripEnteredOtp(e.target.value)}
+                      placeholder="Enter 4-digit OTP"
+                      className="px-3 py-1.5 text-xs bg-slate-900 border border-amber-500/40 rounded-lg text-white font-mono font-bold tracking-widest outline-none focus:border-amber-400"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (tripEnteredOtp === '1234' || tripEnteredOtp.trim() !== '') {
+                          setTripStep('IN_PROGRESS');
+                          setTripOtpError(null);
+                        } else {
+                          setTripOtpError('Invalid OTP! Please enter 1234');
+                        }
+                      }}
+                      className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-1.5 rounded-lg text-xs"
+                    >
+                      Verify &amp; Start Service
+                    </button>
+                  </div>
+                  {tripOtpError && <p className="text-[11px] text-rose-400">{tripOtpError}</p>}
+                </div>
+              )}
+
+              {/* In Progress Service Timer & Completion */}
+              {tripStep === 'IN_PROGRESS' && (
+                <div className="bg-emerald-500/10 border border-emerald-500/50 p-3 rounded-xl flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs text-emerald-400 font-bold">
+                    <Clock className="w-4 h-4 animate-spin-slow" />
+                    <span>Service Running: {Math.floor(sessionTimer / 60)}m {sessionTimer % 60}s</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setTripStep('COMPLETED')}
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-1.5 rounded-lg text-xs"
+                  >
+                    Complete Service (₹899)
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Next Scheduled Booking Card (अगली बुकिंग आईडी कितनी तारीख को है और कब है) */}
+            <div className="bg-slate-800/90 rounded-2xl p-4 border border-purple-500/40 space-y-3 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between border-b border-slate-700 pb-2">
+                  <div className="flex items-center gap-1.5 text-purple-400 font-bold text-xs uppercase">
+                    <Calendar className="w-4 h-4" />
+                    <span>Next Booking (अगली बुकिंग)</span>
+                  </div>
+                  <span className="text-[9px] bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full font-bold">
+                    Upcoming
+                  </span>
+                </div>
+
+                <div className="space-y-2 mt-3 text-xs">
+                  <div className="bg-slate-900/80 p-2.5 rounded-xl border border-slate-700/80">
+                    <span className="text-[10px] text-slate-400 uppercase font-bold block">
+                      Next Booking ID:
+                    </span>
+                    <span className="text-base font-mono font-bold text-white">
+                      #{nextScheduledBooking.bookingId}
+                    </span>
+                  </div>
+
+                  <div className="bg-slate-900/80 p-2.5 rounded-xl border border-slate-700/80 space-y-1">
+                    <span className="text-[10px] text-slate-400 uppercase font-bold block">
+                      Scheduled Date &amp; Time (तारीख व समय):
+                    </span>
+                    <div className="text-xs font-bold text-amber-300">
+                      📅 {nextScheduledBooking.date}
+                    </div>
+                    <div className="text-xs text-slate-200">
+                      ⏰ {nextScheduledBooking.timeSlot}
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-900/80 p-2.5 rounded-xl border border-slate-700/80">
+                    <span className="text-[10px] text-slate-400 uppercase font-bold block">
+                      Client &amp; Destination:
+                    </span>
+                    <div className="font-bold text-white">{nextScheduledBooking.customerName}</div>
+                    <div className="text-[11px] text-slate-400">{nextScheduledBooking.customerArea}</div>
+                  </div>
+
+                  <div className="bg-slate-900/50 p-2 rounded-xl border border-slate-800 flex justify-between text-[11px]">
+                    <span className="text-slate-400">{nextScheduledBooking.serviceName}</span>
+                    <span className="font-bold text-purple-300">₹{nextScheduledBooking.price}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-[10px] text-slate-400 bg-slate-900/50 p-2 rounded-xl border border-slate-800">
+                ⏱️ <strong>Buffer Gap:</strong> {nextScheduledBooking.bufferNotice}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 3 Visual Charts Row (Matching Screenshot 1) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
