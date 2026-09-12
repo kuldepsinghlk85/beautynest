@@ -96,6 +96,30 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
   const [paymentMethod, setPaymentMethod] = useState<'UPI' | 'CARD' | 'COD'>('UPI');
   const [bookingId, setBookingId] = useState('BK-6887');
 
+  // Auto pre-fill from logged-in customer profile
+  useEffect(() => {
+    if (isOpen) {
+      const user = getCurrentUser();
+      if (user) {
+        if (user.area) {
+          const matchHub = VARANASI_LOCATION_HUBS.find(
+            (h) => h.area.toLowerCase() === user.area.toLowerCase()
+          );
+          if (matchHub) {
+            setSelectedVaranasiArea(matchHub.area);
+            setNearbyLandmark(matchHub.landmark);
+            setGpsCoords({ lat: matchHub.lat, lng: matchHub.lng });
+            setTravelDistanceKm(matchHub.distanceKm);
+          }
+        }
+        if (user.address) {
+          setAddress(user.address);
+          setFlatNumber(user.address.split(',')[0] || 'House 42');
+        }
+      }
+    }
+  }, [isOpen]);
+
   if (!isOpen || !service) return null;
 
   const dates = [
@@ -249,30 +273,6 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
     setNearbyLandmark(landmark);
     setAddress(`${flat}, ${street}, ${landmark}, ${area}, Varanasi, UP - 221010`);
   };
-
-  // Auto pre-fill from logged-in customer profile
-  useEffect(() => {
-    if (isOpen) {
-      const user = getCurrentUser();
-      if (user) {
-        if (user.area) {
-          const matchHub = VARANASI_LOCATION_HUBS.find(
-            (h) => h.area.toLowerCase() === user.area.toLowerCase()
-          );
-          if (matchHub) {
-            setSelectedVaranasiArea(matchHub.area);
-            setNearbyLandmark(matchHub.landmark);
-            setGpsCoords({ lat: matchHub.lat, lng: matchHub.lng });
-            setTravelDistanceKm(matchHub.distanceKm);
-          }
-        }
-        if (user.address) {
-          setAddress(user.address);
-          setFlatNumber(user.address.split(',')[0] || 'House 42');
-        }
-      }
-    }
-  }, [isOpen]);
 
   const handleConfirm = () => {
     const randomId = `BK-${Math.floor(1000 + Math.random() * 9000)}`;
