@@ -4776,7 +4776,7 @@ const SERVICE_CATEGORIES = [
     count: 9,
     subcategories: ["Bleach", "De-Tan"],
     icon: "Sun",
-    image: "https://images.unsplash.com/photo-1512290900672-1f02e6b02660?w=600&q=80"
+    image: "https://images.unsplash.com/photo-1526045612212-70caf35c14df?w=600&q=80"
   },
   {
     id: "cat-threading",
@@ -4785,7 +4785,7 @@ const SERVICE_CATEGORIES = [
     count: 5,
     subcategories: ["Threading"],
     icon: "Scissors",
-    image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80"
+    image: "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=600&q=80"
   },
   {
     id: "cat-waxing",
@@ -4794,7 +4794,7 @@ const SERVICE_CATEGORIES = [
     count: 16,
     subcategories: ["Regular Wax", "Rica Wax", "Chocolate Wax", "Roll-On Wax"],
     icon: "Flame",
-    image: "https://images.unsplash.com/photo-1560750588-73207b1ef5b8?w=600&q=80"
+    image: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&q=80"
   },
   {
     id: "cat-manicure",
@@ -4848,7 +4848,7 @@ const SERVICE_CATEGORIES = [
     count: 9,
     subcategories: ["Party", "Bridal", "Occasion"],
     icon: "Smile",
-    image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=600&q=80"
+    image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80"
   },
   {
     id: "cat-mehendi",
@@ -4857,7 +4857,7 @@ const SERVICE_CATEGORIES = [
     count: 4,
     subcategories: ["Mehendi"],
     icon: "Feather",
-    image: "https://images.unsplash.com/photo-1583001809873-a128495da465?w=600&q=80"
+    image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600&q=80"
   },
   {
     id: "cat-male-grooming",
@@ -4866,7 +4866,7 @@ const SERVICE_CATEGORIES = [
     count: 8,
     subcategories: ["Face", "Waxing", "Hair"],
     icon: "User",
-    image: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=600&q=80"
+    image: "https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=600&q=80"
   },
   {
     id: "cat-kids",
@@ -4875,7 +4875,7 @@ const SERVICE_CATEGORIES = [
     count: 4,
     subcategories: ["Hair", "Care"],
     icon: "Baby",
-    image: "https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?w=600&q=80"
+    image: "https://images.unsplash.com/photo-1543332164-6e82f355badc?w=600&q=80"
   },
   {
     id: "cat-bridal-pre-bridal",

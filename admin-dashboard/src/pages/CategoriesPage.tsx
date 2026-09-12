@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   FolderTree,
   ListTree,
@@ -16,16 +16,21 @@ import {
   Check,
   Filter,
   Image as ImageIcon,
+  RefreshCw,
+  Globe,
 } from 'lucide-react';
 import { SERVICE_CATEGORIES, type ServiceCategory } from '../lib/allServices';
 
 export const CATEGORY_PRESETS = [
   { name: 'Facial & Cleanup', url: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&q=80' },
+  { name: 'Bleach & De-Tan', url: 'https://images.unsplash.com/photo-1526045612212-70caf35c14df?w=600&q=80' },
+  { name: 'Hair Care & Salon', url: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?w=600&q=80' },
   { name: 'Bridal & Makeup', url: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80' },
-  { name: 'Hair Care & Spa', url: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&q=80' },
-  { name: 'Waxing & Body', url: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80' },
+  { name: 'Mehendi Art', url: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600&q=80' },
+  { name: 'Male Grooming', url: 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=600&q=80' },
+  { name: 'Kids Hair & Care', url: 'https://images.unsplash.com/photo-1543332164-6e82f355badc?w=600&q=80' },
+  { name: 'Body Care & Spa', url: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80' },
   { name: 'Manicure & Pedicure', url: 'https://images.unsplash.com/photo-1632345031435-8727f6897d53?w=600&q=80' },
-  { name: 'Skincare Glow', url: 'https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=600&q=80' },
 ];
 
 interface CategoriesPageProps {
@@ -40,6 +45,30 @@ export default function CategoriesPage({
   const [categories, setCategories] = useState<ServiceCategory[]>(SERVICE_CATEGORIES);
   const [activeTab, setActiveTab] = useState<'categories' | 'subcategories'>(initialView);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Backend Sync States
+  const [backendOnline, setBackendOnline] = useState(true);
+  const [syncLoading, setSyncLoading] = useState(false);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
+
+  // Load from backend on mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch('http://localhost:4200/api/services/categories');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setBackendOnline(true);
+            setCategories(data);
+          }
+        }
+      } catch {
+        setBackendOnline(false);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   // Modal States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -68,7 +97,6 @@ export default function CategoriesPage({
     }
   };
 
-
   // Total metrics
   const totalCategories = categories.length;
   const totalSubcategories = categories.reduce((acc, cat) => acc + (cat.subcategories?.length || 0), 0);
@@ -85,12 +113,12 @@ export default function CategoriesPage({
   const handleOpenAdd = () => {
     setFormName('');
     setFormSlug('');
-    setFormImage('https://images.unsplash.com/photo-1560750588-73207b1ef5b8?w=600&q=80');
+    setFormImage('https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&q=80');
     setFormSubcats('');
     setIsAddModalOpen(true);
   };
 
-  const handleSaveNew = (e: React.FormEvent) => {
+  const handleSaveNew = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formName) return;
 
@@ -105,11 +133,26 @@ export default function CategoriesPage({
       count: 0,
       subcategories: subcatsArray,
       icon: 'Sparkles',
-      image: formImage || 'https://images.unsplash.com/photo-1560750588-73207b1ef5b8?w=600&q=80',
+      image: formImage || 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&q=80',
     };
 
     setCategories((prev) => [newCat, ...prev]);
     setIsAddModalOpen(false);
+
+    try {
+      const res = await fetch('http://localhost:4200/api/services/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newCat),
+      });
+      if (res.ok) {
+        setBackendOnline(true);
+        setSyncMessage(`Category "${formName}" created & synced with Customer Website!`);
+        setTimeout(() => setSyncMessage(null), 3000);
+      }
+    } catch (err) {
+      console.warn('Backend save failed:', err);
+    }
   };
 
   const handleOpenEdit = (cat: ServiceCategory) => {
@@ -121,7 +164,7 @@ export default function CategoriesPage({
     setIsEditModalOpen(true);
   };
 
-  const handleSaveEdit = (e: React.FormEvent) => {
+  const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedCat) return;
 
@@ -129,21 +172,61 @@ export default function CategoriesPage({
       ? formSubcats.split(',').map((s) => s.trim()).filter(Boolean)
       : selectedCat.subcategories || [];
 
+    const updatedCategory = {
+      ...selectedCat,
+      name: formName,
+      slug: formSlug || selectedCat.slug,
+      image: formImage || selectedCat.image,
+      subcategories: subcatsArray,
+    };
+
     setCategories((prev) =>
-      prev.map((c) =>
-        c.id === selectedCat.id
-          ? {
-              ...c,
-              name: formName,
-              slug: formSlug || c.slug,
-              image: formImage || c.image,
-              subcategories: subcatsArray,
-            }
-          : c
-      )
+      prev.map((c) => (c.id === selectedCat.id ? updatedCategory : c))
     );
     setIsEditModalOpen(false);
+
+    // Sync directly to backend
+    try {
+      const cId = selectedCat.id || selectedCat.slug;
+      const res = await fetch(`http://localhost:4200/api/services/categories/${encodeURIComponent(cId)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedCategory),
+      });
+      if (res.ok) {
+        setBackendOnline(true);
+        setSyncMessage(`Category "${formName}" photo & details synced with Customer Website!`);
+        setTimeout(() => setSyncMessage(null), 3500);
+      }
+    } catch (err) {
+      console.warn('Backend category sync failed:', err);
+    }
+
     setSelectedCat(null);
+  };
+
+  // Push all categories to backend & website in 1 click
+  const handleSyncAllToWebsite = async () => {
+    setSyncLoading(true);
+    try {
+      const res = await fetch('http://localhost:4200/api/services/categories/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(categories),
+      });
+      if (res.ok) {
+        setBackendOnline(true);
+        setSyncMessage('All categories & images synced with Customer Website!');
+        setTimeout(() => setSyncMessage(null), 3500);
+      } else {
+        throw new Error('Batch sync failed with ' + res.status);
+      }
+    } catch {
+      setSyncMessage('Failed to sync. Please ensure backend is active.');
+      setTimeout(() => setSyncMessage(null), 3500);
+    } finally {
+      setSyncLoading(false);
+    }
   };
 
   const handleDeleteCategory = (id: string, name: string) => {
@@ -164,11 +247,23 @@ export default function CategoriesPage({
             <span>/</span>
             <span className="text-gray-700 font-semibold">Categories &amp; Subcategories</span>
           </div>
-          <h1 className="text-2xl font-bold font-serif text-gray-900">
-            Categories &amp; Taxonomy Hierarchy
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold font-serif text-gray-900">
+              Categories &amp; Taxonomy Hierarchy
+            </h1>
+            <span
+              className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
+                backendOnline
+                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                  : 'bg-amber-50 text-amber-700 border border-amber-200'
+              }`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${backendOnline ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+              <span>{backendOnline ? 'Live Website Sync Active' : 'Offline Mode'}</span>
+            </span>
+          </div>
           <p className="text-xs text-gray-500 mt-0.5">
-            Manage your doorstep beauty catalog structure, subcategories, and active services.
+            Manage your doorstep beauty catalog structure, subcategories, custom images, and active services.
           </p>
         </div>
 
@@ -200,6 +295,16 @@ export default function CategoriesPage({
           </div>
 
           <button
+            onClick={handleSyncAllToWebsite}
+            disabled={syncLoading}
+            className="inline-flex items-center gap-1.5 bg-white hover:bg-pink-50 text-brand-primary border border-pink-200 text-xs font-bold px-3.5 py-2 rounded-xl transition-all shadow-xs disabled:opacity-60"
+            title="Push all categories and custom photos to Customer Website"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${syncLoading ? 'animate-spin' : ''}`} />
+            <span>{syncLoading ? 'Syncing...' : 'Sync All with Website'}</span>
+          </button>
+
+          <button
             onClick={handleOpenAdd}
             className="flex items-center gap-2 bg-[#0071E3] hover:bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-xs transition-all"
           >
@@ -208,6 +313,19 @@ export default function CategoriesPage({
           </button>
         </div>
       </div>
+
+      {/* Sync notification banner */}
+      {syncMessage && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold px-4 py-2.5 rounded-xl flex items-center justify-between shadow-xs animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <span>{syncMessage}</span>
+          </div>
+          <button onClick={() => setSyncMessage(null)} className="text-emerald-600 hover:text-emerald-900">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Stat Cards (HostApp / Tabler Design) */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">

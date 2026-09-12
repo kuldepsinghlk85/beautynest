@@ -24,6 +24,25 @@ export class ServicesController {
     return this.servicesService.createCategory(dto);
   }
 
+  @Put('categories/:id')
+  @ApiOperation({ summary: 'Update service category details and photo (Admin)' })
+  async updateCategory(@Param('id') id: string, @Body() dto: any) {
+    return this.servicesService.updateCategory(id, dto);
+  }
+
+  @Post('categories/batch')
+  @ApiOperation({ summary: 'Batch sync categories overrides' })
+  async batchSyncCategories(@Body() body: any) {
+    const items = Array.isArray(body) ? body : body?.categories || [];
+    return this.servicesService.batchSyncCategories(items);
+  }
+
+  @Post('categories/reset')
+  @ApiOperation({ summary: 'Reset all category overrides' })
+  async resetCategories() {
+    return this.servicesService.resetCategoryOverrides();
+  }
+
   @Get()
   @ApiOperation({ summary: 'List and search services with optional filters' })
   async getServices(@Query() query: FilterServiceDto) {

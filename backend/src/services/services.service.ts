@@ -22,9 +22,37 @@ export class ServicesService {
   private readonly logger = new Logger(ServicesService.name);
   private overridesFilePath = path.resolve(process.cwd(), 'data', 'services_overrides.json');
   private serviceOverrides: Record<string, any> = {};
+  private categoriesOverridesFilePath = path.resolve(process.cwd(), 'data', 'categories_overrides.json');
+  private categoryOverrides: Record<string, any> = {};
 
   constructor(private prisma: PrismaService) {
     this.loadOverrides();
+    this.loadCategoryOverrides();
+  }
+
+  private loadCategoryOverrides() {
+    try {
+      const dataDir = path.dirname(this.categoriesOverridesFilePath);
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
+      }
+      if (fs.existsSync(this.categoriesOverridesFilePath)) {
+        const raw = fs.readFileSync(this.categoriesOverridesFilePath, 'utf8');
+        this.categoryOverrides = JSON.parse(raw);
+        this.logger.log(`Loaded ${Object.keys(this.categoryOverrides).length} category overrides`);
+      }
+    } catch (e: any) {
+      this.logger.error(`Failed to load category overrides: ${e.message}`);
+      this.categoryOverrides = {};
+    }
+  }
+
+  private saveCategoryOverrides() {
+    try {
+      fs.writeFileSync(this.categoriesOverridesFilePath, JSON.stringify(this.categoryOverrides, null, 2), 'utf8');
+    } catch (e: any) {
+      this.logger.error(`Failed to save category overrides: ${e.message}`);
+    }
   }
 
   private loadOverrides() {
@@ -46,10 +74,6 @@ export class ServicesService {
 
   private saveOverrides() {
     try {
-      const dataDir = path.dirname(this.overridesFilePath);
-      if (!fs.existsSync(dataDir)) {
-        fs.mkdirSync(dataDir, { recursive: true });
-      }
       fs.writeFileSync(this.overridesFilePath, JSON.stringify(this.serviceOverrides, null, 2), 'utf8');
     } catch (e: any) {
       this.logger.error(`Failed to save service overrides: ${e.message}`);
@@ -65,26 +89,81 @@ export class ServicesService {
     return srv;
   }
 
-  async getAllCategories() {
-    try {
-      const dbCategories = await this.prisma.serviceCategory.findMany({
-        where: { isActive: true },
-        orderBy: { displayOrder: 'asc' },
-        include: { _count: { select: { services: true } } },
-      });
-      if (dbCategories && dbCategories.length > 0) return dbCategories;
-    } catch (e) {
-      // Fallback to static categories
+  private applyCategoryOverride(cat: any) {
+    const key = cat.id || cat.slug || cat.name;
+    const ov =
+      this.categoryOverrides[key] ||
+      this.categoryOverrides[cat.id] ||
+      this.categoryOverrides[cat.slug] ||
+      this.categoryOverrides[cat.name];
+    if (ov) {
+      return { ...cat, ...ov };
     }
-    return SERVICE_CATEGORIES;
+    return cat;
+  }
+
+  async getAllCategories() {
+    const list = SERVICE_CATEGORIES.map((c: any) => this.applyCategoryOverride(c));
+    for (const [k, v] of Object.entries(this.categoryOverrides)) {
+      if (v && v.isCustom && !list.some((c: any) => c.id === v.id || c.slug === v.slug)) {
+        list.push(v);
+      }
+    }
+    return list;
   }
 
   async createCategory(dto: CreateCategoryDto) {
-    try {
-      return await this.prisma.serviceCategory.create({ data: dto });
-    } catch (e) {
-      return { id: `cat-${Date.now()}`, ...dto };
+    const newCat = {
+      id: `cat-${Date.now()}`,
+      ...dto,
+      isCustom: true,
+      updatedAt: new Date().toISOString(),
+    };
+    this.categoryOverrides[newCat.id] = newCat;
+    this.saveCategoryOverrides();
+    return newCat;
+  }
+
+  async updateCategory(id: string, dto: any) {
+    const key = id;
+    const existing = this.categoryOverrides[key] || {};
+    const updated = {
+      ...existing,
+      ...dto,
+      id,
+      updatedAt: new Date().toISOString(),
+    };
+    this.categoryOverrides[key] = updated;
+    if (dto.slug) this.categoryOverrides[dto.slug] = updated;
+    if (dto.name) this.categoryOverrides[dto.name] = updated;
+
+    this.saveCategoryOverrides();
+    this.logger.log(`Category override saved for ${id}`);
+    return this.applyCategoryOverride({ id, ...dto });
+  }
+
+  async batchSyncCategories(items: any[]) {
+    for (const item of items) {
+      const key = item.id || item.slug || item.name;
+      if (key) {
+        this.categoryOverrides[key] = {
+          ...this.categoryOverrides[key],
+          ...item,
+          updatedAt: new Date().toISOString(),
+        };
+        if (item.slug) this.categoryOverrides[item.slug] = this.categoryOverrides[key];
+        if (item.name) this.categoryOverrides[item.name] = this.categoryOverrides[key];
+      }
     }
+    this.saveCategoryOverrides();
+    this.logger.log(`Batch synced ${items.length} categories`);
+    return { success: true, count: items.length };
+  }
+
+  async resetCategoryOverrides() {
+    this.categoryOverrides = {};
+    this.saveCategoryOverrides();
+    return { success: true, message: 'All category overrides cleared' };
   }
 
   async getAllServices(filters?: FilterServiceDto) {

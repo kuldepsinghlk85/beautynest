@@ -4760,20 +4760,132 @@ const BEAUTYNEST_SERVICES = [
 ];
 
 const SERVICE_CATEGORIES = [
-  "Facial & Cleanup",
-  "Bleach & De-Tan",
-  "Threading",
-  "Waxing",
-  "Manicure",
-  "Pedicure",
-  "Body Care",
-  "Hair",
-  "Massage & Spa",
-  "Makeup",
-  "Mehendi",
-  "Male Grooming",
-  "Kids",
-  "Bridal & Pre-Bridal"
+  {
+    id: "cat-facial-cleanup",
+    name: "Facial & Cleanup",
+    slug: "facial-cleanup",
+    count: 17,
+    subcategories: ["Cleanup", "Facial", "Advanced Skin"],
+    icon: "Sparkles",
+    image: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&q=80"
+  },
+  {
+    id: "cat-bleach-detan",
+    name: "Bleach & De-Tan",
+    slug: "bleach-detan",
+    count: 9,
+    subcategories: ["Bleach", "De-Tan"],
+    icon: "Sun",
+    image: "https://images.unsplash.com/photo-1526045612212-70caf35c14df?w=600&q=80"
+  },
+  {
+    id: "cat-threading",
+    name: "Threading",
+    slug: "threading",
+    count: 5,
+    subcategories: ["Threading"],
+    icon: "Scissors",
+    image: "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=600&q=80"
+  },
+  {
+    id: "cat-waxing",
+    name: "Waxing",
+    slug: "waxing",
+    count: 16,
+    subcategories: ["Regular Wax", "Rica Wax", "Chocolate Wax", "Roll-On Wax"],
+    icon: "Flame",
+    image: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&q=80"
+  },
+  {
+    id: "cat-manicure",
+    name: "Manicure",
+    slug: "manicure",
+    count: 9,
+    subcategories: ["Basic", "Premium", "Nail Polish", "Nail Care"],
+    icon: "Hand",
+    image: "https://images.unsplash.com/photo-1632345031435-8727f6897d53?w=600&q=80"
+  },
+  {
+    id: "cat-pedicure",
+    name: "Pedicure",
+    slug: "pedicure",
+    count: 8,
+    subcategories: ["Basic", "Premium", "Specialty"],
+    icon: "Footprints",
+    image: "https://images.unsplash.com/photo-1519415510236-718bdfcd89c8?w=600&q=80"
+  },
+  {
+    id: "cat-body-care",
+    name: "Body Care",
+    slug: "body-care",
+    count: 6,
+    subcategories: ["Scrub", "Polish"],
+    icon: "Heart",
+    image: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80"
+  },
+  {
+    id: "cat-hair",
+    name: "Hair",
+    slug: "hair",
+    count: 18,
+    subcategories: ["Haircut", "Styling", "Colour", "Treatment"],
+    icon: "Sparkle",
+    image: "https://images.unsplash.com/photo-1562322140-8baeececf3df?w=600&q=80"
+  },
+  {
+    id: "cat-massage-spa",
+    name: "Massage & Spa",
+    slug: "massage-spa",
+    count: 9,
+    subcategories: ["Massage", "Spa"],
+    icon: "Flower2",
+    image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600&q=80"
+  },
+  {
+    id: "cat-makeup",
+    name: "Makeup",
+    slug: "makeup",
+    count: 9,
+    subcategories: ["Party", "Bridal", "Occasion"],
+    icon: "Smile",
+    image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80"
+  },
+  {
+    id: "cat-mehendi",
+    name: "Mehendi",
+    slug: "mehendi",
+    count: 4,
+    subcategories: ["Mehendi"],
+    icon: "Feather",
+    image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600&q=80"
+  },
+  {
+    id: "cat-male-grooming",
+    name: "Male Grooming",
+    slug: "male-grooming",
+    count: 8,
+    subcategories: ["Face", "Waxing", "Hair"],
+    icon: "User",
+    image: "https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=600&q=80"
+  },
+  {
+    id: "cat-kids",
+    name: "Kids",
+    slug: "kids",
+    count: 4,
+    subcategories: ["Hair", "Care"],
+    icon: "Baby",
+    image: "https://images.unsplash.com/photo-1543332164-6e82f355badc?w=600&q=80"
+  },
+  {
+    id: "cat-bridal-pre-bridal",
+    name: "Bridal & Pre-Bridal",
+    slug: "bridal-pre-bridal",
+    count: 10,
+    subcategories: ["Pre-Bridal", "Package"],
+    icon: "Crown",
+    image: "https://images.unsplash.com/photo-1595959183082-7b570b7e08e2?w=600&q=80"
+  }
 ];
 
 // Helper Query Functions

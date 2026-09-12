@@ -95,16 +95,20 @@ export {
 };
 
 export const CATEGORIES = [
-  { id: 'facial', name: 'Facial & Cleanup', icon: 'Sparkles', image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&q=80', count: 18 },
-  { id: 'bleach-dtan', name: 'Bleach & De-Tan', icon: 'Sun', image: 'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=400&q=80', count: 13 },
-  { id: 'threading', name: 'Threading & Face Grooming', icon: 'Smile', image: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=400&q=80', count: 6 },
-  { id: 'waxing', name: 'Waxing & Hair Removal', icon: 'Flame', image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80', count: 18 },
-  { id: 'manicure-pedicure', name: 'Manicure & Pedicure', icon: 'Heart', image: 'https://images.unsplash.com/photo-1632345031435-8727f6897d53?w=400&q=80', count: 11 },
-  { id: 'body-care', name: 'Body Care & Spa', icon: 'Flower', image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=400&q=80', count: 7 },
-  { id: 'hair-care', name: 'Hair Care & Treatments', icon: 'Scissors', image: 'https://images.unsplash.com/photo-1560869713-7d0a29430803?w=400&q=80', count: 19 },
-  { id: 'massage-spa', name: 'Massage & Spa', icon: 'Sparkles', image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=400&q=80', count: 10 },
-  { id: 'bridal-makeup', name: 'Bridal & Party Makeup', icon: 'Crown', image: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400&q=80', count: 18 },
-  { id: 'male-kids', name: 'Male Grooming & Kids', icon: 'Smile', image: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&q=80', count: 12 },
+  { id: 'facial', name: 'Facial & Cleanup', icon: 'Sparkles', image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&q=80', count: 17 },
+  { id: 'bleach-dtan', name: 'Bleach & De-Tan', icon: 'Sun', image: 'https://images.unsplash.com/photo-1526045612212-70caf35c14df?w=600&q=80', count: 9 },
+  { id: 'threading', name: 'Threading & Face Grooming', icon: 'Scissors', image: 'https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=600&q=80', count: 5 },
+  { id: 'waxing', name: 'Waxing & Hair Removal', icon: 'Flame', image: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&q=80', count: 16 },
+  { id: 'manicure', name: 'Manicure & Nails', icon: 'Hand', image: 'https://images.unsplash.com/photo-1632345031435-8727f6897d53?w=600&q=80', count: 9 },
+  { id: 'pedicure', name: 'Pedicure & Feet', icon: 'Footprints', image: 'https://images.unsplash.com/photo-1519415510236-718bdfcd89c8?w=600&q=80', count: 8 },
+  { id: 'body-care', name: 'Body Care & Spa', icon: 'Heart', image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80', count: 6 },
+  { id: 'hair-care', name: 'Hair Care & Treatments', icon: 'Sparkle', image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?w=600&q=80', count: 18 },
+  { id: 'massage-spa', name: 'Massage & Spa', icon: 'Flower2', image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600&q=80', count: 9 },
+  { id: 'bridal-makeup', name: 'Bridal & Party Makeup', icon: 'Smile', image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80', count: 9 },
+  { id: 'mehendi', name: 'Mehendi & Henna Art', icon: 'Feather', image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600&q=80', count: 4 },
+  { id: 'male-grooming', name: 'Male Grooming & Barber', icon: 'User', image: 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=600&q=80', count: 8 },
+  { id: 'kids', name: 'Kids Haircut & Care', icon: 'Baby', image: 'https://images.unsplash.com/photo-1543332164-6e82f355badc?w=600&q=80', count: 4 },
+  { id: 'bridal-pre-bridal', name: 'Pre-Bridal Packages', icon: 'Crown', image: 'https://images.unsplash.com/photo-1595959183082-7b570b7e08e2?w=600&q=80', count: 10 },
 ];
 
 const categorySlugMap: Record<string, string> = {

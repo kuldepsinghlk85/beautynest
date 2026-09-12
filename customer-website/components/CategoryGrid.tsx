@@ -1,11 +1,64 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { CATEGORIES } from '@/lib/data';
 import { ArrowRight } from 'lucide-react';
 
 export default function CategoryGrid() {
+  const [categoryList, setCategoryList] = useState(CATEGORIES);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch('http://localhost:4200/api/services/categories');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setCategoryList((prev) =>
+              prev.map((local) => {
+                const remote = data.find(
+                  (r: any) =>
+                    r.id === local.id ||
+                    r.slug === local.id ||
+                    r.name?.toLowerCase() === local.name?.toLowerCase() ||
+                    (local.id === 'facial' && (r.slug === 'facial-cleanup' || r.id === 'cat-facial-cleanup')) ||
+                    (local.id === 'bleach-dtan' && (r.slug === 'bleach-detan' || r.id === 'cat-bleach-detan')) ||
+                    (local.id === 'threading' && (r.slug === 'threading' || r.id === 'cat-threading')) ||
+                    (local.id === 'waxing' && (r.slug === 'waxing' || r.id === 'cat-waxing')) ||
+                    (local.id === 'manicure' && (r.slug === 'manicure' || r.id === 'cat-manicure')) ||
+                    (local.id === 'pedicure' && (r.slug === 'pedicure' || r.id === 'cat-pedicure')) ||
+                    (local.id === 'body-care' && (r.slug === 'body-care' || r.id === 'cat-body-care')) ||
+                    (local.id === 'hair-care' && (r.slug === 'hair' || r.id === 'cat-hair')) ||
+                    (local.id === 'massage-spa' && (r.slug === 'massage-spa' || r.id === 'cat-massage-spa')) ||
+                    (local.id === 'bridal-makeup' && (r.slug === 'makeup' || r.id === 'cat-makeup')) ||
+                    (local.id === 'mehendi' && (r.slug === 'mehendi' || r.id === 'cat-mehendi')) ||
+                    (local.id === 'male-grooming' && (r.slug === 'male-grooming' || r.id === 'cat-male-grooming')) ||
+                    (local.id === 'kids' && (r.slug === 'kids' || r.id === 'cat-kids')) ||
+                    (local.id === 'bridal-pre-bridal' && (r.slug === 'bridal-pre-bridal' || r.id === 'cat-bridal-pre-bridal'))
+                );
+                if (remote && remote.image) {
+                  return {
+                    ...local,
+                    name: remote.name || local.name,
+                    image: remote.image,
+                  };
+                }
+                return local;
+              })
+            );
+          }
+        }
+      } catch {
+        // use static categories fallback
+      }
+    };
+
+    fetchCategories();
+    window.addEventListener('focus', fetchCategories);
+    return () => window.removeEventListener('focus', fetchCategories);
+  }, []);
+
   return (
     <section className="py-12 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -27,8 +80,8 @@ export default function CategoryGrid() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-8 gap-4 sm:gap-6">
-          {CATEGORIES.map((cat) => (
+        <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-7 gap-4 sm:gap-6">
+          {categoryList.map((cat) => (
             <Link
               key={cat.id}
               href={`/services?category=${cat.id}`}
