@@ -135,6 +135,9 @@ export default function BeauticianPortalPage() {
             >
               <ArrowLeft className="w-4 h-4" />
             </Link>
+            <div className="w-9 h-9 rounded-full overflow-hidden border border-pink-400/50 p-0.5 bg-slate-900 shrink-0 shadow-xs">
+              <img src="/logo.png" alt="BeautyNest Logo" className="w-full h-full object-cover rounded-full" />
+            </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />

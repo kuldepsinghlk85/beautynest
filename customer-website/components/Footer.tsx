@@ -13,8 +13,8 @@ export default function Footer() {
           {/* Brand Col */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-brand-primary to-pink-400 flex items-center justify-center text-white">
-                <Sparkles className="w-5 h-5 text-brand-accentLight" />
+              <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-pink-300 shadow-md bg-white flex items-center justify-center p-0.5 shrink-0">
+                <img src="/logo.png" alt="BeautyNest Logo" className="w-full h-full object-cover rounded-full" />
               </div>
               <span className="text-2xl font-serif font-bold text-white tracking-tight">
                 Beauty<span className="text-brand-primary">Nest</span>

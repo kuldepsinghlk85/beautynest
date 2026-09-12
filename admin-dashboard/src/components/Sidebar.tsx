@@ -154,15 +154,15 @@ export default function Sidebar({
     <aside className="w-64 bg-white text-gray-700 flex flex-col justify-between border-r border-gray-100 h-screen flex-shrink-0 select-none shadow-xs">
       {/* Brand Header matching Screenshot 2 */}
       <div>
-        <div className="p-5 flex items-center gap-3 border-b border-gray-100">
-          <div className="w-9 h-9 rounded-xl bg-[#0071E3] flex items-center justify-center text-white shadow-xs">
-            <Sparkles className="w-5 h-5" />
+        <div className="p-4 sm:p-5 flex items-center gap-3 border-b border-gray-100">
+          <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-pink-200 shadow-xs bg-white flex items-center justify-center p-0.5 shrink-0">
+            <img src="/logo.png" alt="BeautyNest Logo" className="w-full h-full object-cover rounded-full" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
               <span className="text-base font-bold text-gray-900 tracking-tight">BeautyNest</span>
             </div>
-            <span className="text-[10px] bg-gray-100 text-gray-600 font-bold px-2 py-0.5 rounded-full inline-block mt-0.5">
+            <span className="text-[10px] bg-pink-50 text-brand-primary font-bold px-2 py-0.5 rounded-full inline-block mt-0.5">
               {currentRole === 'WORKER'
                 ? 'Worker Portal'
                 : currentRole === 'OPERATOR'

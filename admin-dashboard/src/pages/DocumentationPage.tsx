@@ -55,17 +55,22 @@ export default function DocumentationPage({
     <div className="p-6 max-w-7xl mx-auto space-y-6 text-gray-900">
       {/* Top Banner */}
       <div className="bg-gradient-to-r from-slate-900 via-purple-950 to-slate-900 text-white p-6 rounded-3xl shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border border-purple-800/30">
-        <div className="space-y-2 max-w-2xl">
-          <div className="inline-flex items-center gap-2 bg-pink-500/20 text-pink-300 border border-pink-500/30 px-3 py-1 rounded-full text-xs font-bold">
-            <BookOpen className="w-3.5 h-3.5" />
-            <span>BEAUTY NEST MASTER MANUAL</span>
+        <div className="flex items-start sm:items-center gap-4 max-w-2xl">
+          <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-pink-400/50 shadow-lg shrink-0">
+            <img src="/logo.png" alt="BeautyNest Logo" className="w-full h-full object-cover" />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white leading-tight">
-            Complete Platform Documentation &amp; Admin Guide (संपूर्ण सिस्टम दस्तावेज़)
-          </h1>
-          <p className="text-xs sm:text-sm text-gray-300 leading-relaxed font-light">
-            Comprehensive reference manual containing customer features, beautician doorstep mobile app, admin controls, dynamic pricing formulas, and step-by-step modification guides.
-          </p>
+          <div className="space-y-1.5">
+            <div className="inline-flex items-center gap-2 bg-pink-500/20 text-pink-300 border border-pink-500/30 px-3 py-1 rounded-full text-xs font-bold">
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>BEAUTY NEST MASTER MANUAL</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white leading-tight">
+              Complete Platform Documentation &amp; Admin Guide (संपूर्ण सिस्टम दस्तावेज़)
+            </h1>
+            <p className="text-xs sm:text-sm text-gray-300 leading-relaxed font-light">
+              Comprehensive reference manual containing customer features, beautician doorstep mobile app, admin controls, dynamic pricing formulas, and step-by-step modification guides.
+            </p>
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 shrink-0">

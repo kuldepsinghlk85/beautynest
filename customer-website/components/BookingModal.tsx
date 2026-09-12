@@ -271,9 +271,12 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
                 <ArrowLeft className="w-5 h-5" />
               </button>
             )}
+            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white/80 p-0.5 bg-white shrink-0 shadow-xs">
+              <img src="/logo.png" alt="BeautyNest Logo" className="w-full h-full object-cover rounded-full" />
+            </div>
             <div>
               <span className="text-xs uppercase tracking-wider text-pink-100 font-semibold">
-                Doorstep Booking • {step === 6 ? 'Success' : `Step ${step} of 5`}
+                BeautyNest • {step === 6 ? 'Confirmed' : `Step ${step} of 5`}
               </span>
               <h3 className="text-lg font-serif font-bold leading-tight">
                 {step === 1 && 'Select Date & Time'}
@@ -1046,10 +1049,15 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
 
           {/* STEP 6: Booking Confirmed with Digital Consent Badge (Matches Screen 6) */}
           {step === 6 && (
-            <div className="text-center space-y-6 py-2">
-              {/* Pink Checkmark Animated */}
-              <div className="w-16 h-16 bg-brand-primary text-white rounded-full flex items-center justify-center mx-auto shadow-pink-soft">
-                <Check className="w-9 h-9 stroke-[3]" />
+            <div className="text-center space-y-4 py-2">
+              {/* Logo with Checkmark badge */}
+              <div className="relative w-20 h-20 mx-auto">
+                <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-brand-primary p-0.5 bg-white shadow-pink-soft">
+                  <img src="/logo.png" alt="BeautyNest Logo" className="w-full h-full object-cover rounded-full" />
+                </div>
+                <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-emerald-500 text-white rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+                  <Check className="w-4 h-4 stroke-[3]" />
+                </div>
               </div>
 
               <div>

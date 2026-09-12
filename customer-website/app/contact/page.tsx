@@ -32,9 +32,15 @@ export default function ContactPage() {
           {/* Left: Contact Info */}
           <div className="lg:col-span-5 space-y-6">
             <div className="bg-white rounded-3xl p-6 border border-pink-100 shadow-sm space-y-5">
-              <h3 className="text-lg font-serif font-bold text-gray-900">
-                Lucknow Operational Office
-              </h3>
+              <div className="flex items-center gap-3 pb-3 border-b border-gray-100">
+                <div className="w-12 h-12 rounded-full overflow-hidden border border-pink-200 p-0.5 bg-white shrink-0 shadow-xs">
+                  <img src="/logo.png" alt="BeautyNest Logo" className="w-full h-full object-cover rounded-full" />
+                </div>
+                <div>
+                  <h3 className="text-base font-serif font-bold text-gray-900">BeautyNest Headquarters</h3>
+                  <p className="text-[11px] text-gray-500">Ladies Doorstep Salon Operations</p>
+                </div>
+              </div>
               
               <div className="flex items-start gap-3 text-xs text-gray-700">
                 <MapPin className="w-5 h-5 text-brand-primary flex-shrink-0 mt-0.5" />

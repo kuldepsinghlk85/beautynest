@@ -11,7 +11,10 @@ export default function AboutPage() {
         
         {/* Header */}
         <div className="text-center space-y-3">
-          <span className="text-xs font-bold text-brand-primary uppercase tracking-widest bg-pink-100 px-3 py-1 rounded-full">
+          <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-pink-200 shadow-pink-soft mx-auto p-1 bg-white">
+            <img src="/logo.png" alt="BeautyNest Logo" className="w-full h-full object-cover rounded-full" />
+          </div>
+          <span className="text-xs font-bold text-brand-primary uppercase tracking-widest bg-pink-100 px-3 py-1 rounded-full inline-block">
             OUR STORY &amp; MISSION
           </span>
           <h1 className="text-3xl sm:text-5xl font-serif font-bold text-brand-charcoal">

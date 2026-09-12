@@ -286,8 +286,8 @@ export default function BeauticianMobileApp() {
           {!isLoggedIn ? (
             <div className="flex-1 p-6 flex flex-col justify-center space-y-6">
               <div className="text-center space-y-2">
-                <div className="w-16 h-16 rounded-3xl bg-pink-100 text-[#D84374] flex items-center justify-center mx-auto shadow-md">
-                  <Sparkles className="w-8 h-8" />
+                <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-pink-300 shadow-md mx-auto p-0.5 bg-white">
+                  <img src="/logo.png" alt="BeautyNest Logo" className="w-full h-full object-cover rounded-full" />
                 </div>
                 <h2 className="text-xl font-bold text-gray-900">Beautician Partner App</h2>
                 <p className="text-xs text-gray-500">

@@ -111,8 +111,8 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-brand-primary to-pink-400 flex items-center justify-center text-white shadow-pink-soft group-hover:scale-105 transition-transform">
-              <Sparkles className="w-6 h-6 text-brand-accentLight" />
+            <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full overflow-hidden border-2 border-pink-200 shadow-pink-soft group-hover:scale-105 transition-transform bg-white flex items-center justify-center p-0.5 shrink-0">
+              <img src="/logo.png" alt="BeautyNest Logo" className="w-full h-full object-cover rounded-full" />
             </div>
             <div>
               <div className="flex items-center gap-1">
@@ -227,9 +227,17 @@ export default function Navbar() {
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="lg:hidden bg-white border-b border-brand-border px-4 pt-3 pb-6 space-y-3">
-          <div className="flex items-center gap-2 pb-3 border-b border-gray-100">
-            <MapPin className="w-4 h-4 text-brand-primary" />
-            <span className="text-sm font-semibold text-gray-700">Varanasi: {selectedArea}</span>
+          <div className="flex items-center gap-3 pb-3 border-b border-gray-100">
+            <div className="w-10 h-10 rounded-full overflow-hidden border border-pink-200 shadow-xs shrink-0">
+              <img src="/logo.png" alt="BeautyNest Logo" className="w-full h-full object-cover" />
+            </div>
+            <div>
+              <span className="text-sm font-bold text-gray-900 block font-serif">BeautyNest</span>
+              <span className="text-xs text-gray-500 flex items-center gap-1">
+                <MapPin className="w-3 h-3 text-brand-primary" />
+                Varanasi: {selectedArea}
+              </span>
+            </div>
           </div>
           <Link
             href="/"
@@ -316,13 +324,20 @@ export default function Navbar() {
                 <X className="w-5 h-5" />
               </button>
 
-              <div className="flex items-center gap-2 text-brand-primary mb-1">
-                <Heart className="w-4 h-4 fill-brand-primary" />
-                <span className="text-[11px] font-bold uppercase tracking-wider">Ladies Doorstep Salon • Varanasi</span>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-pink-200 shadow-sm shrink-0">
+                  <img src="/logo.png" alt="BeautyNest Logo" className="w-full h-full object-cover rounded-full" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5 text-brand-primary">
+                    <Heart className="w-3.5 h-3.5 fill-brand-primary" />
+                    <span className="text-[11px] font-bold uppercase tracking-wider">Ladies Doorstep Salon • Varanasi</span>
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-bold font-serif text-gray-900">
+                    {authMode === 'register' ? 'New Customer Registration' : 'Customer Login'}
+                  </h3>
+                </div>
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold font-serif text-gray-900">
-                {authMode === 'register' ? 'New Customer Registration' : 'Customer Login'}
-              </h3>
               <p className="text-xs text-gray-500 mt-0.5">
                 {authMode === 'register'
                   ? 'Register with your photo & address for safe, 100% hygienic doorstep salon services'

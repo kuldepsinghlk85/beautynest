@@ -82,6 +82,9 @@ export default function CustomerRegistrationPage() {
             <div>
               {/* Header */}
               <div className="text-center mb-8">
+                <div className="w-16 h-16 mx-auto mb-3 rounded-full overflow-hidden border-2 border-pink-200 shadow-md">
+                  <img src="/logo.png" alt="BeautyNest Logo" className="w-full h-full object-cover" />
+                </div>
                 <div className="inline-flex items-center gap-2 bg-pink-100 text-brand-primary px-3 py-1 rounded-full text-xs font-bold mb-3">
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>Varanasi Ladies Doorstep Salon</span>
