@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { VARANASI_AREAS } from '../lib/data';
 import { INITIAL_CITIES } from '../lib/masterConfig';
+import { getCartCount } from '../lib/cartStore';
 import {
   getCurrentUser,
   setCurrentUser,
@@ -68,6 +69,7 @@ export default function Navbar() {
   const [showMyBookingsModal, setShowMyBookingsModal] = useState(false);
   const [userBookings, setUserBookings] = useState<BookingRecord[]>([]);
   const [loginPhone, setLoginPhone] = useState('9876543210');
+  const [cartCount, setCartCount] = useState(0);
   const customerFileInputRef = useRef<HTMLInputElement>(null);
 
   const loadUserData = () => {
@@ -75,17 +77,21 @@ export default function Navbar() {
     setLocalCurrentUser(u);
     const b = getCustomerBookings(u?.phone);
     setUserBookings(b);
+    setCartCount(getCartCount());
   };
 
   useEffect(() => {
     loadUserData();
     const handleUserChange = () => loadUserData();
     const handleBookingChange = () => loadUserData();
+    const handleCartChange = () => setCartCount(getCartCount());
     window.addEventListener('beautynest_user_change', handleUserChange);
     window.addEventListener('beautynest_booking_created', handleBookingChange);
+    window.addEventListener('beautynest_cart_updated', handleCartChange);
     return () => {
       window.removeEventListener('beautynest_user_change', handleUserChange);
       window.removeEventListener('beautynest_booking_created', handleBookingChange);
+      window.removeEventListener('beautynest_cart_updated', handleCartChange);
     };
   }, []);
 
@@ -297,13 +303,14 @@ export default function Navbar() {
             <Link
               href="/services"
               className="p-2.5 rounded-full text-gray-600 hover:text-brand-primary hover:bg-brand-primaryLight transition-all relative"
-              title="Cart / Quick Book"
-
+              title="कार्ट / चयनित पैकेज (Cart Packages)"
             >
               <ShoppingBag className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-4 h-4 bg-brand-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                1
-              </span>
+              {cartCount > 0 && (
+                <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 bg-brand-primary text-white text-[10px] font-extrabold rounded-full flex items-center justify-center border-2 border-white shadow-xs">
+                  {cartCount}
+                </span>
+              )}
             </Link>
 
             {/* Customer Profile Pill (When Logged In) vs Customer Register CTA */}

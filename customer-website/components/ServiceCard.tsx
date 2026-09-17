@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Star, Clock, Heart, Plus, Check } from 'lucide-react';
+import { Star, Clock, Heart, Plus, Minus, Check, ShoppingBag } from 'lucide-react';
 import { Service } from '@/lib/data';
+import { addToCart, removeFromCart, updateQuantity, getCart } from '@/lib/cartStore';
+import { getMasterCategoryForService } from '@/lib/masterCategories';
 
 interface ServiceCardProps {
   service: Service;
@@ -12,12 +14,48 @@ interface ServiceCardProps {
 
 export default function ServiceCard({ service, onBookNow }: ServiceCardProps) {
   const [isLiked, setIsLiked] = useState(false);
-  const [added, setAdded] = useState(false);
+  const [cartQty, setCartQty] = useState(0);
 
-  const handleBook = (e: React.MouseEvent) => {
+  const masterCat = service.masterCategory || getMasterCategoryForService(service);
+
+  const syncCartQty = () => {
+    const items = getCart();
+    const id = service.id || service.serviceId || service.slug;
+    const item = items.find(
+      (c) => c.service.id === id || c.service.serviceId === id || c.service.slug === id
+    );
+    setCartQty(item ? item.quantity : 0);
+  };
+
+  useEffect(() => {
+    syncCartQty();
+    const handleCartUpdate = () => syncCartQty();
+    window.addEventListener('beautynest_cart_updated', handleCartUpdate);
+    return () => window.removeEventListener('beautynest_cart_updated', handleCartUpdate);
+  }, [service.id]);
+
+  const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
+    addToCart(service);
+  };
+
+  const handleIncrement = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const id = service.id || service.serviceId || service.slug;
+    updateQuantity(id, cartQty + 1);
+  };
+
+  const handleDecrement = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const id = service.id || service.serviceId || service.slug;
+    updateQuantity(id, cartQty - 1);
+  };
+
+  const handleDirectBook = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (cartQty === 0) {
+      addToCart(service);
+    }
     if (onBookNow) {
       onBookNow(service);
     }
@@ -33,12 +71,25 @@ export default function ServiceCard({ service, onBookNow }: ServiceCardProps) {
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
 
-        {/* Bestseller Badge */}
-        {service.isBestseller && (
-          <span className="absolute top-3 left-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
-            Bestseller
+        {/* Master Category Pill */}
+        <div className="absolute top-3 left-3 flex items-center gap-1">
+          <span
+            className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm ${
+              masterCat === 'makeup'
+                ? 'bg-amber-600 text-white'
+                : masterCat === 'spa'
+                ? 'bg-teal-600 text-white'
+                : 'bg-brand-primary text-white'
+            }`}
+          >
+            {masterCat === 'makeup' ? '💄 मेकअप' : masterCat === 'spa' ? '🧖‍♀️ स्पा' : '✨ ब्यूटी'}
           </span>
-        )}
+          {service.isBestseller && (
+            <span className="bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
+              Bestseller
+            </span>
+          )}
+        </div>
 
         {/* Wishlist Button */}
         <button
@@ -79,8 +130,8 @@ export default function ServiceCard({ service, onBookNow }: ServiceCardProps) {
           </p>
         </div>
 
-        {/* Price and Booking Action */}
-        <div className="pt-4 mt-3 border-t border-pink-50 flex items-center justify-between">
+        {/* Price and Cart Actions */}
+        <div className="pt-4 mt-3 border-t border-pink-50 flex items-center justify-between gap-2">
           <div>
             <div className="flex items-baseline gap-2">
               <span className="text-lg font-bold text-gray-900">
@@ -95,26 +146,45 @@ export default function ServiceCard({ service, onBookNow }: ServiceCardProps) {
             </span>
           </div>
 
-          <button
-            onClick={handleBook}
-            className={`inline-flex items-center gap-1 text-xs font-bold px-4 py-2 rounded-full transition-all ${
-              added
-                ? 'bg-emerald-600 text-white'
-                : 'bg-brand-primary hover:bg-brand-primaryDark text-white shadow-pink-soft'
-            }`}
-          >
-            {added ? (
-              <>
-                <Check className="w-3.5 h-3.5" />
-                <span>Added</span>
-              </>
+          {/* Action Buttons: Add/Qty & Book */}
+          <div className="flex items-center gap-1.5">
+            {cartQty > 0 ? (
+              <div className="inline-flex items-center bg-pink-50 border border-brand-primary/40 rounded-full p-0.5 shadow-sm">
+                <button
+                  onClick={handleDecrement}
+                  className="w-6 h-6 rounded-full bg-white text-brand-primary hover:bg-brand-primary hover:text-white flex items-center justify-center transition-colors text-xs font-bold"
+                  title="Remove one"
+                >
+                  <Minus className="w-3 h-3" />
+                </button>
+                <span className="px-2 text-xs font-bold text-brand-charcoal min-w-[20px] text-center">
+                  {cartQty}
+                </span>
+                <button
+                  onClick={handleIncrement}
+                  className="w-6 h-6 rounded-full bg-brand-primary text-white hover:bg-brand-primaryDark flex items-center justify-center transition-colors text-xs font-bold"
+                  title="Add one more"
+                >
+                  <Plus className="w-3 h-3" />
+                </button>
+              </div>
             ) : (
-              <>
+              <button
+                onClick={handleAddToCart}
+                className="inline-flex items-center gap-1 text-xs font-bold px-3 py-2 rounded-full border border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white transition-all shadow-sm active:scale-95"
+              >
                 <Plus className="w-3.5 h-3.5" />
-                <span>Book Now</span>
-              </>
+                <span>+ जोड़ें (Add)</span>
+              </button>
             )}
-          </button>
+
+            <button
+              onClick={handleDirectBook}
+              className="inline-flex items-center gap-1 text-xs font-bold px-3.5 py-2 rounded-full bg-brand-primary hover:bg-brand-primaryDark text-white transition-all shadow-sm active:scale-95 whitespace-nowrap"
+            >
+              <span>बुक करें</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

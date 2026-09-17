@@ -10,6 +10,7 @@ import Testimonials from '@/components/Testimonials';
 import ServiceCard from '@/components/ServiceCard';
 import BeauticianCard from '@/components/BeauticianCard';
 import BookingModal from '@/components/BookingModal';
+import FloatingCartBar from '@/components/FloatingCartBar';
 import { SERVICES, BEAUTICIANS, Service } from '@/lib/data';
 import Link from 'next/link';
 import { ArrowRight, Sparkles } from 'lucide-react';
@@ -18,6 +19,7 @@ export default function HomePage() {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [servicesList, setServicesList] = useState<Service[]>(SERVICES);
+  const [checkoutMode, setCheckoutMode] = useState<'single' | 'dual' | 'split'>('single');
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -153,6 +155,16 @@ export default function HomePage() {
         service={selectedService}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        checkoutMode={checkoutMode}
+      />
+
+      {/* Multi-Service Floating Cart Bar */}
+      <FloatingCartBar
+        onOpenCheckout={(mode = 'single') => {
+          setCheckoutMode(mode);
+          setSelectedService(servicesList[0]);
+          setIsModalOpen(true);
+        }}
       />
     </div>
   );

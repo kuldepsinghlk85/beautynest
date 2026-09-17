@@ -1,4 +1,4 @@
-﻿// Shared user & booking state management for Admin Dashboard
+// Shared user & booking state management for Admin Dashboard
 
 export interface CustomerProfile {
   id: string;
@@ -36,6 +36,9 @@ export interface BookingRecord {
   bookingDate: string;
   createdAt: string;
   consentSigned: boolean;
+  secondaryBeauticianName?: string;
+  secondaryBeauticianPhone?: string;
+  isSplitBooking?: boolean;
 }
 
 export function getAllBookings(): BookingRecord[] {

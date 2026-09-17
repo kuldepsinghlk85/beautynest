@@ -24,10 +24,19 @@ import {
   Radio,
   Building,
   Home,
+  Users,
+  Split,
 } from 'lucide-react';
 import { Service, BEAUTICIANS } from '@/lib/data';
 import { DEFAULT_DISTANCE_RULES } from '@/lib/masterConfig';
 import { getCurrentUser, saveNewBooking, type BookingRecord } from '@/lib/userStore';
+import {
+  getCart,
+  clearCart,
+  validateCartFeasibility,
+  type CartItem,
+} from '@/lib/cartStore';
+import { getMasterCategoryForService } from '@/lib/masterCategories';
 
 interface VaranasiLocationHub {
   area: string;
@@ -57,9 +66,10 @@ interface BookingModalProps {
   service: Service | null;
   isOpen: boolean;
   onClose: () => void;
+  checkoutMode?: 'single' | 'dual' | 'split';
 }
 
-export default function BookingModal({ service, isOpen, onClose }: BookingModalProps) {
+export default function BookingModal({ service, isOpen, onClose, checkoutMode = 'single' }: BookingModalProps) {
   // Step 1: Date & Time, Step 2: Address & Products, Step 3: Beautician Match, Step 4: Consent Form, Step 5: Bill & Pay, Step 6: Confirmed
   const [step, setStep] = useState<1 | 2 | 3 | 4 | 5 | 6>(1);
   const [selectedDate, setSelectedDate] = useState('Mon, 03 Aug');
@@ -95,10 +105,12 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
   const [couponError, setCouponError] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'UPI' | 'CARD' | 'COD'>('UPI');
   const [bookingId, setBookingId] = useState('BK-6887');
+  const [cartItemsState, setCartItemsState] = useState<CartItem[]>([]);
 
-  // Auto pre-fill from logged-in customer profile
+  // Auto pre-fill from logged-in customer profile & cart
   useEffect(() => {
     if (isOpen) {
+      setCartItemsState(getCart());
       const user = getCurrentUser();
       if (user) {
         if (user.area) {
@@ -120,7 +132,15 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
     }
   }, [isOpen]);
 
-  if (!isOpen || !service) return null;
+  const effectiveItems: CartItem[] =
+    cartItemsState.length > 0
+      ? cartItemsState
+      : service
+      ? [{ service, quantity: 1, masterCategory: service.masterCategory || getMasterCategoryForService(service) }]
+      : [];
+
+  if (!isOpen || effectiveItems.length === 0) return null;
+  const effectiveService = effectiveItems[0].service;
 
   const dates = [
     { day: 'Sat', date: '01' },
@@ -136,16 +156,20 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
   const afternoonSlots = ['02:00 PM', '03:30 PM'];
   const eveningSlots = ['05:00 PM', '06:30 PM', '08:00 PM'];
 
+  // Multi-service totals
+  const totalServicePrice = effectiveItems.reduce((acc, item) => acc + item.service.price * item.quantity, 0);
+  const totalDurationMins = effectiveItems.reduce((acc, item) => acc + (item.service.durationMinutes || 45) * item.quantity, 0);
+
   // Distance charge calculation (First 3 KM free, ₹50/KM thereafter)
   const freeKm = DEFAULT_DISTANCE_RULES.freeDistanceKm; // 3 KM
   const perKm = DEFAULT_DISTANCE_RULES.perKmCharge; // ₹50/KM
   const distanceCharge = travelDistanceKm > freeKm ? Math.round((travelDistanceKm - freeKm) * perKm) : 0;
 
   // Cosmetic Product Cost: If customer provides own product -> ₹0!
-  const normalCosmeticProductCost = Math.round(service.price * 0.22); // standard product portion (~22%)
+  const normalCosmeticProductCost = Math.round(totalServicePrice * 0.22); // standard product portion (~22%)
   const cosmeticProductCost = hasOwnProducts ? 0 : normalCosmeticProductCost;
-  const baseServiceCost = service.price - normalCosmeticProductCost; // pure salon labor
-  const safetyKitFee = 49;
+  const baseServiceCost = totalServicePrice - normalCosmeticProductCost; // pure salon labor
+  const safetyKitFee = effectiveItems.length > 1 ? 69 : 49;
 
   // Dynamic Coupon Engine (reads from Admin coupons or defaults)
   const getAvailableCoupons = () => {
@@ -187,11 +211,11 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
     }
 
     if (found.discountType === 'PERCENTAGE') {
-      const calculated = Math.round(service.price * (Number(found.discountValue) / 100));
+      const calculated = Math.round(totalServicePrice * (Number(found.discountValue) / 100));
       return found.maxDiscount ? Math.min(calculated, Number(found.maxDiscount)) : calculated;
     } else {
       // FLAT discount
-      return Math.min(Number(found.discountValue) || 50, service.price);
+      return Math.min(Number(found.discountValue) || 50, totalServicePrice);
     }
   };
 
@@ -217,8 +241,8 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
     }
 
     const minOrder = Number(found.minOrderValue) || 0;
-    if (service.price < minOrder) {
-      setCouponError(`Min. booking value for '${code}' is ₹${minOrder}. Current service is ₹${service.price}.`);
+    if (totalServicePrice < minOrder) {
+      setCouponError(`Min. booking value for '${code}' is ₹${minOrder}. Current total is ₹${totalServicePrice}.`);
       return;
     }
 
@@ -233,7 +257,14 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
     setCouponError(null);
   };
 
-  const matchedBeautician = BEAUTICIANS[0]; // Ananya Sharma (Gold Tier 20%)
+  // Feasibility & Beautician Matching
+  const validation = validateCartFeasibility(effectiveItems, BEAUTICIANS, selectedVaranasiArea);
+  const isDualSpecialistMode = checkoutMode === 'dual' || (effectiveItems.length > 1 && validation.hasSkillMismatch);
+  const isSplitMode = checkoutMode === 'split';
+
+  const specialist1 = validation.recommendedSpecialists[0]?.beautician || BEAUTICIANS[0];
+  const specialist2 = validation.recommendedSpecialists[1]?.beautician || (isDualSpecialistMode ? BEAUTICIANS[1] : null);
+  const matchedBeautician = specialist1;
 
   const handleProceedFromConsent = () => {
     if (!consentAccepted) {
@@ -279,33 +310,79 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
     setBookingId(randomId);
 
     const user = getCurrentUser();
-    const newBooking: BookingRecord = {
-      id: randomId,
-      bookingNumber: randomId,
-      customerName: user?.fullName || 'Priya Sharma',
-      customerPhone: user?.phone || '9876543210',
-      customerAddress: address,
-      area: selectedVaranasiArea,
-      serviceName: service.name,
-      serviceCategory: service.category,
-      servicePrice: service.price,
-      beauticianName: matchedBeautician.name,
-      beauticianPhone: '+91 98390 12001',
-      beauticianTier: (matchedBeautician as any).tier || 'Gold Tier',
-      scheduledDate: `${selectedDate} 2026`,
-      scheduledTime: selectedTime,
-      hasOwnProducts,
-      distanceKm: travelDistanceKm,
-      distanceFee: distanceCharge,
-      totalAmount: total,
-      status: 'CONFIRMED',
-      paymentMethod,
-      bookingDate: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
-      createdAt: new Date().toISOString(),
-      consentSigned: true,
-    };
 
-    saveNewBooking(newBooking);
+    if (isSplitMode && validation.splitGroups.length > 1) {
+      // Create 2 separate orders for each domain!
+      validation.splitGroups.forEach((group, gIdx) => {
+        const splitSuffix = group.category === 'makeup' ? 'M' : group.category === 'spa' ? 'S' : 'B';
+        const splitId = `${randomId}-${splitSuffix}`;
+        const groupTotal = Math.round((total / Math.max(1, totalServicePrice)) * group.subtotal);
+        const splitBooking: BookingRecord = {
+          id: splitId,
+          bookingNumber: splitId,
+          customerName: user?.fullName || 'Priya Sharma',
+          customerPhone: user?.phone || '9876543210',
+          customerAddress: address,
+          area: selectedVaranasiArea,
+          serviceName: group.items.map((i) => `${i.service.name}${i.quantity > 1 ? ` (x${i.quantity})` : ''}`).join(' + '),
+          serviceCategory: group.categoryLabel,
+          servicePrice: group.subtotal,
+          beauticianName: group.recommendedBeautician.name,
+          beauticianPhone: group.recommendedBeautician.phone || '+91 98390 12001',
+          beauticianTier: (group.recommendedBeautician as any).tier || 'Gold Tier',
+          scheduledDate: `${selectedDate} 2026`,
+          scheduledTime: gIdx === 1 ? '02:00 PM - 03:30 PM' : selectedTime,
+          hasOwnProducts,
+          distanceKm: travelDistanceKm,
+          distanceFee: Math.round(distanceCharge / validation.splitGroups.length),
+          totalAmount: groupTotal,
+          status: 'CONFIRMED',
+          paymentMethod,
+          bookingDate: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
+          createdAt: new Date().toISOString(),
+          consentSigned: true,
+          isSplitBooking: true,
+        };
+        saveNewBooking(splitBooking);
+      });
+    } else {
+      // Single or Dual Specialist Booking
+      const allServiceNames = effectiveItems
+        .map((i) => `${i.service.name}${i.quantity > 1 ? ` (x${i.quantity})` : ''}`)
+        .join(' + ');
+
+      const newBooking: BookingRecord = {
+        id: randomId,
+        bookingNumber: randomId,
+        customerName: user?.fullName || 'Priya Sharma',
+        customerPhone: user?.phone || '9876543210',
+        customerAddress: address,
+        area: selectedVaranasiArea,
+        serviceName: allServiceNames,
+        serviceCategory: isDualSpecialistMode ? 'Dual Specialist (मेकअप + ब्यूटी)' : (effectiveService.categoryName || effectiveService.category || 'Beauty'),
+        servicePrice: totalServicePrice,
+        beauticianName: isDualSpecialistMode && specialist2 ? `${specialist1.name} (मेकअप) & ${specialist2.name} (सैलून)` : specialist1.name,
+        beauticianPhone: specialist1.phone || '+91 98390 12001',
+        beauticianTier: (specialist1 as any).tier || 'Gold Tier',
+        secondaryBeauticianName: isDualSpecialistMode && specialist2 ? specialist2.name : undefined,
+        secondaryBeauticianPhone: isDualSpecialistMode && specialist2 ? (specialist2.phone || '+91 98390 12002') : undefined,
+        scheduledDate: `${selectedDate} 2026`,
+        scheduledTime: selectedTime,
+        hasOwnProducts,
+        distanceKm: travelDistanceKm,
+        distanceFee: distanceCharge,
+        totalAmount: total,
+        status: 'CONFIRMED',
+        paymentMethod,
+        bookingDate: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
+        createdAt: new Date().toISOString(),
+        consentSigned: true,
+      };
+
+      saveNewBooking(newBooking);
+    }
+
+    clearCart();
     setStep(6); // Confirmed
   };
 
@@ -355,18 +432,74 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
           {/* STEP 1: Date & Time Picker */}
           {step === 1 && (
             <div className="space-y-6">
-              {/* Selected Service Quick Info */}
-              <div className="flex items-center gap-3 p-3 bg-pink-50 rounded-2xl border border-pink-100">
-                <img
-                  src={service.imageUrl}
-                  alt={service.name}
-                  className="w-14 h-14 rounded-xl object-cover"
-                />
-                <div className="flex-1 min-w-0">
-                  <h4 className="text-sm font-bold text-gray-900 truncate">{service.name}</h4>
-                  <p className="text-xs text-gray-500">{service.durationMinutes} mins • ₹{service.price}</p>
+              {/* Selected Services / Multi-package Quick Info */}
+              {effectiveItems.length > 1 ? (
+                <div className="bg-pink-50/70 rounded-2xl p-3.5 border border-pink-100 space-y-2.5">
+                  <div className="flex items-center justify-between text-xs font-bold text-gray-700 pb-1.5 border-b border-pink-100">
+                    <span>चयनित पैकेज ({effectiveItems.length} सेवाएं)</span>
+                    <span className="text-brand-primary font-bold">
+                      कुल: ₹{totalServicePrice} • {totalDurationMins} मिनट
+                    </span>
+                  </div>
+                  <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1 scrollbar-thin">
+                    {effectiveItems.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between text-xs bg-white p-2 rounded-xl border border-pink-50"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-pink-100 text-brand-primary shrink-0">
+                            {item.masterCategory === 'makeup'
+                              ? '💄 मेकअप'
+                              : item.masterCategory === 'spa'
+                              ? '🧖‍♀️ स्पा'
+                              : '✨ ब्यूटी'}
+                          </span>
+                          <span className="font-semibold text-gray-800 truncate">
+                            {item.service.name}
+                          </span>
+                          {item.quantity > 1 && (
+                            <span className="text-gray-400 font-bold">×{item.quantity}</span>
+                          )}
+                        </div>
+                        <span className="font-bold text-gray-900 shrink-0 ml-2">
+                          ₹{item.service.price * item.quantity}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {isDualSpecialistMode && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-2 text-[11px] text-amber-900 flex items-center gap-1.5 font-medium">
+                      <Users className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                      <span>2 अलग-अलग विशेषज्ञ ब्यूटीशियन (1 मेकअप आर्टिस्ट + 1 सैलून एक्सपर्ट) असाइन किए जाएंगे।</span>
+                    </div>
+                  )}
+
+                  {isSplitMode && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-2 text-[11px] text-amber-900 flex items-center gap-1.5 font-medium">
+                      <Split className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                      <span>यह बुकिंग 2 अलग-अलग ऑर्डरों में विभाजित की जा रही है।</span>
+                    </div>
+                  )}
                 </div>
-              </div>
+              ) : (
+                <div className="flex items-center gap-3 p-3 bg-pink-50 rounded-2xl border border-pink-100">
+                  <img
+                    src={effectiveService.imageUrl}
+                    alt={effectiveService.name}
+                    className="w-14 h-14 rounded-xl object-cover"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-sm font-bold text-gray-900 truncate">
+                      {effectiveService.name}
+                    </h4>
+                    <p className="text-xs text-gray-500">
+                      {effectiveService.durationMinutes} mins • ₹{effectiveService.price}
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* 7-Day Horizontal Date Picker */}
               <div>
@@ -752,51 +885,123 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
             <div className="space-y-6 text-center">
               <div className="inline-flex items-center gap-2 bg-pink-100 text-brand-primary text-xs font-bold px-3 py-1 rounded-full">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>AI Matching Algorithm (96% Compatibility)</span>
+                <span>
+                  {isDualSpecialistMode
+                    ? '2 समर्पित विशेषज्ञ असाइन किए गए (Dual Specialists Assigned)'
+                    : 'AI Matching Algorithm (96% Compatibility)'}
+                </span>
               </div>
 
               <h4 className="text-xl font-serif font-bold text-brand-charcoal">
-                Matched Doorstep Beautician
+                {isDualSpecialistMode
+                  ? 'Matched Doorstep Specialists (2 एक्सपर्ट्स)'
+                  : 'Matched Doorstep Beautician'}
               </h4>
 
-              {/* Beautician Card */}
-              <div className="bg-white rounded-2xl p-5 border-2 border-pink-200 shadow-md text-left">
-                <div className="flex items-center gap-4">
-                  <img
-                    src={matchedBeautician.imageUrl}
-                    alt={matchedBeautician.name}
-                    className="w-16 h-16 rounded-2xl object-cover border-2 border-brand-primary"
-                  />
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h5 className="text-base font-bold text-gray-900">{matchedBeautician.name}</h5>
-                      <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                        Gold Tier Partner
+              {/* Beautician Cards: Dual or Single */}
+              {isDualSpecialistMode && specialist2 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-left">
+                  {/* Specialist 1 */}
+                  <div className="bg-white rounded-2xl p-4 border-2 border-amber-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full uppercase tracking-wider block w-fit mb-2">
+                        एक्सपर्ट 1: मेकअप आर्टिस्ट
                       </span>
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={specialist1.imageUrl}
+                          alt={specialist1.name}
+                          className="w-14 h-14 rounded-2xl object-cover border-2 border-amber-400 shrink-0"
+                        />
+                        <div className="min-w-0">
+                          <h5 className="text-sm font-bold text-gray-900 truncate">
+                            {specialist1.name}
+                          </h5>
+                          <p className="text-[11px] text-gray-500 line-clamp-1">
+                            {specialist1.specialization}
+                          </p>
+                          <span className="text-xs font-bold text-amber-600">
+                            ★ {specialist1.rating} ({specialist1.reviewCount}+ reviews)
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-xs text-gray-500">{matchedBeautician.specialization}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs font-bold text-amber-600">★ {matchedBeautician.rating}</span>
-                      <span className="text-[11px] text-gray-400">({matchedBeautician.reviewCount}+ reviews)</span>
+                    <div className="mt-3 pt-2.5 border-t border-gray-100 text-[11px] text-gray-600 flex items-center justify-between">
+                      <span className="font-semibold text-amber-900">ब्राइडल / पार्टी मेकअप</span>
+                      <span className="text-emerald-700 font-bold">✓ वेरिफाइड प्रो</span>
                     </div>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-gray-100 text-center text-[11px] text-gray-700">
-                  <div className="bg-pink-50 p-2 rounded-xl">
-                    <ShieldCheck className="w-4 h-4 text-brand-primary mx-auto mb-1" />
-                    <span>Verified Pro</span>
-                  </div>
-                  <div className="bg-pink-50 p-2 rounded-xl">
-                    <span className="font-bold text-brand-primary block">5+ Yrs</span>
-                    <span>Experience</span>
-                  </div>
-                  <div className="bg-pink-50 p-2 rounded-xl">
-                    <span className="font-bold text-brand-primary block">{travelDistanceKm} KM</span>
-                    <span>Travel Radius</span>
+                  {/* Specialist 2 */}
+                  <div className="bg-white rounded-2xl p-4 border-2 border-pink-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold text-brand-primary bg-pink-50 border border-pink-200 px-2 py-0.5 rounded-full uppercase tracking-wider block w-fit mb-2">
+                        एक्सपर्ट 2: सैलून ब्यूटीशियन
+                      </span>
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={specialist2.imageUrl}
+                          alt={specialist2.name}
+                          className="w-14 h-14 rounded-2xl object-cover border-2 border-brand-primary shrink-0"
+                        />
+                        <div className="min-w-0">
+                          <h5 className="text-sm font-bold text-gray-900 truncate">
+                            {specialist2.name}
+                          </h5>
+                          <p className="text-[11px] text-gray-500 line-clamp-1">
+                            {specialist2.specialization}
+                          </p>
+                          <span className="text-xs font-bold text-amber-600">
+                            ★ {specialist2.rating} ({specialist2.reviewCount}+ reviews)
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-3 pt-2.5 border-t border-gray-100 text-[11px] text-gray-600 flex items-center justify-between">
+                      <span className="font-semibold text-brand-primary">सैलून स्किन व बॉडी केयर</span>
+                      <span className="text-emerald-700 font-bold">✓ वेरिफाइड प्रो</span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="bg-white rounded-2xl p-5 border-2 border-pink-200 shadow-md text-left">
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={matchedBeautician.imageUrl}
+                      alt={matchedBeautician.name}
+                      className="w-16 h-16 rounded-2xl object-cover border-2 border-brand-primary"
+                    />
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h5 className="text-base font-bold text-gray-900">{matchedBeautician.name}</h5>
+                        <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                          Gold Tier Partner
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500">{matchedBeautician.specialization}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs font-bold text-amber-600">★ {matchedBeautician.rating}</span>
+                        <span className="text-[11px] text-gray-400">({matchedBeautician.reviewCount}+ reviews)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-gray-100 text-center text-[11px] text-gray-700">
+                    <div className="bg-pink-50 p-2 rounded-xl">
+                      <ShieldCheck className="w-4 h-4 text-brand-primary mx-auto mb-1" />
+                      <span>Verified Pro</span>
+                    </div>
+                    <div className="bg-pink-50 p-2 rounded-xl">
+                      <span className="font-bold text-brand-primary block">5+ Yrs</span>
+                      <span>Experience</span>
+                    </div>
+                    <div className="bg-pink-50 p-2 rounded-xl">
+                      <span className="font-bold text-brand-primary block">{travelDistanceKm} KM</span>
+                      <span>Travel Radius</span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="flex flex-col gap-2.5">
                 <button
@@ -1126,19 +1331,42 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
               <div className="bg-brand-bg rounded-2xl p-4 border border-pink-100 text-left text-xs space-y-2.5">
                 <div className="flex justify-between">
                   <span className="text-gray-500">Booking ID</span>
-                  <span className="font-bold text-brand-charcoal font-mono">{bookingId}</span>
+                  <span className="font-bold text-brand-charcoal font-mono">
+                    {isSplitMode ? `${bookingId}-M & ${bookingId}-B` : bookingId}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Scheduled</span>
-                  <span className="font-semibold text-gray-800">{selectedDate} 2026 • {selectedTime}</span>
+                  <span className="font-semibold text-gray-800">
+                    {selectedDate} 2026 • {selectedTime}
+                  </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Service</span>
-                  <span className="font-semibold text-gray-800">{service.name}</span>
+                <div className="flex justify-between items-start">
+                  <span className="text-gray-500 shrink-0">Services ({effectiveItems.length})</span>
+                  <span className="font-semibold text-gray-800 text-right ml-3 truncate max-w-xs">
+                    {effectiveItems.length > 1
+                      ? effectiveItems.map((i) => `${i.service.name}${i.quantity > 1 ? ` x${i.quantity}` : ''}`).join(', ')
+                      : effectiveService.name}
+                  </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Professional</span>
-                  <span className="font-semibold text-brand-primary">{matchedBeautician.name} (Gold Tier)</span>
+                <div className="flex justify-between items-start">
+                  <span className="text-gray-500 shrink-0">Assigned Specialists</span>
+                  <div className="text-right ml-3">
+                    {isDualSpecialistMode && specialist2 ? (
+                      <div className="space-y-0.5">
+                        <span className="font-bold text-amber-700 block">
+                          💄 {specialist1.name} (मेकअप)
+                        </span>
+                        <span className="font-bold text-brand-primary block">
+                          💅 {specialist2.name} (सैलून ब्यूटी)
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="font-semibold text-brand-primary">
+                        {matchedBeautician.name} (Gold Tier)
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Customer Products</span>
@@ -1148,7 +1376,9 @@ export default function BookingModal({ service, isOpen, onClose }: BookingModalP
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Travel Distance</span>
-                  <span className="font-semibold text-gray-800">{travelDistanceKm} KM ({distanceCharge === 0 ? 'Free' : `₹${distanceCharge}`})</span>
+                  <span className="font-semibold text-gray-800">
+                    {travelDistanceKm} KM ({distanceCharge === 0 ? 'Free' : `₹${distanceCharge}`})
+                  </span>
                 </div>
                 <div className="flex justify-between items-center bg-white p-2 rounded-xl border border-pink-100 text-[11px]">
                   <span className="text-gray-600 flex items-center gap-1 font-semibold">

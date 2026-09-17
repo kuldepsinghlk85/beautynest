@@ -1,4 +1,4 @@
-﻿// Central user & booking state management for BeautyNest
+// Central user & booking state management for BeautyNest
 
 export interface CustomerProfile {
   id: string;
@@ -36,6 +36,9 @@ export interface BookingRecord {
   bookingDate: string;
   createdAt: string;
   consentSigned: boolean;
+  secondaryBeauticianName?: string;
+  secondaryBeauticianPhone?: string;
+  isSplitBooking?: boolean;
 }
 
 // Check current logged in user
