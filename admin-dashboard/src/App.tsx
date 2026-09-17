@@ -21,6 +21,7 @@ import SliderManagerPage from './pages/SliderManagerPage';
 import PackagesPage from './pages/PackagesPage';
 import OffersPage from './pages/OffersPage';
 import DocumentationPage from './pages/DocumentationPage';
+import BookingAlertToast from './components/BookingAlertToast';
 
 export default function App() {
   const [currentRole, setCurrentRole] = useState<UserRole>('ADMIN');
@@ -109,8 +110,16 @@ export default function App() {
     }
   };
 
+  const handleViewBooking = (_bookingId: string) => {
+    if (currentRole === 'OPERATOR') {
+      setCurrentTab('operator-console');
+    } else {
+      setCurrentTab('bookings');
+    }
+  };
+
   return (
-    <div className="flex h-screen bg-[#F8F9FA] text-[#2D2D2D] overflow-hidden">
+    <div className="flex h-screen bg-[#F8F9FA] text-[#2D2D2D] overflow-hidden relative">
       {/* Sidebar Navigation */}
       <Sidebar
         currentTab={currentTab}
@@ -126,6 +135,7 @@ export default function App() {
           currentRole={currentRole}
           onRoleChange={handleRoleChange}
           onOpenDocs={() => setCurrentTab('docs')}
+          onNavigateToBooking={handleViewBooking}
           onRefresh={() => {
             const tab = currentTab;
             setCurrentTab('dashboard');
@@ -134,6 +144,9 @@ export default function App() {
         />
         <main className="flex-1 overflow-hidden">{renderContent()}</main>
       </div>
+
+      {/* Floating Real-Time Booking Alert Toast (Simultaneous for Admin & Operator) */}
+      <BookingAlertToast onViewBooking={handleViewBooking} />
     </div>
   );
 }

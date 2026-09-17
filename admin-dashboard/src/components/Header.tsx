@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Search,
   Bell,
@@ -10,7 +10,15 @@ import {
   Sparkles,
   ChevronDown,
   BookOpen,
+  CheckCircle2,
+  ExternalLink,
+  X,
 } from 'lucide-react';
+import {
+  getSeenBookingIds,
+  markBookingAsSeen,
+  markAllBookingsAsSeen,
+} from '../lib/bookingNotificationService';
 
 export type UserRole = 'ADMIN' | 'WORKER' | 'OPERATOR';
 
@@ -20,6 +28,7 @@ interface HeaderProps {
   onRoleChange: (role: UserRole) => void;
   onRefresh?: () => void;
   onOpenDocs?: () => void;
+  onNavigateToBooking?: (bookingId: string) => void;
 }
 
 export default function Header({
@@ -28,9 +37,67 @@ export default function Header({
   onRoleChange,
   onRefresh,
   onOpenDocs,
+  onNavigateToBooking,
 }: HeaderProps) {
+  const [isBellOpen, setIsBellOpen] = useState(false);
+  const [unreadBookings, setUnreadBookings] = useState<any[]>([]);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const loadUnreadBookings = () => {
+    if (typeof window === 'undefined') return;
+    try {
+      const saved = localStorage.getItem('beautynest_all_bookings');
+      if (saved) {
+        const all: any[] = JSON.parse(saved);
+        const seenIds = getSeenBookingIds();
+        const unread = all.filter((b) => {
+          const id = b.id || b.bookingNumber;
+          return id && !seenIds.includes(id);
+        });
+        setUnreadBookings(unread);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    loadUnreadBookings();
+    const handleUpdate = () => loadUnreadBookings();
+    window.addEventListener('storage', handleUpdate);
+    window.addEventListener('beautynest_booking_created', handleUpdate);
+    window.addEventListener('beautynest_seen_updated', handleUpdate);
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsBellOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      window.removeEventListener('storage', handleUpdate);
+      window.removeEventListener('beautynest_booking_created', handleUpdate);
+      window.removeEventListener('beautynest_seen_updated', handleUpdate);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleMarkAllRead = () => {
+    markAllBookingsAsSeen(unreadBookings);
+    setUnreadBookings([]);
+  };
+
+  const handleItemClick = (bId: string) => {
+    markBookingAsSeen(bId);
+    setIsBellOpen(false);
+    if (onNavigateToBooking) {
+      onNavigateToBooking(bId);
+    }
+  };
+
   return (
-    <header className="h-16 bg-white border-b border-gray-100 px-6 flex items-center justify-between flex-shrink-0 select-none z-10">
+    <header className="h-16 bg-white border-b border-gray-100 px-6 flex items-center justify-between flex-shrink-0 select-none z-10 relative">
       {/* Left: Role Switcher & Context */}
       <div className="flex items-center gap-3">
         <h1 className="text-lg font-bold font-serif text-gray-900 capitalize hidden sm:block">
@@ -110,14 +177,86 @@ export default function Header({
           <Sun className="w-4 h-4" />
         </button>
 
-        {/* Notification Bell */}
-        <button
-          className="relative p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
-          title="Notifications"
-        >
-          <Bell className="w-4 h-4" />
-          <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-[#0071E3]" />
-        </button>
+        {/* Notification Bell with Badge & Dropdown */}
+        <div className="relative" ref={dropdownRef}>
+          <button
+            onClick={() => setIsBellOpen(!isBellOpen)}
+            className="relative p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-xl transition-colors"
+            title="Notifications"
+          >
+            <Bell className="w-4 h-4" />
+            {unreadBookings.length > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow-xs animate-pulse">
+                {unreadBookings.length}
+              </span>
+            )}
+          </button>
+
+          {/* Dropdown Menu */}
+          {isBellOpen && (
+            <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-gray-100 p-3 z-50">
+              <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-bold text-xs text-gray-900 font-serif">
+                    बुकिंग नोटिफिकेशन्स (Alerts)
+                  </span>
+                  {unreadBookings.length > 0 && (
+                    <span className="bg-rose-100 text-rose-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                      {unreadBookings.length} New
+                    </span>
+                  )}
+                </div>
+                {unreadBookings.length > 0 && (
+                  <button
+                    onClick={handleMarkAllRead}
+                    className="text-[11px] text-brand-primary font-bold hover:underline flex items-center gap-1"
+                  >
+                    <CheckCircle2 className="w-3 h-3" />
+                    सभी पढ़ी गई (Mark All Read)
+                  </button>
+                )}
+              </div>
+
+              <div className="max-h-80 overflow-y-auto divide-y divide-gray-50 mt-1">
+                {unreadBookings.length === 0 ? (
+                  <div className="py-8 text-center text-xs text-gray-400">
+                    🎉 कोई नई अनरीड बुकिंग नहीं है (All caught up!)
+                  </div>
+                ) : (
+                  unreadBookings.slice(0, 6).map((b: any) => {
+                    const bId = b.id || b.bookingNumber;
+                    return (
+                      <div
+                        key={bId}
+                        onClick={() => handleItemClick(bId)}
+                        className="py-2.5 px-2 hover:bg-pink-50/50 rounded-xl cursor-pointer transition-colors"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-mono text-[11px] font-bold text-gray-900">
+                            {b.bookingNumber || bId}
+                          </span>
+                          <span className="text-[11px] font-bold text-brand-primary">
+                            ₹{b.totalAmount || b.servicePrice || 1299}
+                          </span>
+                        </div>
+                        <div className="font-bold text-xs text-gray-800 mt-0.5">
+                          {b.customerName || 'Priya Sharma'}
+                        </div>
+                        <div className="text-[11px] text-gray-500 line-clamp-1">
+                          {b.serviceName}
+                        </div>
+                        <div className="text-[10px] text-gray-400 mt-0.5 flex items-center justify-between">
+                          <span>{b.scheduledTime || '11:30 AM'} • {b.area || 'Sigra'}</span>
+                          <span className="text-brand-primary font-bold">देखें &rarr;</span>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* User Profile Pill (Matches Screenshots 1 & 2) */}
         <div className="flex items-center gap-2 pl-2 border-l border-gray-200">
