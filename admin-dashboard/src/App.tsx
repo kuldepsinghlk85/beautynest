@@ -22,6 +22,7 @@ import PackagesPage from './pages/PackagesPage';
 import OffersPage from './pages/OffersPage';
 import DocumentationPage from './pages/DocumentationPage';
 import BookingAlertToast from './components/BookingAlertToast';
+import SchedulePage from './pages/SchedulePage';
 
 export default function App() {
   const [currentRole, setCurrentRole] = useState<UserRole>('ADMIN');
@@ -61,7 +62,10 @@ export default function App() {
       case 'consent-forms':
         return <ConsentFormsPage />;
       case 'bookings':
-        return <BookingsPage />;
+        return <BookingsPage onNavigateTab={setCurrentTab} />;
+      case 'schedule':
+      case 'timeline':
+        return <SchedulePage />;
       case 'beauticians':
         return <BeauticiansPage />;
       case 'customers':

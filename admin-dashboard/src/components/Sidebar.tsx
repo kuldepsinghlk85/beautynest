@@ -8,6 +8,7 @@ import {
   Scissors,
   Building2,
   CalendarCheck,
+  CalendarDays,
   CreditCard,
   Tag,
   Star,
@@ -80,6 +81,7 @@ export default function Sidebar({
       items: [
         { id: 'cities', label: 'Cities', icon: Building2, badge: '7' }, // Screenshot 2 Serviceable Cities!
         { id: 'bookings', label: 'Bookings', icon: CalendarCheck, badge: '5 New' },
+        { id: 'schedule', label: 'Day Schedule', icon: CalendarDays, badge: 'Live' },
         { id: 'payments', label: 'Payments', icon: CreditCard },
         { id: 'coupons', label: 'Coupons & Promos', icon: Tag },
         { id: 'slider', label: 'Hero Sliders', icon: Sliders },
@@ -135,6 +137,7 @@ export default function Sidebar({
       groupTitle: 'DISPATCH',
       items: [
         { id: 'operator-console', label: 'Operator Console', icon: Headphones },
+        { id: 'schedule', label: 'Day Schedule', icon: CalendarDays, badge: 'Live' },
         { id: 'bookings', label: 'Live Bookings', icon: CalendarCheck },
         { id: 'customers', label: 'Customer Lookup', icon: Users },
         { id: 'beauticians', label: 'Beautician Locator', icon: UserCheck },

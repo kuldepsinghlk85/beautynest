@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Search,
   Filter,
@@ -16,6 +16,7 @@ import {
   Square,
   ArrowRight,
   ShieldCheck,
+  CalendarDays,
 } from 'lucide-react';
 import { RECENT_BOOKINGS, BEAUTICIANS_LIST, AdminBooking } from '../lib/mockAdminData';
 import {
@@ -27,7 +28,11 @@ import {
   BookingGroupInfo,
 } from '../lib/bookingNotificationService';
 
-export default function BookingsPage() {
+interface BookingsPageProps {
+  onNavigateTab?: (tab: string) => void;
+}
+
+export default function BookingsPage({ onNavigateTab }: BookingsPageProps) {
   const [bookings, setBookings] = useState<AdminBooking[]>(RECENT_BOOKINGS);
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
@@ -239,34 +244,46 @@ export default function BookingsPage() {
           </p>
         </div>
 
-        {/* Batch Actions Bar (visible when items selected) */}
-        {selectedBookingIds.length > 0 && (
-          <div className="flex items-center gap-2 bg-brand-primary/10 border border-brand-primary/30 px-3 py-1.5 rounded-xl text-xs font-bold text-brand-primary animate-fade-in">
-            <span>{selectedBookingIds.length} बुकिंग्स चुनी गईं</span>
+        <div className="flex items-center gap-3">
+          {onNavigateTab && (
             <button
-              onClick={handleMarkSelectedAsSeen}
-              className="px-2.5 py-1 bg-white text-gray-700 hover:bg-gray-100 rounded-lg shadow-xs transition-colors"
+              onClick={() => onNavigateTab('schedule')}
+              className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-bold px-3.5 py-2 rounded-2xl shadow-sm hover:shadow-md transition-all"
             >
-              देखी गई मार्क करें
+              <CalendarDays className="w-4 h-4" />
+              <span>📅 दैनिक व आगामी शेड्यूल (Day Schedule)</span>
             </button>
-            <button
-              onClick={() => {
-                const selectedList = bookings.filter((b) => selectedBookingIds.includes(b.id));
-                setGroupReassignBookings(selectedList);
-              }}
-              className="px-2.5 py-1 bg-brand-primary text-white hover:bg-brand-primary/90 rounded-lg shadow-xs transition-colors"
-            >
-              रीअसाइन करें
-            </button>
-            <button
-              onClick={() => setSelectedBookingIds([])}
-              className="text-gray-400 hover:text-gray-700 p-1"
-              title="Clear selection"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
+          )}
+
+          {/* Batch Actions Bar (visible when items selected) */}
+          {selectedBookingIds.length > 0 && (
+            <div className="flex items-center gap-2 bg-brand-primary/10 border border-brand-primary/30 px-3 py-1.5 rounded-xl text-xs font-bold text-brand-primary animate-fade-in">
+              <span>{selectedBookingIds.length} बुकिंग्स चुनी गईं</span>
+              <button
+                onClick={handleMarkSelectedAsSeen}
+                className="px-2.5 py-1 bg-white text-gray-700 hover:bg-gray-100 rounded-lg shadow-xs transition-colors"
+              >
+                देखी गई मार्क करें
+              </button>
+              <button
+                onClick={() => {
+                  const selectedList = bookings.filter((b) => selectedBookingIds.includes(b.id));
+                  setGroupReassignBookings(selectedList);
+                }}
+                className="px-2.5 py-1 bg-brand-primary text-white hover:bg-brand-primary/90 rounded-lg shadow-xs transition-colors"
+              >
+                रीअसाइन करें
+              </button>
+              <button
+                onClick={() => setSelectedBookingIds([])}
+                className="text-gray-400 hover:text-gray-700 p-1"
+                title="Clear selection"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Filter and Search Bar */}
