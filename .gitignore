@@ -49,6 +49,10 @@ Thumbs.db
 *.sln
 *.sw?
 
+# Binaries & Tools
+tools/
+*.exe
+
 # Scratch & temporary files
 .system_generated/
 *.log
