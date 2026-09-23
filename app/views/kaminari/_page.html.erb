@@ -1,0 +1,7 @@
+<% if page.current? %>
+  <span class="bc-page-btn bc-page-btn--active" aria-current="page"><%= page %></span>
+<% else %>
+  <%= link_to page, url, remote: remote, rel: page.rel,
+        class: "bc-page-btn",
+        data: { turbo_action: "advance" } %>
+<% end %>

@@ -1,84 +1,63 @@
-version: '3.8'
-
 services:
-  # 1. PostgreSQL Database
-  postgres:
+  db:
     image: postgres:16-alpine
-    container_name: beautynest-postgres
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgrespassword
-      POSTGRES_DB: beautynest_db
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: beauty_connect_development
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
       retries: 5
 
-  # 2. Redis Cache
-  redis:
-    image: redis:7-alpine
-    container_name: beautynest-redis
-    restart: always
+  web:
+    image: beauty-connect-web-web:latest
+    build:
+      context: .
+      dockerfile: .devops/Dockerfile
+    restart: unless-stopped
     ports:
-      - '6379:6379'
+      - "3009:3000"
     volumes:
-      - redis_data:/data
-
-  # 3. NestJS Backend API
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: beautynest-backend
-    restart: always
+      - .:/app
+      - ./storage:/app/storage
+      - gem_cache:/usr/local/bundle
     environment:
-      PORT: 4000
-      NODE_ENV: development
-      DATABASE_URL: postgresql://postgres:postgrespassword@postgres:5432/beautynest_db?schema=public
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      JWT_SECRET: beautynest_super_secret_jwt_token_2026_spa_ladies
-      JWT_REFRESH_SECRET: beautynest_refresh_secret_key_2026
-      RAZORPAY_KEY_ID: rzp_test_beautynest2026
-      RAZORPAY_KEY_SECRET: rzp_secret_beautynest2026
-    ports:
-      - '4000:4000'
+      RAILS_ENV: development
+      DATABASE_URL: postgresql://postgres:password@db:5432/beauty_connect_development
+      SECRET_KEY_BASE: beautyconnect_dev_secret_key_base_not_for_production_use_only
+      RAILS_LOG_TO_STDOUT: "true"
+      CLOUDINARY_CLOUD_NAME: "${CLOUDINARY_CLOUD_NAME:-ki5nokty}"
+      CLOUDINARY_API_KEY: "${CLOUDINARY_API_KEY:-335139946867126}"
+      CLOUDINARY_API_SECRET: "${CLOUDINARY_API_SECRET:-oVXjxRyYaSzuGVBYC8tXaC2_MnA}"
+      CLOUDINARY_FOLDER: "${CLOUDINARY_FOLDER:-beauty_connect}"
+      APP_HOST: "${APP_HOST:-localhost:3009}"
+      APP_PROTOCOL: "${APP_PROTOCOL:-http}"
+      SMTP_ADDRESS: "${SMTP_ADDRESS:-smtp.ethereal.email}"
+      SMTP_PORT: "${SMTP_PORT:-587}"
+      SMTP_USERNAME: "${SMTP_USERNAME:-elna.simonis15@ethereal.email}"
+      SMTP_PASSWORD: "${SMTP_PASSWORD:-CMQBFykQN8M39bCDXV}"
+      SMTP_DOMAIN: "${SMTP_DOMAIN:-ethereal.email}"
+      SMTP_AUTH: "${SMTP_AUTH:-plain}"
+      SMTP_STARTTLS: "true"
     depends_on:
-      postgres:
+      db:
         condition: service_healthy
-      redis:
-        condition: service_started
-
-  # 4. Customer Website (Next.js 14)
-  customer-website:
-    build:
-      context: ./customer-website
-      dockerfile: Dockerfile
-    container_name: beautynest-customer-website
-    restart: always
-    ports:
-      - '3000:3000'
-    environment:
-      NEXT_PUBLIC_API_URL: http://localhost:4000
-
-  # 5. Admin Web Dashboard (React 18)
-  admin-dashboard:
-    build:
-      context: ./admin-dashboard
-      dockerfile: Dockerfile
-    container_name: beautynest-admin-dashboard
-    restart: always
-    ports:
-      - '5173:5173'
-    environment:
-      VITE_API_URL: http://localhost:4000
+    command: >
+      sh -c "sed -i 's/\r$$//' bin/* 2>/dev/null || true;
+             chmod +x bin/* 2>/dev/null || true;
+             mkdir -p storage tmp/pids && chmod 777 storage 2>/dev/null || true;
+             (bundle check || bundle install) &&
+             rm -f tmp/pids/server.pid &&
+             bin/rails db:prepare &&
+             bin/rails server -b 0.0.0.0 -p 3000"
 
 volumes:
   postgres_data:
-  redis_data:
+  gem_cache:

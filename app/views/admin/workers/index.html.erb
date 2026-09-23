@@ -1,0 +1,352 @@
+<% content_for :page_title, "Workers" %>
+
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">Workforce Management</div>
+      <h2 class="page-title fs-1 fw-bold mb-0">Service Professionals</h2>
+    </div>
+
+    <div class="col-auto ms-auto d-print-none">
+      <div class="btn-list">
+        <div class="dropdown d-inline-block">
+          <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="ti ti-download me-1 fs-3"></i> Export
+          </button>
+          <div class="dropdown-menu dropdown-menu-end shadow-md py-1" style="min-width: 220px;">
+            <%= link_to admin_workers_path(request.query_parameters.merge(format: :csv)), class: "dropdown-item py-2", data: { turbo: false } do %>
+              <i class="ti ti-file-spreadsheet me-2 fs-3 text-success"></i> Export Beauticians (CSV)
+            <% end %>
+            <%= link_to admin_bookings_path(format: :csv), class: "dropdown-item py-2", data: { turbo: false } do %>
+              <i class="ti ti-calendar-event me-2 fs-3 text-primary"></i> Export Bookings (CSV)
+            <% end %>
+            <div class="dropdown-divider my-1"></div>
+            <%= link_to admin_backup_export_path(format: :json), class: "dropdown-item py-2 text-primary fw-semibold", data: { turbo: false } do %>
+              <i class="ti ti-database-export me-2 fs-3 text-purple"></i> Full Database Backup (JSON)
+            <% end %>
+            <% if current_user&.admin? %>
+              <a href="#" class="dropdown-item py-2 text-indigo fw-semibold" data-bs-toggle="modal" data-bs-target="#importBackupModal">
+                <i class="ti ti-database-import me-2 fs-3 text-indigo"></i> Restore / Import Backup (JSON)
+              </a>
+            <% end %>
+          </div>
+        </div>
+        <%= link_to new_admin_worker_invitation_path, class: "btn btn-primary" do %>
+          <i class="ti ti-mail-plus me-1 fs-3"></i> Invite Worker
+        <% end %>
+        <%= link_to new_admin_worker_path, class: "btn btn-outline-primary" do %>
+          <i class="ti ti-user-plus me-1 fs-3"></i> Add Manually
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <!-- ═══════════════ UNIFIED CARD HEADER TABS ═══════════════ -->
+  <div class="card-header border-bottom py-2 d-flex align-items-center justify-content-between">
+    <div class="apple-segmented-switch">
+      <a href="<%= admin_workers_path(tab: 'active') %>" 
+         class="seg-item <%= 'active' if @active_tab != 'invitations' %>">
+        <i class="ti ti-users fs-3"></i>
+        <span>Active Workforce</span>
+        <span class="seg-badge"><%= @active_workers_count %></span>
+      </a>
+      <a href="<%= admin_workers_path(tab: 'invitations') %>" 
+         class="seg-item <%= 'active' if @active_tab == 'invitations' %>">
+        <i class="ti ti-mail-forward fs-3"></i>
+        <span>Invited Workers</span>
+        <span class="seg-badge <%= 'warning' if @pending_invitations_count.to_i > 0 && @active_tab != 'invitations' %>">
+          <%= @pending_invitations_count.to_i > 0 ? @pending_invitations_count : @total_invitations_count %>
+        </span>
+      </a>
+    </div>
+
+    <div class="text-secondary small d-none d-sm-block">
+      <% if @active_tab == "invitations" %>
+        <span class="fw-bold text-reset"><%= @invitations.length %></span> <%= "invitation".pluralize(@invitations.length) %> listed
+      <% else %>
+        <span class="fw-bold text-reset"><%= @workers.length %></span> <%= "worker".pluralize(@workers.length) %> listed
+      <% end %>
+    </div>
+  </div>
+
+  <% if @active_tab == "invitations" %>
+    <div class="table-responsive">
+      <table class="table table-vcenter card-table table-hover">
+        <thead>
+          <tr>
+            <th>Invited Professional</th>
+            <th>Primary Skill</th>
+            <th>Invited By</th>
+            <th>Sent Date</th>
+            <th>Validity / Status</th>
+            <th class="text-end pe-3">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if @invitations.any? %>
+            <% @invitations.each do |invite| %>
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <span class="avatar avatar-sm rounded-circle me-3 bg-primary-lt fw-bold flex-shrink-0">
+                      <%= (invite.name.presence || invite.email)[0].upcase %>
+                    </span>
+                    <div>
+                      <div class="fw-semibold text-reset">
+                        <%= invite.name.presence || "—" %>
+                      </div>
+                      <div class="text-secondary small font-monospace"><%= invite.email %></div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge bg-purple-lt"><%= invite.speciality.presence || "Beauty Professional" %></span>
+                </td>
+                <td>
+                  <span class="text-secondary small">
+                    <i class="ti ti-user me-1 text-muted"></i><%= invite.invited_by&.name || "Admin" %>
+                  </span>
+                </td>
+                <td>
+                  <span class="text-secondary small">
+                    <%= invite.created_at.strftime("%b %d, %Y") %>
+                  </span>
+                </td>
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="badge <%= invite.status_badge_class %>">
+                      <%= invite.display_status %>
+                    </span>
+                    <% if invite.pending? %>
+                      <span class="text-secondary small" style="font-size: 0.75rem;">
+                        (expires in <%= distance_of_time_in_words(Time.current, invite.expires_at) %>)
+                      </span>
+                    <% end %>
+                  </div>
+                </td>
+                <td class="text-end pe-3">
+                  <div class="btn-list justify-content-end flex-nowrap">
+                    <% if invite.pending? || invite.expired? %>
+                      <%= button_to resend_admin_worker_invitation_path(invite), method: :post,
+                            class: "btn btn-icon btn-ghost-primary btn-sm",
+                            title: "Resend Invite Email",
+                            data: { turbo_confirm: "Resend invitation email to #{invite.email}?" } do %>
+                        <i class="ti ti-mail-forward fs-3"></i>
+                      <% end %>
+                      <%= button_to revoke_admin_worker_invitation_path(invite), method: :patch,
+                            class: "btn btn-icon btn-ghost-danger btn-sm",
+                            title: "Revoke Invite",
+                            data: { turbo_confirm: "Revoke this invitation? The link will be immediately invalidated." } do %>
+                        <i class="ti ti-ban fs-3"></i>
+                      <% end %>
+                    <% else %>
+                      <span class="text-muted small px-2">—</span>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          <% else %>
+            <tr>
+              <td colspan="6" class="text-center py-5 text-secondary">
+                <i class="ti ti-mail-off fs-1 d-block mb-2 text-muted"></i>
+                No worker invitations found. <%= link_to "Send an invitation", new_admin_worker_invitation_path, class: "fw-semibold" %>.
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    <%= render_pagination %>
+
+  <% else %>
+    <!-- ═══════════════ ACTIVE WORKFORCE FILTER & TABLE ═══════════════ -->
+    <div class="card-body border-bottom py-3">
+      <%= form_with url: admin_workers_path, method: :get, class: "w-100" do %>
+        <input type="hidden" name="tab" value="active">
+        <div class="row g-2 align-items-center">
+          <div class="col-md-3">
+            <div class="input-icon">
+              <span class="input-icon-addon">
+                <i class="ti ti-search text-secondary fs-3"></i>
+              </span>
+              <input class="form-control" type="text" name="q" value="<%= params[:q] %>"
+                     placeholder="Search name, email, phone..." autocomplete="off">
+            </div>
+          </div>
+          <div class="col-md-2">
+            <select class="form-select" name="city_id" onchange="this.form.requestSubmit()">
+              <option value="">All Cities</option>
+              <% @cities&.each do |c| %>
+                <option value="<%= c.id %>" <%= "selected" if params[:city_id] == c.id.to_s %>><%= c.name %></option>
+              <% end %>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <select class="form-select" name="availability" onchange="this.form.requestSubmit()">
+              <option value="">All Availability</option>
+              <option value="available_today" <%= "selected" if params[:availability] == "available_today" %>>🟢 Available Today</option>
+              <option value="unavailable_today" <%= "selected" if params[:availability] == "unavailable_today" %>>🔴 Unavailable Today</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <select class="form-select" name="status" onchange="this.form.requestSubmit()">
+              <option value="">All Statuses</option>
+              <option value="active" <%= "selected" if params[:status] == "active" %>>Active</option>
+              <option value="inactive" <%= "selected" if params[:status] == "inactive" %>>Inactive</option>
+            </select>
+          </div>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-outline-primary">
+              <i class="ti ti-filter me-1 fs-3"></i> Filter
+            </button>
+            <% if params[:q].present? || params[:status].present? || params[:city_id].present? || params[:availability].present? %>
+              <%= link_to "Reset", admin_workers_path(tab: 'active'), class: "btn btn-ghost-secondary ms-1" %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-vcenter card-table table-hover">
+        <thead>
+          <tr>
+            <th>Worker</th>
+            <th>Serving City</th>
+            <th>Today's Availability</th>
+            <th>Rating</th>
+            <th>Jobs</th>
+            <th>KYC</th>
+            <th>Account</th>
+            <th class="text-end pe-3">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if @workers.any? %>
+            <% @workers.each do |w| %>
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <%= link_to admin_worker_path(w[:id]), class: "text-decoration-none me-3" do %>
+                      <span class="avatar avatar-sm rounded-circle bg-indigo-lt fw-bold flex-shrink-0" title="View Profile & Schedule">
+                        <%= w[:initials] %>
+                      </span>
+                    <% end %>
+                    <div>
+                      <div class="d-flex align-items-center flex-wrap gap-1">
+                        <%= worker_tier_capsule_badge(w) %>
+                        <span class="fw-semibold text-reset">
+                          <%= link_to w[:name], admin_worker_path(w[:id]), class: "text-reset text-decoration-none fw-bold hover-underline", title: "View Schedule & Profile" %>
+                        </span>
+                      </div>
+                      <div class="text-secondary small font-monospace"><%= w[:email] %></div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge bg-surface-secondary text-reset border">
+                    <i class="ti ti-map-pin text-primary me-1"></i><%= w[:city] %>
+                  </span>
+                </td>
+
+                <td>
+                  <%= worker_availability_badge(w) %>
+                </td>
+                <td>
+                  <% if w[:rating].to_f > 0 %>
+                    <div class="d-inline-flex align-items-center text-warning fw-bold">
+                      <i class="ti ti-star-filled me-1"></i><%= sprintf("%.1f", w[:rating].to_f) %>
+                      <span class="text-secondary small ms-1">(<%= w[:reviews] %>)</span>
+                    </div>
+                  <% else %>
+                    <span class="text-muted small">No ratings</span>
+                  <% end %>
+                </td>
+                <td class="fw-bold text-reset"><%= w[:bookings] %></td>
+                <td>
+                  <% profile = w.worker_profile %>
+                  <% if profile %>
+                    <span class="badge <%= profile.kyc_badge_class %>" style="font-size: 0.7rem;">
+                      <%= profile.kyc_label %>
+                    </span>
+                  <% else %>
+                    <span class="text-secondary small">—</span>
+                  <% end %>
+                </td>
+                <td><%= active_status_badge(w[:status]) %></td>
+                <td class="text-end pe-3">
+                  <div class="btn-list justify-content-end align-items-center flex-nowrap">
+                    <%= link_to admin_worker_path(w[:id], tab: 'schedule'), class: "btn btn-icon btn-ghost-primary btn-sm", title: "7-Day Slot Calendar Schedule" do %>
+                      <i class="ti ti-calendar-event fs-3"></i>
+                    <% end %>
+                    <%= link_to admin_worker_path(w[:id]), class: "btn btn-icon btn-ghost-secondary btn-sm", title: "View Profile" do %>
+                      <i class="ti ti-eye fs-3"></i>
+                    <% end %>
+                    <%= link_to edit_admin_worker_path(w[:id]), class: "btn btn-icon btn-ghost-primary btn-sm", title: "Edit Worker" do %>
+                      <i class="ti ti-pencil fs-3"></i>
+                    <% end %>
+
+                    <!-- Protected Worker Actions Dropdown -->
+                    <div class="dropdown d-inline-block">
+                      <button type="button" class="btn btn-icon btn-ghost-secondary btn-sm" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false" title="More Options">
+                        <i class="ti ti-dots-vertical fs-3"></i>
+                      </button>
+                      <div class="dropdown-menu dropdown-menu-end shadow-lg border py-1" style="min-width: 200px;">
+                        <div class="dropdown-header text-uppercase small fw-bold px-3 py-1 text-secondary" style="font-size: 0.68rem; letter-spacing: 0.05em;">
+                          Specialist Options
+                        </div>
+                        <%= link_to admin_worker_path(w[:id], tab: 'schedule'), class: "dropdown-item py-2" do %>
+                          <i class="ti ti-calendar-event me-2 fs-3 text-primary"></i> 7-Day Slot Schedule
+                        <% end %>
+                        <%= link_to admin_worker_path(w[:id], tab: 'history'), class: "dropdown-item py-2" do %>
+                          <i class="ti ti-history me-2 fs-3 text-secondary"></i> Service History
+                        <% end %>
+                        <%= link_to admin_worker_path(w[:id], tab: 'reviews'), class: "dropdown-item py-2" do %>
+                          <i class="ti ti-star me-2 fs-3 text-warning"></i> Customer Reviews
+                        <% end %>
+                        <%= link_to admin_worker_path(w[:id], tab: 'profile'), class: "dropdown-item py-2" do %>
+                          <i class="ti ti-user me-2 fs-3 text-secondary"></i> Full KYC Profile
+                        <% end %>
+                        <%= link_to edit_admin_worker_path(w[:id]), class: "dropdown-item py-2" do %>
+                          <i class="ti ti-pencil me-2 fs-3 text-secondary"></i> Edit Details
+                        <% end %>
+                        <div class="dropdown-divider my-1"></div>
+                        <%= button_to admin_worker_path(w[:id]), method: :delete,
+                              form: { class: "m-0 w-100" },
+                              data: {
+                                turbo_confirm: "Are you sure you want to permanently delete specialist '#{w[:name]}'? This action is permanent.",
+                                confirm_title: "Permanently Delete Worker",
+                                confirm_btn: "Delete Worker",
+                                confirm_theme: "danger",
+                                confirm_icon: "ti-trash"
+                              },
+                              class: "dropdown-item py-2 text-danger" do %>
+                          <i class="ti ti-trash me-2 fs-3"></i> Delete Specialist
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          <% else %>
+            <tr>
+              <td colspan="8" class="text-center py-5 text-secondary">
+                <i class="ti ti-users-minus fs-1 d-block mb-2 text-muted"></i>
+                No workers found matching your filters. <%= link_to "Add / Invite a worker", new_admin_worker_invitation_path, class: "fw-semibold" %>.
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    <%= render_pagination %>
+  <% end %>
+</div>
+
+<%= render "admin/shared/import_backup_modal" if current_user&.admin? %>
+
+

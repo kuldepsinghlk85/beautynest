@@ -1,0 +1,76 @@
+<div class="card-body p-4 p-md-5">
+  <div class="text-center mb-4">
+    <div class="avatar avatar-lg bg-primary-lt rounded-circle mx-auto mb-3">
+      <i class="ti ti-lock-check fs-1 text-primary"></i>
+    </div>
+    <h2 class="h2 text-center mb-1 fw-bold">Set New Password</h2>
+    <p class="text-secondary small">Choose a strong new password for <%= @user.email %></p>
+  </div>
+
+  <% if flash[:alert] %>
+    <div class="alert alert-danger alert-dismissible v6-alert-box mb-4" role="alert">
+      <div class="d-flex">
+        <div><i class="ti ti-alert-circle fs-2 me-2"></i></div>
+        <div><%= flash[:alert] %></div>
+      </div>
+      <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+    </div>
+  <% end %>
+
+  <%= form_with url: reset_password_path(token: params[:token]), method: :post, class: "space-y" do |f| %>
+    <div class="mb-3">
+      <label class="form-label" for="password">
+        New Password <span class="text-danger">*</span>
+      </label>
+      <div class="input-group input-group-flat">
+        <input type="password" name="password" id="password" class="form-control"
+               placeholder="At least 6 characters" minlength="6" autocomplete="new-password" required autofocus>
+        <span class="input-group-text">
+          <a href="#" class="link-secondary" title="Show password" onclick="togglePassword(event, this, 'password')">
+            <i class="ti ti-eye fs-3"></i>
+          </a>
+        </span>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label" for="password_confirmation">
+        Confirm New Password <span class="text-danger">*</span>
+      </label>
+      <div class="input-group input-group-flat">
+        <input type="password" name="password_confirmation" id="password_confirmation" class="form-control"
+               placeholder="Confirm your password" minlength="6" autocomplete="new-password" required>
+        <span class="input-group-text">
+          <a href="#" class="link-secondary" title="Show password" onclick="togglePassword(event, this, 'password_confirmation')">
+            <i class="ti ti-eye fs-3"></i>
+          </a>
+        </span>
+      </div>
+    </div>
+
+    <div class="form-footer mt-4">
+      <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+        <i class="ti ti-check me-1 fs-3"></i> Save Password & Sign In
+      </button>
+    </div>
+  <% end %>
+
+  <div class="text-center text-secondary small mt-4 pt-3 border-top">
+    <%= link_to "Cancel and return to Sign In", login_path, class: "link-secondary" %>
+  </div>
+</div>
+
+<script>
+  function togglePassword(e, el, inputId) {
+    e.preventDefault();
+    const input = document.getElementById(inputId);
+    const icon = el.querySelector('i');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.className = 'ti ti-eye-off fs-3';
+    } else {
+      input.type = 'password';
+      icon.className = 'ti ti-eye fs-3';
+    }
+  }
+</script>

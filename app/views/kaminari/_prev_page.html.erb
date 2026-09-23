@@ -1,0 +1,9 @@
+<% if current_page.first? %>
+  <li class="page-item disabled">
+    <span class="page-link" aria-disabled="true">Previous</span>
+  </li>
+<% else %>
+  <li class="page-item">
+    <%= link_to "Previous", url, rel: 'prev', remote: remote, data: { turbo_action: "advance" }, class: 'page-link' %>
+  </li>
+<% end %>

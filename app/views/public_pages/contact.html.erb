@@ -1,0 +1,154 @@
+<% content_for :page_title, "Contact — Get in Touch with #{site_name}" %>
+
+<%= render "shared/public_nav", active: "contact" %>
+
+<!-- Page Header -->
+<section class="bc-page-hero" style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);">
+  <div class="bc-page-hero-inner">
+    <span class="bc-page-pretitle"><i class="ti ti-headset"></i> WE ARE HERE FOR YOU</span>
+    <h1>Get in Touch with <%= site_name %></h1>
+    <p>Have questions about bookings, packages, or joining as a certified beautician? We'd love to hear from you.</p>
+  </div>
+</section>
+
+<!-- Contact Section -->
+<section class="bc-section">
+  <div style="display:grid; grid-template-columns: 5fr 7fr; gap:3rem; align-items:start;">
+
+    <!-- Left: Contact Info -->
+    <div style="display:flex; flex-direction:column; gap:1.25rem;">
+
+      <div class="bc-contact-info-card">
+        <div class="bc-contact-logo">
+          <i class="ti ti-sparkles" style="color:#db2777; font-size:1.5rem;"></i>
+        </div>
+        <div>
+          <h3><%= site_name %> HQ</h3>
+          <p>Premium Home Beauty Services</p>
+        </div>
+      </div>
+
+      <div class="bc-contact-detail">
+        <div class="bc-contact-icon"><i class="ti ti-map-pin" style="color:#db2777;"></i></div>
+        <div>
+          <strong>Headquarters</strong>
+          <p>Varanasi, Uttar Pradesh – 221005, India</p>
+        </div>
+      </div>
+
+      <div class="bc-contact-detail">
+        <div class="bc-contact-icon"><i class="ti ti-phone" style="color:#db2777;"></i></div>
+        <div>
+          <strong>Phone Support</strong>
+          <p>+91 98765 43210 (Mon – Sun, 8:00 AM – 9:00 PM)</p>
+        </div>
+      </div>
+
+      <div class="bc-contact-detail">
+        <div class="bc-contact-icon"><i class="ti ti-mail" style="color:#db2777;"></i></div>
+        <div>
+          <strong>Email Inquiries</strong>
+          <p><%= Setting.get("support_email", "care@#{site_name.parameterize}.in") %></p>
+          <p style="font-size:.82rem;color:#6b7280;">Partner inquiries: partner@<%= site_name.parameterize %>.in</p>
+        </div>
+      </div>
+
+      <!-- WhatsApp CTA -->
+      <a href="https://wa.me/919876543210?text=Hi%20<%= ERB::Util.url_encode(site_name) %>,%20I%20would%20like%20to%20know%20more%20about%20your%20doorstep%20services"
+         target="_blank" rel="noreferrer" class="bc-whatsapp-card">
+        <div class="bc-wa-icon"><i class="ti ti-brand-whatsapp"></i></div>
+        <div>
+          <h4>Chat on WhatsApp</h4>
+          <p>Instant answers from our customer concierge</p>
+        </div>
+        <span class="bc-wa-btn">Chat Now</span>
+      </a>
+    </div>
+
+    <!-- Right: Message Form (static — no submission) -->
+    <div class="bc-contact-form-card">
+      <h3>Send Us a Message</h3>
+      <p>Our support team usually replies in under 15 minutes during salon hours.</p>
+
+      <form id="bc-contact-form" class="bc-contact-form">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+          <div class="bc-form-group">
+            <label>Your Full Name</label>
+            <input type="text" placeholder="e.g. Priya Sharma">
+          </div>
+          <div class="bc-form-group">
+            <label>Phone Number (+91)</label>
+            <input type="tel" placeholder="9876543210">
+          </div>
+        </div>
+
+        <div class="bc-form-group">
+          <label>Your City</label>
+          <input type="text" placeholder="e.g. Varanasi / Lucknow / Agra">
+        </div>
+
+        <div class="bc-form-group">
+          <label>Subject</label>
+          <select>
+            <option value="">Select a topic…</option>
+            <option>Booking Inquiry</option>
+            <option>Service Availability</option>
+            <option>Pricing & Offers</option>
+            <option>Join as a Beautician</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="bc-form-group">
+          <label>Message or Query</label>
+          <textarea rows="4" placeholder="Tell us what service you are interested in or your question…"></textarea>
+        </div>
+
+        <button type="button" onclick="showContactSuccess()" class="bc-submit-btn">
+          <i class="ti ti-send"></i> Send Inquiry
+        </button>
+      </form>
+
+      <div id="bc-contact-success" class="bc-contact-success" style="display:none;">
+        <div class="bc-success-icon"><i class="ti ti-check"></i></div>
+        <h4>Message Received!</h4>
+        <p>Thank you for reaching out. Our concierge representative will contact you shortly.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FAQ Section -->
+<section style="background:#fff; border-top:1px solid rgba(0,0,0,.06); border-bottom:1px solid rgba(0,0,0,.06);">
+  <div class="bc-section">
+    <div class="bc-section-header">
+      <span class="pretitle">FAQ</span>
+      <h2>Frequently Asked Questions</h2>
+    </div>
+    <div class="bc-faq-grid">
+      <% [
+        { q: "How do I book a service?", a: "Simply create an account, choose a service, pick a time slot, and confirm your booking. A beautician will arrive at your door at the scheduled time." },
+        { q: "Are beauticians background verified?", a: "Yes. Every #{site_name} beautician is Aadhaar-verified, police background checked, and has passed our strict hygiene and skill assessment." },
+        { q: "What hygiene standards do you follow?", a: "We use single-use disposable kits, sealed brand cosmetics, and sterile equipment. All products are opened in front of you." },
+        { q: "Can I cancel or reschedule a booking?", a: "Yes, you can cancel or reschedule up to 2 hours before the appointment from your account dashboard at no charge." },
+        { q: "Which cities do you serve?", a: "We currently serve Varanasi, Lucknow, Agra, Kanpur, Prayagraj, and 5+ more cities. We're expanding rapidly!" },
+        { q: "How do I join as a beautician?", a: "Click 'Apply Now' or contact us via WhatsApp. Our partner team will schedule a skill assessment and onboarding within 48 hours." },
+      ].each do |f| %>
+        <div class="bc-faq-item">
+          <h4><i class="ti ti-question-mark" style="color:#db2777;"></i> <%= f[:q] %></h4>
+          <p><%= f[:a] %></p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</section>
+
+<%= render "shared/public_footer" %>
+
+<script>
+  function showContactSuccess() {
+    document.getElementById('bc-contact-form').style.display = 'none';
+    document.getElementById('bc-contact-success').style.display = 'block';
+  }
+</script>

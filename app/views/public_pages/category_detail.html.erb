@@ -1,0 +1,2014 @@
+<script>window.__FORCE_LIGHT__ = true;</script>
+<% content_for :page_title, "#{@category.name} — BeautyNest" %>
+
+<%= render "shared/public_nav", active: "categories" %>
+
+<script>
+  // Lock to light mode — override theme controller if it fires
+  (function applyLight() {
+    document.documentElement.setAttribute('data-bs-theme', 'light');
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.body.removeAttribute('data-bs-theme');
+    document.body.classList.remove('theme-dark');
+  })();
+  window.__CUSTOMER_TOKEN__ = "<%= @customer_token.presence || '' %>";
+  if (window.__CUSTOMER_TOKEN__) {
+    try { localStorage.setItem('customerToken', window.__CUSTOMER_TOKEN__); } catch(e) {}
+  }
+</script>
+
+<style>
+  .bn-detail-page {
+    background: var(--bg, #f4f3f8);
+    min-height: 100vh;
+    padding-top: 68px;
+  }
+
+  /* ── Breadcrumb ── */
+  .bn-breadcrumb {
+    background: var(--surface, #fff);
+    border-bottom: 1px solid var(--border, rgba(0,0,0,.07));
+    padding: .65rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    font-size: .8rem;
+    color: var(--text-3, #4b5563);
+    flex-wrap: wrap;
+  }
+  .bn-breadcrumb a { color: var(--accent, #db2777); text-decoration: none; font-weight: 500; }
+  .bn-breadcrumb a:hover { text-decoration: underline; }
+  .bn-breadcrumb-sep { color: var(--border-strong, rgba(0,0,0,.14)); }
+  .bn-breadcrumb-current { color: var(--text-1, #111827); font-weight: 600; }
+
+  /* ── Page header strip ── */
+  .bn-detail-header {
+    background: var(--surface, #ffffff);
+    border-bottom: 1px solid var(--border, rgba(0,0,0,.07));
+    padding: 1.8rem 1.5rem 1.6rem;
+  }
+  .bn-detail-header-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .bn-detail-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--text-3, #4b5563);
+    font-size: .8rem;
+    font-weight: 500;
+    text-decoration: none;
+    margin-bottom: .7rem;
+    transition: color .14s;
+  }
+  .bn-detail-back:hover { color: var(--accent, #db2777); }
+  .bn-detail-header h1 {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 800;
+    color: var(--text-1, #111827);
+    margin: 0 0 .3rem;
+    letter-spacing: -.022em;
+    line-height: 1.2;
+  }
+  .bn-detail-header h1 span { color: var(--accent, #db2777); }
+  .bn-detail-header p {
+    color: var(--text-3, #4b5563);
+    margin: 0;
+    font-size: .9rem;
+  }
+
+  /* ── Main content ── */
+  .bn-detail-layout {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* ── Subcategory capsule tabs ── */
+  .bn-sub-label {
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--text-4, #64748b);
+    margin-bottom: .75rem;
+  }
+  .bn-sub-tabs {
+    display: flex;
+    gap: .55rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+    align-items: center;
+  }
+  .bn-sub-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 16px;
+    border-radius: 50px;
+    font-size: .83rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid var(--border-strong, rgba(0,0,0,.14));
+    background: var(--surface, #fff);
+    color: var(--text-2, #374151);
+    transition: all .14s;
+    white-space: nowrap;
+    user-select: none;
+    text-decoration: none;
+  }
+  .bn-sub-tab:hover {
+    border-color: var(--accent, #db2777);
+    color: var(--accent, #db2777);
+    background: var(--accent-dim, rgba(219,39,119,.06));
+    text-decoration: none;
+  }
+  .bn-sub-tab.active {
+    background: var(--accent, #db2777);
+    color: #fff;
+    border-color: var(--accent, #db2777);
+    box-shadow: var(--shadow-sm);
+    text-decoration: none;
+  }
+  .bn-sub-tab-count {
+    font-size: .68rem;
+    font-weight: 700;
+    background: rgba(0,0,0,.08);
+    border-radius: 20px;
+    padding: 1px 6px;
+    line-height: 1.6;
+  }
+  .bn-sub-tab.active .bn-sub-tab-count { background: rgba(255,255,255,.25); }
+
+  /* ── Services section header ── */
+  .bn-svc-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.2rem;
+    flex-wrap: wrap;
+    gap: .8rem;
+  }
+  .bn-svc-header-left h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-1, #111827);
+    margin: 0 0 .12rem;
+    letter-spacing: -.015em;
+  }
+  .bn-svc-header-left p {
+    font-size: .77rem;
+    color: var(--text-4, #64748b);
+    margin: 0;
+  }
+  .bn-svc-count-badge {
+    background: var(--accent-dim, rgba(219,39,119,.1));
+    color: var(--accent, #db2777);
+    border: 1px solid rgba(219,39,119,.18);
+    border-radius: 20px;
+    padding: 3px 13px;
+    font-size: .75rem;
+    font-weight: 600;
+  }
+
+  /* ── Services grid ── */
+  .bn-svc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(272px, 1fr));
+    gap: 1.1rem;
+  }
+
+  /* ── Service card ── */
+  .bn-svc-card {
+    background: var(--surface, #fff);
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid var(--border, rgba(0,0,0,.07));
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,.05));
+    transition: transform .18s cubic-bezier(.16,1,.3,1), box-shadow .18s, border-color .18s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .bn-svc-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md, 0 4px 20px -4px rgba(0,0,0,.08));
+    border-color: rgba(219,39,119,.25);
+  }
+  .bn-svc-card-img {
+    width: 100%; height: 152px;
+    object-fit: cover;
+    display: block;
+    background: var(--surface-3, #f0eef8);
+  }
+  .bn-svc-card-img-placeholder {
+    width: 100%; height: 152px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.4rem;
+    background: var(--surface-3, #f0eef8);
+    color: var(--accent, #db2777);
+  }
+  .bn-svc-card-tag {
+    position: absolute;
+    top: 9px; left: 9px;
+    background: var(--surface, #fff);
+    color: var(--text-2, #374151);
+    font-size: .66rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    border: 1px solid var(--border, rgba(0,0,0,.07));
+    letter-spacing: .03em;
+  }
+  .bn-svc-card-sale {
+    position: absolute;
+    top: 9px; right: 9px;
+    background: var(--danger, #b91c1c);
+    color: #fff;
+    font-size: .65rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    letter-spacing: .03em;
+  }
+  .bn-svc-card-body {
+    padding: .9rem 1rem 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .bn-svc-card-meta {
+    font-size: .71rem;
+    color: var(--text-4, #64748b);
+    margin-bottom: .35rem;
+    display: flex; align-items: center; gap: 3px;
+  }
+  .bn-svc-card-name {
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--text-1, #111827);
+    margin: 0 0 .35rem;
+    line-height: 1.3;
+    letter-spacing: -.01em;
+  }
+  .bn-svc-card-desc {
+    font-size: .78rem;
+    color: var(--text-3, #4b5563);
+    margin: 0 0 .7rem;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+  }
+  .bn-svc-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: .6rem;
+    border-top: 1px solid var(--border, rgba(0,0,0,.07));
+  }
+  .bn-svc-price-wrap { display: flex; align-items: baseline; gap: 5px; }
+  .bn-svc-price { font-size: 1.05rem; font-weight: 800; color: var(--text-1, #111827); }
+  .bn-svc-price-original {
+    font-size: .76rem;
+    color: var(--text-4, #64748b);
+    text-decoration: line-through;
+  }
+  .bn-svc-duration {
+    font-size: .71rem;
+    color: var(--text-4, #64748b);
+    display: flex; align-items: center; gap: 3px;
+    margin-top: 2px;
+  }
+  .bn-svc-cart-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #ffffff;
+    color: var(--accent, #db2777);
+    border: 1.5px solid var(--accent, #db2777);
+    border-radius: 9999px;
+    padding: 7px 16px;
+    font-size: .8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .16s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+    box-shadow: 0 1px 3px rgba(219, 39, 119, 0.08);
+  }
+  .bn-svc-cart-btn:hover {
+    background: var(--accent, #db2777);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(219, 39, 119, 0.28);
+    transform: translateY(-1px);
+  }
+  .bn-svc-cart-btn.added {
+    background: #ecfdf5;
+    color: #059669;
+    border-color: #10b981;
+    box-shadow: 0 1px 3px rgba(16, 185, 129, 0.12);
+  }
+  .bn-svc-cart-btn.added:hover {
+    background: #d1fae5;
+    color: #047857;
+  }
+  .bn-svc-cart-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .bn-svc-book-btn { display: none; }
+
+  /* ── Empty / error ── */
+  .bn-empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-3, #4b5563);
+    grid-column: 1/-1;
+  }
+  .bn-empty-state svg { opacity: .35; margin-bottom: .6rem; }
+  .bn-empty-state h3  { margin: 0 0 .35rem; color: var(--text-2,#374151); font-size: 1rem; }
+
+  @media (max-width: 640px) {
+    .bn-svc-grid { grid-template-columns: 1fr 1fr; gap: .85rem; }
+    .bn-svc-card-img, .bn-svc-card-img-placeholder { height: 118px; }
+  }
+  @media (max-width: 440px) {
+    .bn-svc-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ── Assigned Beautician Banner ── */
+  .bn-assigned-worker-banner {
+    background: linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%);
+    border-bottom: 1.5px solid #fbcfe8;
+    padding: 1.15rem 1.5rem;
+    box-shadow: 0 4px 20px rgba(233, 30, 140, 0.05);
+  }
+  .bn-aw-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+  }
+  .bn-aw-left {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+  }
+  .bn-aw-avatar-wrap {
+    position: relative;
+    width: 62px;
+    height: 62px;
+    border-radius: 1rem;
+    overflow: hidden;
+    border: 2px solid #f472b6;
+    flex-shrink: 0;
+    box-shadow: 0 3px 12px rgba(233, 30, 140, 0.15);
+    background: #fdf2f8;
+  }
+  .bn-aw-avatar-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .bn-aw-check {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    background: #10b981;
+    color: #fff;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fff;
+  }
+  .bn-aw-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #fdf2f8;
+    color: #db2777;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 50px;
+    border: 1px solid #fbcfe8;
+    margin-bottom: 2px;
+  }
+  .bn-aw-name {
+    font-size: 1.12rem;
+    font-weight: 800;
+    color: #111827;
+    margin: 0 0 3px;
+    letter-spacing: -0.02em;
+  }
+  .bn-aw-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: #4b5563;
+    margin: 0;
+    flex-wrap: wrap;
+  }
+  .bn-aw-rating { font-weight: 700; color: #b45309; }
+  .bn-aw-exp {
+    font-weight: 700;
+    color: #059669;
+    background: #ecfdf5;
+    padding: 1px 7px;
+    border-radius: 4px;
+    border: 1px solid #a7f3d0;
+  }
+  .bn-aw-dot { color: #d1d5db; }
+  .bn-aw-change-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #db2777;
+    background: #fff;
+    border: 1.5px solid #f472b6;
+    text-decoration: none;
+    transition: all 0.16s ease;
+    box-shadow: 0 2px 6px rgba(233, 30, 140, 0.08);
+  }
+  .bn-aw-change-btn:hover {
+    background: #db2777;
+    color: #fff;
+    border-color: #db2777;
+    text-decoration: none;
+  }
+
+  /* ── Apple HIG Booking Modal ── */
+  .bn-modal-backdrop {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: bnFadeIn .18s ease-out;
+  }
+  @keyframes bnFadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .bn-modal-card {
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid rgba(0,0,0,0.08);
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.28);
+    max-width: 540px;
+    width: 100%;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: bnPopIn .2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes bnPopIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .bn-modal-header {
+    padding: 1.25rem 1.5rem 1rem;
+    border-bottom: 1px solid #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #ffffff;
+  }
+  .bn-modal-subtitle {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #db2777;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .bn-modal-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #111827;
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+  .bn-modal-close-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .bn-modal-close-btn:hover { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
+
+  .bn-modal-body {
+    padding: 1.25rem 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  .bn-modal-alert {
+    background: #fef2f2;
+    border: 1.5px solid #fca5a5;
+    color: #991b1b;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    font-size: 0.83rem;
+    font-weight: 600;
+    line-height: 1.45;
+  }
+
+  /* Assigned worker strip inside modal */
+  .bn-modal-worker-card {
+    background: #fdf2f8;
+    border: 1.5px solid #fbcfe8;
+    border-radius: 14px;
+    padding: 0.85rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+  }
+  .bn-mwc-avatar-wrap {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid #f472b6;
+    flex-shrink: 0;
+    background: #fff;
+  }
+  .bn-mwc-avatar-wrap img { width: 100%; height: 100%; object-fit: cover; }
+  .bn-mwc-check {
+    position: absolute;
+    bottom: -2px; right: -2px;
+    background: #10b981;
+    color: #fff;
+    border-radius: 50%;
+    width: 15px; height: 15px;
+    font-size: 9px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    border: 1.5px solid #fff;
+  }
+  .bn-mwc-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #db2777;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .bn-mwc-name {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #111827;
+    margin: 1px 0 2px;
+  }
+  .bn-mwc-meta {
+    font-size: 0.73rem;
+    color: #4b5563;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .bn-mwc-rating { font-weight: 700; color: #b45309; }
+  .bn-mwc-exp {
+    font-weight: 700;
+    color: #059669;
+    background: #ecfdf5;
+    padding: 1px 6px;
+    border-radius: 4px;
+    border: 1px solid #a7f3d0;
+  }
+  .bn-mwc-days { font-weight: 600; color: #374151; }
+  .bn-mwc-dot { color: #d1d5db; }
+
+  /* Date & Slot Selectors */
+  .bn-modal-section { display: flex; flex-direction: column; gap: 0.45rem; }
+  .bn-modal-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #374151;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .bn-modal-label-hint { font-weight: 600; color: #db2777; font-size: 0.74rem; }
+
+  .bn-dates-strip {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+  }
+  @media (max-width: 520px) {
+    .bn-dates-strip { grid-template-columns: repeat(4, 1fr); }
+  }
+  .bn-date-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 3px;
+    border-radius: 12px;
+    border: 1.5px solid #e5e7eb;
+    background: #ffffff;
+    cursor: pointer;
+    transition: all .14s ease;
+    text-align: center;
+    user-select: none;
+  }
+  .bn-date-card:hover:not(.disabled) {
+    border-color: #db2777;
+    background: #fdf2f8;
+  }
+  .bn-date-card.active {
+    background: #db2777;
+    border-color: #db2777;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(219,39,119,0.28);
+  }
+  .bn-date-card.disabled {
+    opacity: 0.42;
+    background: #f9fafb;
+    border-color: #e5e7eb;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  .bn-date-day { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; margin-bottom: 2px; }
+  .bn-date-num { font-size: 0.95rem; font-weight: 800; line-height: 1.1; }
+  .bn-date-status {
+    font-size: 0.6rem;
+    font-weight: 700;
+    margin-top: 4px;
+    padding: 1px 4px;
+    border-radius: 4px;
+  }
+  .bn-date-card.active .bn-date-status { background: rgba(255,255,255,0.25); color: #fff; }
+  .bn-date-card:not(.active) .bn-date-status.avail { color: #059669; }
+  .bn-date-card:not(.active) .bn-date-status.off { color: #dc2626; }
+
+  /* Slots Grid */
+  .bn-slots-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 7px;
+  }
+  @media (max-width: 520px) {
+    .bn-slots-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  .bn-slot-btn {
+    padding: 9px 4px;
+    border-radius: 10px;
+    border: 1.5px solid #e5e7eb;
+    background: #ffffff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #1f2937;
+    cursor: pointer;
+    text-align: center;
+    transition: all .14s ease;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .bn-slot-btn:hover:not(.disabled) { border-color: #db2777; background: #fdf2f8; }
+  .bn-slot-btn.active {
+    background: #db2777;
+    border-color: #db2777;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(219,39,119,0.28);
+  }
+  .bn-slot-btn.disabled {
+    opacity: 0.38;
+    background: #f9fafb;
+    border-color: #e5e7eb;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  .bn-slot-sub { font-size: 0.6rem; font-weight: 600; opacity: 0.8; }
+
+  /* Worker / Specialist Picker Grid */
+  .bn-workers-picker-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 180px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  .bn-worker-choice-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    border: 1.5px solid #e5e7eb;
+    background: #ffffff;
+    cursor: pointer;
+    transition: all .15s ease;
+    user-select: none;
+  }
+  .bn-worker-choice-card:hover:not(.disabled) {
+    border-color: #f472b6;
+    background: #fdf2f8;
+  }
+  .bn-worker-choice-card.active {
+    border-color: #db2777;
+    background: #fdf2f8;
+    box-shadow: 0 0 0 1px #db2777;
+  }
+  .bn-worker-choice-card.disabled {
+    opacity: 0.45;
+    background: #f9fafb;
+    border-color: #e5e7eb;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  .bn-wcc-radio {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid #d1d5db;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all .15s ease;
+  }
+  .bn-worker-choice-card.active .bn-wcc-radio {
+    border-color: #db2777;
+    background: #db2777;
+  }
+  .bn-worker-choice-card.active .bn-wcc-radio::after {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #ffffff;
+  }
+  .bn-wcc-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 1.5px solid #e5e7eb;
+    background: #f3f4f6;
+  }
+  .bn-wcc-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .bn-wcc-avatar.auto-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fdf2f8;
+    border-color: #fbcfe8;
+    color: #db2777;
+    font-size: 1.1rem;
+  }
+  .bn-wcc-info { flex: 1; min-width: 0; }
+  .bn-wcc-name-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+  }
+  .bn-wcc-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #111827;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .bn-wcc-meta {
+    font-size: 0.72rem;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 1px;
+  }
+  .bn-wcc-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+  }
+  .bn-wcc-badge.warn {
+    background: #fffbeb;
+    color: #b45309;
+    border-color: #fde68a;
+  }
+  .bn-wcc-badge.danger {
+    background: #fef2f2;
+    color: #b91c1c;
+    border-color: #fca5a5;
+  }
+  .bn-worker-alert {
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1.4;
+    background: #fffbeb;
+    border: 1.5px solid #fde68a;
+    color: #92400e;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+
+  /* Form Input */
+  .bn-modal-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1.5px solid #d1d5db;
+    font-size: 0.85rem;
+    color: #111827;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+    background: #ffffff;
+  }
+  .bn-modal-input:focus {
+    border-color: #db2777;
+    box-shadow: 0 0 0 3px rgba(219, 39, 119, 0.15);
+  }
+
+  /* Payment Summary */
+  .bn-modal-pay-summary {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .bn-mps-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    color: #4b5563;
+  }
+  .bn-mps-row strong { color: #111827; font-size: 0.95rem; }
+  .bn-pay-badge {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  /* Footer & Action */
+  .bn-modal-footer {
+    padding: 1rem 1.5rem 1.25rem;
+    border-top: 1px solid #f3f4f6;
+    background: #ffffff;
+  }
+  .bn-modal-cta-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    background: #db2777;
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(219,39,119,0.32);
+    transition: background .15s, transform .15s, box-shadow .15s;
+  }
+  .bn-modal-cta-btn:hover:not(:disabled) {
+    background: #be185d;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(219,39,119,0.42);
+  }
+  .bn-modal-cta-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .bn-modal-sec-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1.5px solid #d1d5db;
+    background: #ffffff;
+    color: #374151;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all .15s;
+    box-sizing: border-box;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .bn-modal-sec-btn:hover { background: #f9fafb; color: #111827; border-color: #9ca3af; }
+  .bn-modal-text-btn {
+    background: none;
+    border: none;
+    color: #db2777;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 6px 12px;
+    text-decoration: none;
+  }
+  .bn-modal-text-btn:hover { text-decoration: underline; }
+
+  /* Success Screen */
+  .bn-modal-success {
+    padding: 2.2rem 1.5rem 1.8rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .bn-success-icon-wrap {
+    width: 64px; height: 64px;
+    background: #ecfdf5;
+    border: 2px solid #a7f3d0;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1rem;
+    color: #10b981;
+    animation: bnScaleBounce .3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  @keyframes bnScaleBounce { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .bn-success-title { font-size: 1.35rem; font-weight: 800; color: #111827; margin: 0 0 0.25rem; }
+  .bn-success-sub { font-size: 0.85rem; color: #4b5563; margin: 0 0 1.25rem; }
+  .bn-success-card {
+    width: 100%;
+    box-sizing: border-box;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+  }
+  .bn-sc-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.82rem;
+    color: #6b7280;
+  }
+  .bn-sc-val { color: #111827; font-weight: 700; }
+  .bn-success-actions { width: 100%; }
+
+  /* ── Floating Bottom Cart Bar ── */
+  .bn-floating-cart-bar {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 32px);
+    max-width: 820px;
+    background: #111827;
+    color: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    z-index: 998;
+    padding: 12px 20px;
+    animation: bnSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    backdrop-filter: blur(16px);
+  }
+  @keyframes bnSlideUp {
+    from { transform: translate(-50%, 40px); opacity: 0; }
+    to { transform: translate(-50%, 0); opacity: 1; }
+  }
+  .bn-fcb-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .bn-fcb-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .bn-fcb-badge {
+    position: relative;
+    width: 42px;
+    height: 42px;
+    background: var(--accent, #db2777);
+    color: #ffffff;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .bn-fcb-badge span {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #ffffff;
+    color: #db2777;
+    font-size: 0.7rem;
+    font-weight: 800;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+  .bn-fcb-text-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .bn-fcb-items-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    color: #f3f4f6;
+  }
+  .bn-fcb-items-label strong {
+    color: #34d399;
+    font-size: 1.05rem;
+  }
+  .bn-fcb-sched-label {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .bn-fcb-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .bn-fcb-btn-view {
+    padding: 8px 16px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    font-size: 0.84rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+  .bn-fcb-btn-view:hover {
+    background: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+  }
+  .bn-fcb-btn-checkout {
+    padding: 8px 18px;
+    border-radius: 10px;
+    background: var(--accent, #db2777);
+    color: #ffffff;
+    font-size: 0.84rem;
+    font-weight: 800;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+    box-shadow: 0 4px 14px rgba(219, 39, 119, 0.35);
+  }
+  .bn-fcb-btn-checkout:hover {
+    background: var(--accent-hover, #be185d);
+    color: #ffffff;
+    transform: translateY(-1px);
+  }
+  @media (max-width: 600px) {
+    .bn-floating-cart-bar { bottom: 12px; width: calc(100% - 20px); padding: 10px 14px; }
+    .bn-fcb-inner { justify-content: space-between; }
+    .bn-fcb-btn-view { display: none; }
+  }
+</style>
+
+<div class="bn-detail-page">
+
+  <% if @selected_worker.present? %>
+    <!-- Dedicated Assigned Beautician Top Banner -->
+    <div class="bn-assigned-worker-banner">
+      <div class="bn-aw-inner">
+        <div class="bn-aw-left">
+          <div class="bn-aw-avatar-wrap">
+            <img src="<%= @selected_worker.display_avatar_url %>" alt="<%= @selected_worker.name %>" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'64\' height=\'64\' viewBox=\'0 0 24 24\' fill=\'%23fdf2f8\'><rect width=\'24\' height=\'24\' fill=\'%23fdf2f8\'/><path d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\' fill=\'%23db2777\'/></svg>';">
+            <span class="bn-aw-check">✓</span>
+          </div>
+          <div class="bn-aw-info">
+            <span class="bn-aw-pill">Assigned Professional for Booking</span>
+            <h3 class="bn-aw-name">Booking exclusively with <%= @selected_worker.name %></h3>
+            <p class="bn-aw-meta">
+              <span class="bn-aw-rating">★ <%= @selected_worker.rating_display %> (<%= @selected_worker.reviews_count_display %>)</span>
+              <span class="bn-aw-dot">•</span>
+              <span class="bn-aw-exp"><%= @selected_worker.experience_display %></span>
+              <span class="bn-aw-dot">•</span>
+              <span><%= @selected_worker.serving_city %></span>
+              <span class="bn-aw-dot">•</span>
+              <span>Working Days: <%= @selected_worker.worker_profile&.available_days_short %></span>
+            </p>
+          </div>
+        </div>
+        <div class="bn-aw-right">
+          <a href="/beauticians" class="bn-aw-change-btn">
+            Change Beautician
+          </a>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Breadcrumb -->
+  <nav class="bn-breadcrumb" aria-label="Breadcrumb">
+    <a href="/categories<%= "?worker_id=#{@selected_worker.id}" if @selected_worker %>">Categories</a>
+    <span class="bn-breadcrumb-sep">›</span>
+    <span class="bn-breadcrumb-current"><%= @category.name %></span>
+  </nav>
+
+  <!-- Page header -->
+  <div class="bn-detail-header">
+    <div class="bn-detail-header-inner">
+      <div>
+        <a href="/categories<%= "?worker_id=#{@selected_worker.id}" if @selected_worker %>" class="bn-detail-back">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+          All Categories
+        </a>
+        <h1><span><%= @category.name %></span></h1>
+        <% if @category.description.present? %>
+          <p><%= @category.description %></p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="bn-detail-layout">
+
+    <!-- Subcategory tabs (SSR links) -->
+    <div class="bn-sub-label">Filter by Subcategory</div>
+    <div class="bn-sub-tabs">
+      <a href="/categories/<%= @category.slug %><%= "?worker_id=#{@selected_worker.id}" if @selected_worker %>" class="bn-sub-tab <%= 'active' if @active_sub.nil? %>">
+        All
+        <span class="bn-sub-tab-count"><%= @subcategories.sum { |s| s.services.select(&:active?).size } %></span>
+      </a>
+      <% @subcategories.each do |sub| %>
+        <a href="/categories/<%= @category.slug %>?sub_id=<%= sub.id %><%= "&worker_id=#{@selected_worker.id}" if @selected_worker %>" class="bn-sub-tab <%= 'active' if @active_sub&.id == sub.id %>">
+          <%= sub.name %>
+          <span class="bn-sub-tab-count"><%= sub.services.select(&:active?).size %></span>
+        </a>
+      <% end %>
+    </div>
+
+    <!-- Services Section (SSR) -->
+    <div class="bn-svc-header">
+      <div class="bn-svc-header-left">
+        <h2><%= @active_sub ? @active_sub.name : "#{@category.name} — All Services" %></h2>
+        <p><%= @active_sub ? "Showing services in this subcategory" : "Showing all services in this category" %></p>
+      </div>
+      <span class="bn-svc-count-badge"><%= @services.size %> Services</span>
+    </div>
+
+    <div class="bn-svc-grid">
+      <% if @services.empty? %>
+        <div class="bn-empty-state">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+          <h3>No services yet</h3>
+          <p>Try another subcategory.</p>
+        </div>
+      <% else %>
+        <% em = category_emoji(@category.slug) %>
+        <% @services.each do |svc| %>
+          <div class="bn-svc-card">
+            <% if svc.image_url.present? %>
+              <img class="bn-svc-card-img" src="<%= svc.image_url %>" alt="<%= svc.name %>" loading="lazy" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex'">
+              <div class="bn-svc-card-img-placeholder" style="display:none"><%= em %></div>
+            <% else %>
+              <div class="bn-svc-card-img-placeholder"><%= em %></div>
+            <% end %>
+
+            <% if svc.tag_label.present? %>
+              <span class="bn-svc-card-tag"><%= svc.tag_label %></span>
+            <% end %>
+            <% if svc.on_sale? %>
+              <span class="bn-svc-card-sale">SALE</span>
+            <% end %>
+
+            <div class="bn-svc-card-body">
+              <% sub_name = svc.subcategory&.name %>
+              <% crumb = [@category.name, sub_name].compact.join(" › ") %>
+              <% if crumb.present? %>
+                <div class="bn-svc-card-meta">
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                  <%= crumb %>
+                </div>
+              <% end %>
+
+              <div class="bn-svc-card-name"><%= svc.name %></div>
+              <% if svc.description.present? %>
+                <div class="bn-svc-card-desc"><%= svc.description %></div>
+              <% end %>
+
+              <div class="bn-svc-card-footer">
+                <div>
+                  <div class="bn-svc-price-wrap">
+                    <span class="bn-svc-price"><%= svc.display_price %></span>
+                    <% if svc.on_sale? %>
+                      <span class="bn-svc-price-original">₹<%= svc.base_price.to_i %></span>
+                    <% end %>
+                  </div>
+                  <% if svc.duration_minutes.present? %>
+                    <div class="bn-svc-duration">
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      <%= svc.duration_minutes %> min
+                    </div>
+                  <% end %>
+                </div>
+                <% in_cart = current_cart.cart_items.any? { |ci| ci.service_id == svc.id } %>
+                <button type="button" class="bn-svc-cart-btn <%= 'added' if in_cart %>" id="bn-svc-btn-<%= svc.id %>" onclick="handleServiceCartClick('<%= svc.id %>', '<%= j(svc.name) %>', <%= svc.effective_price %>, '<%= j(svc.display_price) %>', '<%= svc.duration_minutes %>')" title="<%= in_cart ? 'In your cart' : 'Add to Cart' %>">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                  </svg>
+                  <span class="bn-svc-btn-text"><%= in_cart ? 'Added ✓' : 'Add' %></span>
+                </button>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+
+  </div>
+</div><!-- /.bn-detail-page -->
+
+<!-- Floating Bottom Cart Bar -->
+<div class="bn-floating-cart-bar" id="bn-floating-cart-bar" style="<%= current_cart.item_count > 0 ? '' : 'display: none;' %>">
+  <div class="bn-fcb-inner">
+    <div class="bn-fcb-info">
+      <div class="bn-fcb-badge">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="21" r="1"></circle>
+          <circle cx="20" cy="21" r="1"></circle>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+        </svg>
+        <span id="bn-fcb-item-count"><%= current_cart.item_count %></span>
+      </div>
+      <div class="bn-fcb-text-wrap">
+        <div class="bn-fcb-items-label">
+          <span id="bn-fcb-items-text"><%= current_cart.item_count %> <%= 'service'.pluralize(current_cart.item_count) %> in cart</span>
+          <strong id="bn-fcb-total"><%= current_cart.display_grand_total %></strong>
+        </div>
+        <div class="bn-fcb-sched-label" id="bn-fcb-schedule">
+          <% if current_cart.formatted_schedule.present? %>
+            <i class="ti ti-clock"></i> <%= current_cart.formatted_schedule %> <%= "with #{current_cart.worker.name.split.first}" if current_cart.worker %>
+          <% else %>
+            <span>Doorstep Appointment</span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    <div class="bn-fcb-actions">
+      <a href="/cart" class="bn-fcb-btn-view">View Cart</a>
+      <a href="/checkout" class="bn-fcb-btn-checkout">Proceed to Checkout →</a>
+    </div>
+  </div>
+</div>
+
+<!-- Interactive Apple HIG Scheduling & Booking Modal -->
+<div id="bn-booking-modal" class="bn-modal-backdrop" style="display: none;" onclick="if(event.target === this) closeBookingModal();">
+  <div class="bn-modal-card" role="dialog" aria-modal="true">
+    <!-- Header -->
+    <div class="bn-modal-header">
+      <div>
+        <span class="bn-modal-subtitle">Schedule Doorstep Appointment</span>
+        <h3 id="bn-modal-svc-name" class="bn-modal-title">Service Name</h3>
+      </div>
+      <button class="bn-modal-close-btn" onclick="closeBookingModal()" aria-label="Close">✕</button>
+    </div>
+
+    <!-- Alert / Error banner -->
+    <div id="bn-modal-alert" class="bn-modal-alert" style="display: none; margin: 1rem 1.5rem 0;"></div>
+
+    <div id="bn-modal-body-content" class="bn-modal-body">
+      <!-- Assigned Beautician strip -->
+      <div id="bn-modal-worker-card" class="bn-modal-worker-card" style="display: none;">
+        <div class="bn-mwc-avatar-wrap">
+          <img id="bn-mwc-avatar" src="" alt="Beautician" onerror="this.onerror=null;this.src='<%= ImageUrlResolver.fallback_for(:beautician) %>';">
+          <span class="bn-mwc-check">✓</span>
+        </div>
+        <div class="bn-mwc-info">
+          <div class="bn-mwc-badge">Exclusively Assigned Professional</div>
+          <h4 id="bn-mwc-name" class="bn-mwc-name">Beautician Name</h4>
+          <p class="bn-mwc-meta">
+            <span id="bn-mwc-rating" class="bn-mwc-rating">★ 4.9</span>
+            <span class="bn-mwc-dot">•</span>
+            <span id="bn-mwc-exp" class="bn-mwc-exp">7 Yrs Exp</span>
+            <span class="bn-mwc-dot">•</span>
+            <span id="bn-mwc-days" class="bn-mwc-days">Working Days: Mon - Sat</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Step 1: City Verification -->
+      <div class="bn-modal-section">
+        <div class="bn-modal-label">
+          <span>1. Service City</span>
+          <span id="bn-modal-city-hint" class="bn-modal-label-hint">Doorstep Coverage</span>
+        </div>
+        <select id="bn-modal-city-select" class="bn-modal-input" onchange="onModalCityChanged(this.value)">
+          <% (@cities || []).each do |c| %>
+            <option value="<%= c.name %>" data-city-id="<%= c.id %>" <%= 'selected' if (@selected_worker&.serving_city == c.name) || (c.name.casecmp?('Delhi')) %>><%= c.name %></option>
+          <% end %>
+        </select>
+      </div>
+
+      <!-- Step 2: Date Selection -->
+      <div class="bn-modal-section">
+        <div class="bn-modal-label">
+          <span>2. Select Appointment Date</span>
+          <span id="bn-selected-date-label" class="bn-modal-label-hint"></span>
+        </div>
+        <div id="bn-dates-strip" class="bn-dates-strip">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- Step 3: Time Slot Selection -->
+      <div class="bn-modal-section">
+        <div class="bn-modal-label">
+          <span>3. Select Time Slot</span>
+          <span id="bn-selected-slot-label" class="bn-modal-label-hint"></span>
+        </div>
+        <div id="bn-slots-grid" class="bn-slots-grid">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- Step 4: Assigned Beauty Professional -->
+      <div class="bn-modal-section">
+        <div class="bn-modal-label">
+          <span>4. Assigned Beauty Professional</span>
+          <span id="bn-modal-worker-hint" class="bn-modal-label-hint"></span>
+        </div>
+        <!-- Specialist status banner (if requested worker is unavailable or city has zero workers) -->
+        <div id="bn-worker-alert" class="bn-worker-alert" style="display: none;"></div>
+
+        <!-- Dynamic Specialists List -->
+        <div id="bn-workers-picker-grid" class="bn-workers-picker-grid">
+          <!-- Dynamically populated from /api/v1/booking_flow/workers -->
+        </div>
+      </div>
+
+      <!-- Step 5: Summary Row -->
+      <div class="bn-modal-section">
+        <div class="bn-modal-pay-summary">
+          <div class="bn-mps-row">
+            <span>Service Total</span>
+            <strong id="bn-modal-total-price">₹0</strong>
+          </div>
+          <div class="bn-mps-row">
+            <span>Booking Assurance</span>
+            <span class="bn-pay-badge">✓ Free Cancellation Up to 2 Hrs</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer with Add to Cart CTA -->
+    <div id="bn-modal-footer" class="bn-modal-footer">
+      <button id="bn-submit-booking-btn" class="bn-modal-cta-btn" onclick="submitAddToCart()">
+        <span id="bn-btn-text">Verify Availability & Add to Cart</span>
+      </button>
+    </div>
+
+    <!-- Success Confirmation State (shown upon adding to cart) -->
+    <div id="bn-modal-success-content" class="bn-modal-success" style="display: none;">
+      <div class="bn-success-icon-wrap">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+      </div>
+      <h3 class="bn-success-title">Verified & Added to Cart!</h3>
+      <p class="bn-success-sub">Your service and beautician slot have been reserved in your cart.</p>
+      
+      <div class="bn-success-card">
+        <div class="bn-sc-row">
+          <span>Service</span>
+          <strong id="bn-succ-svc" class="bn-sc-val">Gold Glow Facial</strong>
+        </div>
+        <div class="bn-sc-row">
+          <span>Assigned Beautician</span>
+          <strong id="bn-succ-worker" class="bn-sc-val" style="color:#db2777;">Priya Beautician</strong>
+        </div>
+        <div class="bn-sc-row">
+          <span>Scheduled Appointment</span>
+          <span id="bn-succ-schedule" class="bn-sc-val">Thu, 17 Sep at 10:30 AM</span>
+        </div>
+        <div class="bn-sc-row">
+          <span>Service City</span>
+          <span id="bn-succ-city" class="bn-sc-val">Delhi</span>
+        </div>
+        <div class="bn-sc-row">
+          <span>Price</span>
+          <strong id="bn-succ-amount" class="bn-sc-val">₹1,200</strong>
+        </div>
+      </div>
+
+      <div class="bn-success-actions" style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+        <%= link_to checkout_page_path, class: "bn-modal-cta-btn", style: "text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px;" do %>
+          <span>Proceed to Checkout</span> <i class="ti ti-arrow-right"></i>
+        <% end %>
+        <%= link_to cart_path, class: "bn-modal-sec-btn", style: "text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px;" do %>
+          <span>View Cart</span> <i class="ti ti-shopping-bag"></i>
+        <% end %>
+        <button type="button" class="bn-modal-text-btn" onclick="closeBookingModal()">+ Add More Services</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  var selectedWorker = <%= @selected_worker ? {
+    id: @selected_worker.id,
+    name: @selected_worker.name,
+    avatar: @selected_worker.display_avatar_url,
+    experience: @selected_worker.experience_display,
+    rating: @selected_worker.rating_display,
+    reviews: @selected_worker.reviews_count_display,
+    city: @selected_worker.serving_city,
+    working_days: @selected_worker.worker_profile&.available_days_short || "All week (7 days)"
+  }.to_json.html_safe : "null" %>;
+
+  var preloadedDates = <%= (@worker_dates || []).to_json.html_safe %>;
+  var cartHasSchedule = <%= (current_cart.booking_date.present? && current_cart.time_slot.present?).to_json %>;
+  var cartItemCount = <%= current_cart.item_count %>;
+
+  var currentService = null;
+  var selectedDate = null;
+  var selectedSlot = null;
+  var selectedWorkerChoice = null;
+
+  // Sync worker to localStorage if present
+  if (selectedWorker) {
+    try {
+      localStorage.setItem('selected_worker_id', selectedWorker.id);
+      localStorage.setItem('selected_worker_name', selectedWorker.name);
+      localStorage.setItem('selected_worker_city', selectedWorker.city);
+    } catch(e) {}
+  }
+
+  // Always open scheduling modal to verify independent date & time before adding to cart
+  window.handleServiceCartClick = function(serviceId, serviceName, price, displayPrice, duration) {
+    openBookingModal(serviceId, serviceName, price, displayPrice, duration);
+  };
+
+  function updateCartUI(data) {
+    cartItemCount = data.item_count;
+    cartHasSchedule = true;
+
+    // Navbar badges
+    var navBadge = document.getElementById('bn-nav-cart-badge');
+    if (navBadge) navBadge.textContent = data.item_count;
+    var mobBadge = document.getElementById('bn-mobile-cart-badge');
+    if (mobBadge) mobBadge.textContent = data.item_count;
+
+    // Floating bottom cart bar
+    var bar = document.getElementById('bn-floating-cart-bar');
+    if (bar) {
+      bar.style.display = 'block';
+      var cntEl = document.getElementById('bn-fcb-item-count');
+      if (cntEl) cntEl.textContent = data.item_count;
+      var txtEl = document.getElementById('bn-fcb-items-text');
+      if (txtEl) txtEl.textContent = data.item_count + (data.item_count === 1 ? ' service' : ' services') + ' in cart';
+      var totEl = document.getElementById('bn-fcb-total');
+      if (totEl && data.grand_total) totEl.textContent = '₹' + Math.round(data.grand_total);
+      if (data.schedule) {
+        var schedEl = document.getElementById('bn-fcb-schedule');
+        if (schedEl) schedEl.textContent = data.schedule;
+      }
+    }
+  }
+
+  window.openBookingModal = function(serviceId, serviceName, price, displayPrice, duration) {
+    currentService = {
+      id: serviceId,
+      name: serviceName,
+      price: price,
+      display_price: displayPrice,
+      duration: duration
+    };
+
+    var modal = document.getElementById('bn-booking-modal');
+    if (!modal) return;
+
+    // Reset view states
+    document.getElementById('bn-modal-body-content').style.display = 'flex';
+    document.getElementById('bn-modal-footer').style.display = 'block';
+    document.getElementById('bn-modal-success-content').style.display = 'none';
+    hideAlert();
+
+    // Set service title & total
+    document.getElementById('bn-modal-svc-name').textContent = serviceName + (duration ? ' (' + duration + ' min)' : '');
+    document.getElementById('bn-modal-total-price').textContent = displayPrice || ('₹' + price);
+
+    // Setup worker section
+    var workerCard = document.getElementById('bn-modal-worker-card');
+    var btnText = document.getElementById('bn-btn-text');
+
+    if (selectedWorker) {
+      workerCard.style.display = 'flex';
+      document.getElementById('bn-mwc-name').textContent = selectedWorker.name;
+      document.getElementById('bn-mwc-avatar').src = selectedWorker.avatar || '<%= ImageUrlResolver.fallback_for(:beautician) %>';
+      document.getElementById('bn-mwc-rating').textContent = '★ ' + selectedWorker.rating;
+      document.getElementById('bn-mwc-exp').textContent = selectedWorker.experience;
+      document.getElementById('bn-mwc-days').textContent = 'Working Days: ' + selectedWorker.working_days;
+      btnText.textContent = 'Verify Availability & Add to Cart';
+    } else {
+      workerCard.style.display = 'none';
+      btnText.textContent = 'Verify Availability & Add to Cart';
+    }
+
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    // Render dates
+    renderDates();
+  };
+
+  window.closeBookingModal = function() {
+    var modal = document.getElementById('bn-booking-modal');
+    if (modal) modal.style.display = 'none';
+    document.body.style.overflow = '';
+  };
+
+  function showAlert(msg) {
+    var el = document.getElementById('bn-modal-alert');
+    if (!el) return;
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  function hideAlert() {
+    var el = document.getElementById('bn-modal-alert');
+    if (el) el.style.display = 'none';
+  }
+
+  function renderDates() {
+    var container = document.getElementById('bn-dates-strip');
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (preloadedDates && preloadedDates.length > 0) {
+      populateDateCards(preloadedDates);
+    } else {
+      container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:10px;font-size:0.8rem;color:#6b7280;">Loading schedule...</div>';
+      var citySelect = document.getElementById('bn-modal-city-select');
+      var selCity = citySelect ? (citySelect.selectedOptions[0]?.getAttribute('data-city-id') || citySelect.value) : '<%= @cities.first&.id %>';
+      var url = '/api/v1/booking_flow/dates?' + (selectedWorker ? ('worker_id=' + encodeURIComponent(selectedWorker.id)) : ('city_id=' + encodeURIComponent(selCity)));
+
+      fetch(url)
+        .then(function(r) { return r.json(); })
+        .then(function(j) {
+          if (j.data && j.data.dates) {
+            populateDateCards(j.data.dates);
+          } else {
+            container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#ef4444;font-size:0.8rem;">Could not load dates.</div>';
+          }
+        })
+        .catch(function() {
+          container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#ef4444;font-size:0.8rem;">Could not load dates.</div>';
+        });
+    }
+  }
+
+  function populateDateCards(dates) {
+    var container = document.getElementById('bn-dates-strip');
+    container.innerHTML = '';
+
+    var firstAvailable = null;
+
+    dates.forEach(function(d) {
+      var card = document.createElement('div');
+      var isAvail = d.is_available && (d.is_working_day !== false);
+
+      card.className = 'bn-date-card' + (isAvail ? '' : ' disabled');
+
+      var parts = d.date.split('-');
+      var dayNum = parts[2];
+      var monthNum = parts[1];
+      var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var monthStr = months[parseInt(monthNum, 10) - 1] || '';
+
+      var statusText = isAvail ? 'Avail' : (d.status_text || 'Off');
+
+      card.innerHTML =
+        '<span class="bn-date-day">' + (d.day_short || d.day.substr(0, 2)) + '</span>' +
+        '<span class="bn-date-num">' + dayNum + '</span>' +
+        '<span style="font-size:0.6rem;color:inherit;opacity:0.8;">' + monthStr + '</span>' +
+        '<span class="bn-date-status ' + (isAvail ? 'avail' : 'off') + '">' + statusText + '</span>';
+
+      if (isAvail) {
+        card.onclick = function() {
+          selectDate(d.date, d.display_date, card);
+        };
+        if (!firstAvailable) firstAvailable = { date: d.date, display: d.display_date, el: card };
+      }
+
+      container.appendChild(card);
+    });
+
+    if (firstAvailable) {
+      selectDate(firstAvailable.date, firstAvailable.display, firstAvailable.el);
+    } else {
+      document.getElementById('bn-selected-date-label').textContent = 'No available dates';
+      document.getElementById('bn-slots-grid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:12px;color:#6b7280;font-size:0.8rem;">No slots available.</div>';
+    }
+  }
+
+  function selectDate(dateStr, displayStr, cardEl) {
+    selectedDate = dateStr;
+    document.getElementById('bn-selected-date-label').textContent = displayStr;
+
+    var cards = document.querySelectorAll('.bn-date-card');
+    cards.forEach(function(c) { c.classList.remove('active'); });
+    if (cardEl) cardEl.classList.add('active');
+
+    hideAlert();
+    loadTimeSlots(dateStr);
+  }
+
+  function loadTimeSlots(dateStr) {
+    var container = document.getElementById('bn-slots-grid');
+    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:10px;font-size:0.8rem;color:#6b7280;">Loading available slots...</div>';
+
+    var citySelect = document.getElementById('bn-modal-city-select');
+    var selCity = citySelect ? (citySelect.selectedOptions[0]?.getAttribute('data-city-id') || citySelect.value) : '<%= @cities.first&.id %>';
+
+    var url = '/api/v1/booking_flow/time_slots?date=' + encodeURIComponent(dateStr) +
+              '&city_id=' + encodeURIComponent(selCity) +
+              (selectedWorker ? ('&worker_id=' + encodeURIComponent(selectedWorker.id)) : '');
+
+    fetch(url)
+      .then(function(r) { return r.json(); })
+      .then(function(j) {
+        container.innerHTML = '';
+        var slots = (j.data && j.data.time_slots) ? j.data.time_slots : [];
+        if (slots.length === 0) {
+          container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:10px;font-size:0.8rem;color:#6b7280;">No time slots available for this date.</div>';
+          return;
+        }
+
+        var firstSlot = null;
+        slots.forEach(function(s) {
+          var btn = document.createElement('div');
+          var isAvail = s.is_available;
+          btn.className = 'bn-slot-btn' + (isAvail ? '' : ' disabled');
+          btn.innerHTML =
+            '<span>' + s.slot + '</span>' +
+            '<span class="bn-slot-sub">' + (isAvail ? 'Available' : (s.status_text || 'Booked')) + '</span>';
+
+          if (isAvail) {
+            btn.onclick = function() {
+              selectSlot(s.slot, btn);
+            };
+            if (!firstSlot) firstSlot = { slot: s.slot, el: btn };
+          }
+          container.appendChild(btn);
+        });
+
+        if (firstSlot) {
+          selectSlot(firstSlot.slot, firstSlot.el);
+        } else {
+          selectedSlot = null;
+          document.getElementById('bn-selected-slot-label').textContent = 'All slots full';
+        }
+      })
+      .catch(function() {
+        container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#ef4444;font-size:0.8rem;">Could not load slots.</div>';
+      });
+  }
+
+  function selectSlot(slotStr, btnEl) {
+    selectedSlot = slotStr;
+    document.getElementById('bn-selected-slot-label').textContent = slotStr;
+
+    var btns = document.querySelectorAll('.bn-slot-btn');
+    btns.forEach(function(b) { b.classList.remove('active'); });
+    if (btnEl) btnEl.classList.add('active');
+
+    hideAlert();
+    loadWorkersForSlot(selectedDate, slotStr);
+  }
+
+  function loadWorkersForSlot(dateStr, slotStr) {
+    var listContainer = document.getElementById('bn-workers-picker-grid');
+    var alertEl = document.getElementById('bn-worker-alert');
+    var hintEl = document.getElementById('bn-modal-worker-hint');
+    var submitBtn = document.getElementById('bn-submit-booking-btn');
+    var btnText = document.getElementById('bn-btn-text');
+
+    if (!listContainer) return;
+    listContainer.innerHTML = '<div style="padding: 10px; font-size: 0.8rem; color: #6b7280; text-align: center;">Checking specialist availability...</div>';
+    if (alertEl) alertEl.style.display = 'none';
+
+    var citySelect = document.getElementById('bn-modal-city-select');
+    var selCity = citySelect ? (citySelect.selectedOptions[0]?.getAttribute('data-city-id') || citySelect.value) : '<%= @cities.first&.id %>';
+    var cityName = citySelect ? citySelect.value : 'selected city';
+
+    var url = '/api/v1/booking_flow/workers?city_id=' + encodeURIComponent(selCity) +
+              '&date=' + encodeURIComponent(dateStr) +
+              '&time_slot=' + encodeURIComponent(slotStr) +
+              (selectedWorker ? ('&worker_id=' + encodeURIComponent(selectedWorker.id)) : '');
+
+    fetch(url)
+      .then(function(r) { return r.json(); })
+      .then(function(j) {
+        listContainer.innerHTML = '';
+        var data = j.data || {};
+        var workers = data.workers || [];
+        var reqWorker = data.requested_worker;
+
+        // If a specific worker was pre-selected from beauticians profile
+        if (selectedWorker && reqWorker) {
+          if (!reqWorker.available) {
+            if (alertEl) {
+              alertEl.innerHTML = '<span>⚠️ ' + (reqWorker.error || 'Requested specialist is unavailable.') + '</span>';
+              alertEl.style.display = 'flex';
+            }
+            if (hintEl) hintEl.textContent = 'Specialist Unavailable';
+          } else {
+            if (alertEl) alertEl.style.display = 'none';
+            if (hintEl) hintEl.textContent = '✓ ' + selectedWorker.name + ' available';
+          }
+        }
+
+        if (workers.length === 0) {
+          if (alertEl) {
+            alertEl.innerHTML = '<span>⚠️ No beauty professionals are available in ' + cityName + ' on ' + dateStr + ' at ' + slotStr + '. Please choose another time slot or date.</span>';
+            alertEl.style.display = 'flex';
+          }
+          listContainer.innerHTML = '<div style="padding: 12px; font-size: 0.8rem; color: #dc2626; text-align: center; font-weight: 600; background: #fef2f2; border-radius: 10px; border: 1px dashed #fca5a5;">No beauty professionals available for this slot in ' + cityName + '.</div>';
+          if (submitBtn) submitBtn.disabled = true;
+          if (btnText) btnText.textContent = 'Slot Unavailable — Pick Another Time';
+          if (hintEl) hintEl.textContent = '0 Available';
+          selectedWorkerChoice = null;
+          return;
+        }
+
+        if (submitBtn) submitBtn.disabled = false;
+        if (btnText) btnText.textContent = 'Verify Availability & Add to Cart';
+        if (hintEl) hintEl.textContent = workers.length + ' Available in ' + cityName;
+
+        // 1. Auto-assign option card
+        var isAutoActive = (selectedWorkerChoice === null && (!selectedWorker || (reqWorker && !reqWorker.available)));
+        var autoCard = document.createElement('div');
+        autoCard.className = 'bn-worker-choice-card' + (isAutoActive ? ' active' : '');
+        autoCard.innerHTML =
+          '<div class="bn-wcc-radio"></div>' +
+          '<div class="bn-wcc-avatar auto-icon"><i class="ti ti-sparkles"></i></div>' +
+          '<div class="bn-wcc-info">' +
+            '<div class="bn-wcc-name-row">' +
+              '<span class="bn-wcc-name">⚡ Auto-Assign Best Specialist</span>' +
+              '<span class="bn-wcc-badge">Recommended</span>' +
+            '</div>' +
+            '<div class="bn-wcc-meta">' +
+              '<span>Top-rated professional for this slot (' + workers[0].name + ' or equivalent)</span>' +
+            '</div>' +
+          '</div>';
+
+        autoCard.onclick = function() {
+          selectedWorkerChoice = null;
+          document.querySelectorAll('.bn-worker-choice-card').forEach(function(c) { c.classList.remove('active'); });
+          autoCard.classList.add('active');
+          if (alertEl && (!selectedWorker || !reqWorker || reqWorker.available)) alertEl.style.display = 'none';
+          if (hintEl) hintEl.textContent = 'Auto-assign recommended';
+          if (submitBtn) submitBtn.disabled = false;
+          if (btnText) btnText.textContent = 'Verify Availability & Add to Cart';
+        };
+        listContainer.appendChild(autoCard);
+
+        // 2. Individual available specialists cards
+        workers.forEach(function(w) {
+          var isThisReq = selectedWorker && (selectedWorker.id == w.id);
+          var isThisChoice = selectedWorkerChoice && (selectedWorkerChoice.id == w.id);
+          var isCardActive = isThisChoice || (isThisReq && selectedWorkerChoice === null);
+
+          var wCard = document.createElement('div');
+          wCard.className = 'bn-worker-choice-card' + (isCardActive ? ' active' : '');
+          wCard.innerHTML =
+            '<div class="bn-wcc-radio"></div>' +
+            '<div class="bn-wcc-avatar">' +
+              '<img src="' + (w.avatar_url || '<%= ImageUrlResolver.fallback_for(:beautician) %>') + '" alt="' + w.name + '" onerror="this.src=\'<%= ImageUrlResolver.fallback_for(:beautician) %>\'">' +
+            '</div>' +
+            '<div class="bn-wcc-info">' +
+              '<div class="bn-wcc-name-row">' +
+                '<span class="bn-wcc-name">' + w.name + '</span>' +
+                '<span class="bn-wcc-badge">✓ Available</span>' +
+              '</div>' +
+              '<div class="bn-wcc-meta">' +
+                '<span style="color:#b45309;font-weight:700;">★ ' + (w.rating || '4.9') + '</span>' +
+                '<span>•</span>' +
+                '<span style="color:#059669;font-weight:600;">' + (w.experience_years ? (w.experience_years + ' Yrs Exp') : 'Certified') + '</span>' +
+                '<span>•</span>' +
+                '<span>' + (w.serving_city || cityName) + '</span>' +
+              '</div>' +
+            '</div>';
+
+          wCard.onclick = function() {
+            selectedWorkerChoice = w;
+            document.querySelectorAll('.bn-worker-choice-card').forEach(function(c) { c.classList.remove('active'); });
+            wCard.classList.add('active');
+            if (alertEl) alertEl.style.display = 'none';
+            if (hintEl) hintEl.textContent = 'Assigned: ' + w.name;
+            if (submitBtn) submitBtn.disabled = false;
+            if (btnText) btnText.textContent = 'Verify Availability & Add to Cart';
+          };
+
+          listContainer.appendChild(wCard);
+
+          if (isCardActive) {
+            selectedWorkerChoice = w;
+            if (hintEl) hintEl.textContent = 'Assigned: ' + w.name;
+          }
+        });
+      })
+      .catch(function() {
+        listContainer.innerHTML = '<div style="padding:10px; font-size:0.8rem; color:#dc2626; text-align:center;">Could not verify specialists.</div>';
+      });
+  }
+
+  window.onModalCityChanged = function(cityName) {
+    hideAlert();
+    selectedWorkerChoice = null;
+    var wAlert = document.getElementById('bn-worker-alert');
+    if (wAlert) wAlert.style.display = 'none';
+
+    if (selectedWorker && selectedWorker.city && cityName) {
+      if (selectedWorker.city.toLowerCase() !== cityName.toLowerCase()) {
+        showAlert(selectedWorker.name + ' is not available in ' + cityName + '. She only provides services in ' + selectedWorker.city + '.');
+      }
+    }
+    renderDates();
+  };
+
+  window.submitAddToCart = function() {
+    hideAlert();
+
+    if (!selectedDate) {
+      showAlert('Please choose an available appointment date.');
+      return;
+    }
+    if (!selectedSlot) {
+      showAlert('Please choose an available time slot.');
+      return;
+    }
+
+    var citySelect = document.getElementById('bn-modal-city-select');
+    var selectedCity = citySelect ? citySelect.value : '';
+
+    if (selectedWorker && selectedWorker.city && selectedCity) {
+      if (selectedWorker.city.toLowerCase() !== selectedCity.toLowerCase() && !selectedWorkerChoice) {
+        showAlert(selectedWorker.name + ' is not available in ' + selectedCity + '. She only provides services in ' + selectedWorker.city + '. Please choose an available specialist or change city.');
+        return;
+      }
+    }
+
+    var submitBtn = document.getElementById('bn-submit-booking-btn');
+    var btnText = document.getElementById('bn-btn-text');
+    var origText = btnText.textContent;
+
+    submitBtn.disabled = true;
+    btnText.textContent = 'Verifying Availability...';
+
+    var chosenWorkerId = null;
+    if (selectedWorkerChoice) {
+      chosenWorkerId = selectedWorkerChoice.id;
+    } else if (selectedWorker) {
+      chosenWorkerId = selectedWorker.id;
+    }
+
+    var payload = {
+      service_id: currentService.id,
+      worker_id: chosenWorkerId,
+      city_id: selectedCity,
+      date: selectedDate,
+      time_slot: selectedSlot,
+      quantity: 1
+    };
+
+    fetch('/cart/items', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify(payload)
+    })
+    .then(function(res) {
+      return res.json().then(function(json) {
+        return { ok: res.ok, status: res.status, data: json };
+      });
+    })
+    .then(function(res) {
+      submitBtn.disabled = false;
+      btnText.textContent = origText;
+
+      if (res.ok && res.data && res.data.success) {
+        updateCartUI(res.data);
+
+        // Update card button on page
+        var cardBtn = document.getElementById('bn-svc-btn-' + currentService.id);
+        if (cardBtn) {
+          cardBtn.classList.add('added');
+          var textSpan = cardBtn.querySelector('.bn-svc-btn-text');
+          if (textSpan) textSpan.textContent = 'Added ✓';
+        }
+
+        // Switch to Added to Cart confirmation view in modal
+        document.getElementById('bn-modal-body-content').style.display = 'none';
+        document.getElementById('bn-modal-footer').style.display = 'none';
+
+        var assignedWorkerName = (res.data && res.data.cart && res.data.cart.worker && res.data.cart.worker.name) ||
+                                 (selectedWorkerChoice ? selectedWorkerChoice.name : (selectedWorker ? selectedWorker.name : 'Assigned Specialist'));
+
+        document.getElementById('bn-succ-svc').textContent = currentService.name;
+        document.getElementById('bn-succ-worker').textContent = assignedWorkerName;
+        document.getElementById('bn-succ-schedule').textContent = selectedDate + ' at ' + selectedSlot;
+        document.getElementById('bn-succ-city').textContent = (res.data && res.data.cart && res.data.cart.city_name) || selectedCity;
+        document.getElementById('bn-succ-amount').textContent = currentService.display_price || ('₹' + currentService.price);
+
+        document.getElementById('bn-modal-success-content').style.display = 'flex';
+      } else {
+        var msg = (res.data && res.data.error) || (res.data && res.data.errors && res.data.errors.join('. ')) || 'Beautician is not available for this slot. Please choose another date or time.';
+        showAlert(msg);
+      }
+    })
+    .catch(function(err) {
+      submitBtn.disabled = false;
+      btnText.textContent = origText;
+      showAlert('A network error occurred. Please check your connection and try again.');
+    });
+  };
+
+  // Keyboard accessibility: ESC to close
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeBookingModal();
+  });
+})();
+</script>

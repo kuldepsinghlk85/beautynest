@@ -1,0 +1,108 @@
+<% content_for :page_title, "Edit Customer" %>
+
+<div class="page-header">
+  <div class="page-header-left">
+    <h1>Edit Customer</h1>
+    <p>Update customer details and account permissions</p>
+  </div>
+  <div class="page-header-actions">
+    <%= link_to admin_customer_path(@customer[:id]), class: "btn btn-secondary" do %>
+      <svg data-feather="arrow-left"></svg> Back to Profile
+    <% end %>
+  </div>
+</div>
+
+<%= form_with url: admin_customer_path(@customer[:id]), method: :patch, local: true do |f| %>
+  <div class="detail-grid">
+    <div>
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-header">
+          <span class="card-title">Basic Information</span>
+          <%= active_status_badge(@customer[:status]) %>
+        </div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+            <div class="form-group">
+              <label class="form-label" for="customer_name">Full Name</label>
+              <input type="text" name="customer[name]" id="customer_name" class="form-control" value="<%= @customer[:name] %>" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="customer_email">Email Address</label>
+              <input type="email" name="customer[email]" id="customer_email" class="form-control" value="<%= @customer[:email] %>" required>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+            <div class="form-group">
+              <label class="form-label" for="customer_phone">Phone Number</label>
+              <input type="text" name="customer[phone]" id="customer_phone" class="form-control" value="<%= @customer[:phone] %>" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="customer_city">City</label>
+              <select name="customer[city]" id="customer_city" class="form-control">
+                <% ["Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai", "Pune", "Ahmedabad", "Kolkata", "Jaipur", "Lucknow", "Bhopal"].each do |city| %>
+                  <option value="<%= city %>" <%= "selected" if @customer[:city] == city %>><%= city %></option>
+                <% end %>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:16px;">
+            <label class="form-label" for="customer_status">Account Status</label>
+            <select name="customer[status]" id="customer_status" class="form-control">
+              <option value="active" <%= "selected" if @customer[:status] == "active" %>>Active — Full access to bookings and services</option>
+              <option value="inactive" <%= "selected" if @customer[:status] == "inactive" %>>Inactive — Account temporarily disabled</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="customer_notes">Admin Notes</label>
+            <textarea name="customer[notes]" id="customer_notes" class="form-control" rows="3" placeholder="Add private notes about this customer (visible only to admins)..."></textarea>
+          </div>
+        </div>
+      </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header"><span class="card-title">Customer Summary</span></div>
+        <div class="card-body">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+            <div class="table-avatar <%= @customer[:avatar_color] %>" style="width:50px;height:50px;font-size:18px;border-radius:50%;"><%= @customer[:initials] %></div>
+            <div>
+              <div style="font-size:15px;font-weight:700;color:var(--text-1);"><%= @customer[:name] %></div>
+              <div style="font-size:12px;color:var(--text-3);">ID #<%= @customer[:id] %> &bull; Joined <%= @customer[:joined] %></div>
+            </div>
+          </div>
+
+          <div class="info-row"><span class="info-key">Total Bookings</span><span class="info-val"><strong><%= @customer[:bookings] %></strong></span></div>
+          <div class="info-row"><span class="info-key">Current Status</span><span class="info-val"><%= active_status_badge(@customer[:status]) %></span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Account Security</span></div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:8px;">
+          <button type="button" class="btn btn-secondary" style="justify-content:flex-start;width:100%;"><svg data-feather="key"></svg> Send Password Reset</button>
+          <button type="button" class="btn btn-danger" style="justify-content:flex-start;width:100%;"><svg data-feather="user-x"></svg> Suspend Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="v6-action-footer-card">
+    <div class="v6-action-footer-left">
+      <%= active_status_badge(@customer[:status]) %>
+      <span style="font-size:13px;color:var(--text-3);"><%= @customer[:name] %> &bull; <%= @customer[:email] %></span>
+    </div>
+    <div class="v6-action-footer-right">
+      <%= link_to "Cancel", admin_customer_path(@customer[:id]), class: "btn btn-secondary" %>
+      <button type="submit" class="btn btn-primary">
+        <svg data-feather="check"></svg> Save Changes
+      </button>
+    </div>
+  </div>
+<% end %>

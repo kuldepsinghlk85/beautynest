@@ -1,0 +1,1804 @@
+<% content_for :page_title, "#{t('hero.title_1')} #{t('hero.title_2')} — BeautyNest" %>
+
+<%= render "shared/public_nav", active: "home" %>
+
+<style>
+  /* ==========================================================================
+     BeautyNest Luxury Storefront Styles — Pixel Perfect to Design Mockup
+     100% Pure CSS (No Bootstrap grid dependency)
+     ========================================================================== */
+  .bn-home-wrap {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+    color: #111827;
+    background: #ffffff;
+    overflow-x: hidden;
+  }
+
+  /* Typography */
+  .font-playfair {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+  .script-font {
+    font-family: 'Playfair Display', cursive, serif;
+    font-style: italic;
+    color: #db2777;
+    letter-spacing: -0.01em;
+  }
+
+  /* Universal Section Container */
+  .bn-container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .bn-section {
+    padding: 4.5rem 1.5rem;
+    max-width: 1240px;
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+  .bn-section.pt-0 {
+    padding-top: 0 !important;
+  }
+
+  /* Pill Tags */
+  .bn-pill-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(219, 39, 119, 0.08);
+    border: 1px solid rgba(219, 39, 119, 0.22);
+    border-radius: 50px;
+    padding: 6px 16px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #db2777;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 1.25rem;
+  }
+
+  /* Section Header */
+  .bn-section-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .bn-section-header.text-center {
+    text-align: center;
+    display: block;
+  }
+  .bn-section-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(1.8rem, 3vw, 2.4rem);
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 0.5rem;
+    letter-spacing: -0.02em;
+  }
+  .bn-section-sub {
+    font-size: 0.96rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.5;
+  }
+  .bn-view-all-link {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #db2777;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+  }
+  .bn-view-all-link:hover {
+    color: #be185d;
+    transform: translateX(3px);
+  }
+
+  /* ==========================================================================
+     1. HERO SECTION WITH IMAGE SLIDER (SIDE-BY-SIDE ON DESKTOP)
+     ========================================================================== */
+  .bn-hero-section {
+    background: linear-gradient(180deg, #fff0f6 0%, #fff7fa 55%, #ffffff 100%);
+    padding: 3rem 1.5rem 4rem;
+    min-height: calc(88vh - 70px);
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+  }
+  .bn-hero-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 3.5rem;
+    align-items: center;
+    width: 100%;
+  }
+
+  /* Left Column */
+  .bn-hero-left {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .bn-hero-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(2.5rem, 4.4vw, 4rem);
+    font-weight: 800;
+    line-height: 1.12;
+    letter-spacing: -0.03em;
+    color: #0f172a;
+    margin: 0 0 1.25rem;
+  }
+  .bn-hero-title .glow-pink {
+    background: linear-gradient(135deg, #db2777 0%, #be185d 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-style: italic;
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+  .bn-hero-desc {
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: #4b5563;
+    max-width: 520px;
+    margin: 0 0 2rem;
+  }
+  .bn-hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+  }
+  .bn-btn-hero-primary {
+    background: linear-gradient(135deg, #db2777 0%, #be185d 100%);
+    color: #ffffff !important;
+    padding: 14px 34px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    border: none;
+    box-shadow: 0 8px 24px rgba(219, 39, 119, 0.35);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .bn-btn-hero-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(219, 39, 119, 0.45);
+    color: #ffffff;
+  }
+  .bn-btn-hero-outline {
+    background: #ffffff;
+    color: #374151 !important;
+    border: 1.5px solid rgba(219, 39, 119, 0.3);
+    padding: 13px 28px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.92rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s ease;
+  }
+  .bn-btn-hero-outline:hover {
+    border-color: #db2777;
+    color: #db2777 !important;
+    background: #fffdfd;
+  }
+  .bn-script-sub {
+    font-family: 'Playfair Display', cursive, serif;
+    font-style: italic;
+    color: #db2777;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.75rem;
+  }
+  .bn-checks-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.25rem;
+  }
+  .bn-check-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #374151;
+  }
+  .bn-check-circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(219, 39, 119, 0.12);
+    color: #db2777;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    flex-shrink: 0;
+  }
+
+  /* Right Column: Hero Slider Component */
+  .bn-hero-right {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  .bn-slider-card {
+    position: relative;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px -10px rgba(219, 39, 119, 0.22), 0 8px 24px rgba(0, 0, 0, 0.06);
+    background: #111827;
+    width: 100%;
+    height: 420px;
+  }
+  .bn-slide-item {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: scale(1.04);
+  }
+  .bn-slide-item.active {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+  }
+  .bn-slide-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .bn-slide-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.75) 100%);
+  }
+  .bn-slide-top-badge {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(10px);
+    border-radius: 50px;
+    padding: 6px 14px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #111827;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    z-index: 2;
+  }
+  .green-blink-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.25);
+  }
+  .bn-slide-content-card {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    background: rgba(17, 24, 39, 0.72);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 20px;
+    padding: 16px 20px;
+    color: #ffffff;
+    z-index: 2;
+  }
+  .bn-slide-content-tag {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #f472b6;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+  .bn-slide-content-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 2px;
+  }
+  .bn-slide-content-sub {
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 10px;
+  }
+  .bn-slide-btn {
+    background: linear-gradient(135deg, #db2777 0%, #be185d 100%);
+    color: #ffffff !important;
+    padding: 6px 18px;
+    border-radius: 50px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+  }
+  .bn-slider-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(8px);
+    border: none;
+    color: #111827;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 3;
+    transition: all 0.15s ease;
+  }
+  .bn-slider-btn:hover {
+    background: #ffffff;
+    transform: translateY(-50%) scale(1.08);
+  }
+  .bn-slider-prev { left: 14px; }
+  .bn-slider-next { right: 14px; }
+
+  .bn-slider-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .bn-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+  .bn-dot.active {
+    width: 28px;
+    border-radius: 12px;
+    background: #db2777;
+  }
+  .bn-slider-caption {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #64748b;
+  }
+
+  /* ==========================================================================
+     2. POPULAR CATEGORIES & 14 SUBCATEGORIES
+     ========================================================================== */
+  .bn-cat-trio {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 3.5rem;
+  }
+  .bn-trio-card {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 1.75rem 1.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .bn-trio-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgba(219, 39, 119, 0.12);
+  }
+  .bn-trio-info {
+    flex: 1;
+    z-index: 1;
+  }
+  .bn-trio-badge {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    padding: 3px 10px;
+    border-radius: 50px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    margin-bottom: 0.6rem;
+  }
+  .bn-trio-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 0.4rem;
+  }
+  .bn-trio-desc {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin: 0 0 0.85rem;
+    line-height: 1.45;
+    max-width: 220px;
+  }
+  .bn-trio-btn {
+    font-size: 0.82rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .bn-trio-img-wrap {
+    width: 88px;
+    height: 88px;
+    border-radius: 20px;
+    overflow: hidden;
+    flex-shrink: 0;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  }
+  .bn-trio-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .bn-trio-spa { background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%); }
+  .bn-trio-beauty { background: linear-gradient(135deg, #fff0f6 0%, #ffffff 100%); }
+  .bn-trio-bridal { background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%); }
+
+  /* 14 Subcategories Grid (2 rows of 7) */
+  .bn-subcat-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1.25rem;
+  }
+  .bn-subcat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    text-decoration: none;
+    gap: 8px;
+    transition: transform 0.15s ease;
+  }
+  .bn-subcat-item:hover {
+    transform: translateY(-3px);
+  }
+  .bn-subcat-squircle {
+    width: 72px;
+    height: 72px;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #f8fafc;
+    border: 1.5px solid rgba(219, 39, 119, 0.15);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+  }
+  .bn-subcat-item:hover .bn-subcat-squircle {
+    border-color: #db2777;
+    box-shadow: 0 8px 20px rgba(219, 39, 119, 0.2);
+  }
+  .bn-subcat-squircle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .bn-subcat-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #374151;
+    line-height: 1.25;
+  }
+
+  /* ==========================================================================
+     3. TRENDING DOORSTEP SALON RITUALS (SERVICES)
+     ========================================================================== */
+  .bn-services-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.75rem;
+  }
+  .bn-service-card {
+    background: #ffffff;
+    border-radius: 24px;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    transition: all 0.2s ease;
+  }
+  .bn-service-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgba(219, 39, 119, 0.12);
+  }
+  .bn-scard-media {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+    background: #f1f5f9;
+  }
+  .bn-scard-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+  .bn-service-card:hover .bn-scard-media img {
+    transform: scale(1.05);
+  }
+  .bn-scard-deal-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: linear-gradient(135deg, #db2777 0%, #be185d 100%);
+    color: #ffffff;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    padding: 4px 10px;
+    border-radius: 50px;
+    box-shadow: 0 2px 8px rgba(219, 39, 119, 0.4);
+    text-transform: uppercase;
+  }
+  .bn-scard-fav {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.15s ease;
+  }
+  .bn-scard-fav:hover {
+    color: #db2777;
+    background: #ffffff;
+  }
+  .bn-scard-duration {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    background: rgba(17, 24, 39, 0.75);
+    backdrop-filter: blur(8px);
+    color: #ffffff;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .bn-scard-body {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+  .bn-scard-rating {
+    font-size: 0.74rem;
+    color: #f59e0b;
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+  }
+  .bn-scard-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 0.4rem;
+    line-height: 1.3;
+  }
+  .bn-scard-desc {
+    font-size: 0.8rem;
+    color: #64748b;
+    line-height: 1.45;
+    margin: 0 0 1rem;
+    flex-grow: 1;
+  }
+  .bn-scard-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+  }
+  .bn-scard-price-box {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .bn-scard-price {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+  .bn-scard-mrp {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    text-decoration: line-through;
+  }
+  .bn-scard-discount {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #16a34a;
+  }
+  .bn-btn-add {
+    background: linear-gradient(135deg, #db2777 0%, #be185d 100%);
+    color: #ffffff;
+    border: none;
+    padding: 6px 18px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 0.82rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 2px 8px rgba(219, 39, 119, 0.3);
+    transition: all 0.16s ease;
+    text-decoration: none;
+  }
+  .bn-btn-add:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(219, 39, 119, 0.45);
+    color: #ffffff;
+  }
+
+  /* ==========================================================================
+     4. KOREAN RITUALS FEATURE BANNER
+     ========================================================================== */
+  .bn-korean-banner {
+    background: linear-gradient(135deg, #fff0f6 0%, #fce7f3 60%, #fed7aa 100%);
+    border: 1.5px solid rgba(219, 39, 119, 0.2);
+    border-radius: 28px;
+    padding: 3rem;
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    align-items: center;
+    gap: 2.5rem;
+    box-shadow: 0 16px 40px rgba(219, 39, 119, 0.08);
+    margin: 4rem auto;
+    max-width: 1240px;
+    box-sizing: border-box;
+  }
+  .bn-korean-img-wrap {
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12);
+    aspect-ratio: 16 / 10;
+  }
+  .bn-korean-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* ==========================================================================
+     5. TOP RATED BEAUTICIANS IN VARANASI
+     ========================================================================== */
+  .bn-beauticians-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+  .bn-bcard-box {
+    background: #ffffff;
+    border-radius: 22px;
+    padding: 1.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+    display: flex;
+    gap: 1.25rem;
+    align-items: center;
+    transition: all 0.2s ease;
+  }
+  .bn-bcard-box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(219, 39, 119, 0.1);
+  }
+  .bn-bcard-avatar {
+    width: 68px;
+    height: 68px;
+    border-radius: 20px;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 2px solid rgba(219, 39, 119, 0.25);
+  }
+  .bn-bcard-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .bn-bcard-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .bn-bcard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.25rem;
+  }
+  .bn-bcard-header h4 {
+    font-size: 0.96rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+  }
+  .bn-rating-pill {
+    background: #fef3c7;
+    color: #b45309;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 50px;
+  }
+  .bn-bcard-spec {
+    font-size: 0.78rem;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .bn-bcard-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .bn-bcard-badge-pill {
+    font-size: 0.68rem;
+    background: #fdf2f8;
+    color: #db2777;
+    padding: 2px 8px;
+    border-radius: 50px;
+    font-weight: 600;
+    border: 1px solid rgba(219, 39, 119, 0.15);
+  }
+
+  /* ==========================================================================
+     6. HOW IT WORKS (3 EASY STEPS)
+     ========================================================================== */
+  .bn-steps-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.75rem;
+  }
+  .bn-step-box {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 2.25rem 1.75rem;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    position: relative;
+    transition: all 0.2s ease;
+  }
+  .bn-step-box:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgba(219, 39, 119, 0.1);
+  }
+  .bn-step-badge {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: rgba(219, 39, 119, 0.25);
+  }
+  .bn-step-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #db2777, #be185d);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 6px 18px rgba(219, 39, 119, 0.3);
+  }
+  .bn-step-box h3 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 0.5rem;
+  }
+  .bn-step-box p {
+    font-size: 0.85rem;
+    color: #64748b;
+    line-height: 1.6;
+    margin: 0 0 1rem;
+  }
+  .bn-step-link {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #db2777;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* ==========================================================================
+     7. TRUST STATS STRIP
+     ========================================================================== */
+  .bn-stats-banner {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 2.25rem;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.04);
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .bn-stat-num {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #db2777;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+  .bn-stat-lbl {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* ==========================================================================
+     8. TESTIMONIALS
+     ========================================================================== */
+  .bn-reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.75rem;
+  }
+  .bn-review-card {
+    background: #ffffff;
+    border-radius: 22px;
+    padding: 2rem 1.75rem;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .bn-rev-stars {
+    color: #f59e0b;
+    font-size: 0.88rem;
+    margin-bottom: 0.8rem;
+  }
+  .bn-rev-text {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #374151;
+    font-style: italic;
+    margin: 0 0 1.5rem;
+  }
+  .bn-rev-author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .bn-rev-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .bn-rev-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .bn-rev-name {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.2;
+  }
+  .bn-rev-city {
+    font-size: 0.72rem;
+    color: #64748b;
+  }
+
+  /* ==========================================================================
+     9. LUXURY FOOTER
+     ========================================================================== */
+  .bn-luxury-footer {
+    background: #0f0a1e;
+    color: rgba(255, 255, 255, 0.75);
+    padding: 4rem 1.5rem 2rem;
+    margin-top: 4rem;
+  }
+  .bn-footer-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
+    gap: 3rem;
+    max-width: 1240px;
+    margin: 0 auto 3rem;
+  }
+  .bn-footer-brand {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .bn-footer-brand .b1 { color: #f472b6; }
+  .bn-footer-desc {
+    font-size: 0.85rem;
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.65);
+    margin-bottom: 1.25rem;
+  }
+  .bn-footer-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 1.25rem;
+  }
+  .bn-footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .bn-footer-links a {
+    color: rgba(255, 255, 255, 0.65);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color 0.15s ease;
+  }
+  .bn-footer-links a:hover {
+    color: #f472b6;
+  }
+  .bn-footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1240px;
+    margin: 0 auto;
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.5);
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  /* ==========================================================================
+     RESPONSIVE BREAKPOINTS (PERFECT ON ALL DEVICES)
+     ========================================================================== */
+  @media (max-width: 992px) {
+    .bn-hero-grid {
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+      text-align: center;
+    }
+    .bn-hero-left {
+      align-items: center;
+    }
+    .bn-hero-actions, .bn-checks-row {
+      justify-content: center;
+    }
+    .bn-cat-trio,
+    .bn-services-grid,
+    .bn-beauticians-grid,
+    .bn-steps-row,
+    .bn-reviews-grid {
+      grid-template-columns: 1fr;
+    }
+    .bn-subcat-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .bn-stats-banner {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .bn-korean-banner {
+      grid-template-columns: 1fr;
+    }
+    .bn-footer-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .bn-hero-section {
+      padding-top: 2rem;
+    }
+    .bn-slider-card {
+      height: 320px;
+    }
+    .bn-subcat-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .bn-footer-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="bn-home-wrap">
+
+  <!-- ======= 1. HERO SECTION WITH IMAGE SLIDER ======= -->
+  <section class="bn-hero-section" id="hero">
+    <div class="bn-container">
+      <div class="bn-hero-grid">
+        
+        <!-- Left Hero Content -->
+        <div class="bn-hero-left">
+          <div class="bn-pill-tag">
+            <i class="ti ti-sparkles"></i> <%= t("hero.pill") %>
+          </div>
+
+          <h1 class="bn-hero-title">
+            <%= t("hero.title_1") %><br>
+            <span class="glow-pink"><%= t("hero.title_2") %></span>
+          </h1>
+
+          <p class="bn-hero-desc">
+            <%= t("hero.desc").gsub("\n", "<br>").html_safe %>
+          </p>
+
+          <div class="bn-hero-actions">
+            <%= link_to "/categories", class: "bn-btn-hero-primary" do %>
+              <%= t("hero.book_now") %> <i class="ti ti-arrow-right"></i>
+            <% end %>
+            <a href="#trending" class="bn-btn-hero-outline">
+              <%= t("hero.view_services") %>
+            </a>
+          </div>
+
+          <div class="bn-script-sub"><%= t("hero.script_sub") %></div>
+
+          <div class="bn-checks-row">
+            <div class="bn-check-item">
+              <span class="bn-check-circle"><i class="ti ti-check"></i></span>
+              <span><%= t("hero.verified_beauticians") %></span>
+            </div>
+            <div class="bn-check-item">
+              <span class="bn-check-circle"><i class="ti ti-check"></i></span>
+              <span><%= t("hero.hygiene_guarantee") %></span>
+            </div>
+            <div class="bn-check-item">
+              <span class="bn-check-circle"><i class="ti ti-check"></i></span>
+              <span><%= t("hero.on_time") %></span>
+            </div>
+            <div class="bn-check-item">
+              <span class="bn-check-circle"><i class="ti ti-check"></i></span>
+              <span><%= t("hero.post_pay") %></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Hero Slider Component -->
+        <div class="bn-hero-right">
+          <div class="bn-slider-card" id="bn-hero-slider">
+            
+            <!-- Slide 1: Korean Glass Skin Facial -->
+            <div class="bn-slide-item active" data-index="0">
+              <img src="/slider/slide1.png" alt="Korean Glass Skin Facial at Home">
+              <div class="bn-slide-overlay"></div>
+              <div class="bn-slide-top-badge">
+                <span class="green-blink-dot"></span>
+                <span><%= t("slider.organic_products") %></span>
+              </div>
+              <div class="bn-slide-content-card">
+                <div class="bn-slide-content-tag"><%= t("slider.slide1_tag") %></div>
+                <div class="bn-slide-content-title"><%= t("slider.slide1_title") %></div>
+                <div class="bn-slide-content-sub"><%= t("slider.slide1_sub") %></div>
+                <%= link_to "/categories", class: "bn-slide-btn" do %>
+                  <%= t("slider.slide1_btn") %>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- Slide 2: Hair Care & Styling -->
+            <div class="bn-slide-item" data-index="1">
+              <img src="/slider/slide2.png" alt="Hair Spa and Styling at Home">
+              <div class="bn-slide-overlay"></div>
+              <div class="bn-slide-top-badge">
+                <span class="green-blink-dot"></span>
+                <span><%= t("slider.salon_grade") %></span>
+              </div>
+              <div class="bn-slide-content-card">
+                <div class="bn-slide-content-tag"><%= t("slider.slide2_tag") %></div>
+                <div class="bn-slide-content-title"><%= t("slider.slide2_title") %></div>
+                <div class="bn-slide-content-sub"><%= t("slider.slide2_sub") %></div>
+                <%= link_to "/categories", class: "bn-slide-btn" do %>
+                  <%= t("slider.slide2_btn") %>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- Slide 3: Bridal HD Makeup -->
+            <div class="bn-slide-item" data-index="2">
+              <img src="/slider/slide3.png" alt="Bridal HD Makeup by Certified Artists">
+              <div class="bn-slide-overlay"></div>
+              <div class="bn-slide-top-badge">
+                <span class="green-blink-dot"></span>
+                <span><%= t("slider.top_artists") %></span>
+              </div>
+              <div class="bn-slide-content-card">
+                <div class="bn-slide-content-tag"><%= t("slider.slide3_tag") %></div>
+                <div class="bn-slide-content-title"><%= t("slider.slide3_title") %></div>
+                <div class="bn-slide-content-sub"><%= t("slider.slide3_sub") %></div>
+                <%= link_to "/categories", class: "bn-slide-btn" do %>
+                  <%= t("slider.slide3_btn") %>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- Slide 4: Spa & Relaxation -->
+            <div class="bn-slide-item" data-index="3">
+              <img src="/slider/slide4.png" alt="Spa and Body Massages">
+              <div class="bn-slide-overlay"></div>
+              <div class="bn-slide-top-badge">
+                <span class="green-blink-dot"></span>
+                <span><%= t("slider.verified_pros") %></span>
+              </div>
+              <div class="bn-slide-content-card">
+                <div class="bn-slide-content-tag"><%= t("slider.slide4_tag") %></div>
+                <div class="bn-slide-content-title"><%= t("slider.slide4_title") %></div>
+                <div class="bn-slide-content-sub"><%= t("slider.slide4_sub") %></div>
+                <%= link_to "/categories", class: "bn-slide-btn" do %>
+                  <%= t("slider.slide4_btn") %>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- Slider Controls -->
+            <button class="bn-slider-btn bn-slider-prev" id="slider-prev-btn" aria-label="Previous Slide">
+              <i class="ti ti-chevron-left"></i>
+            </button>
+            <button class="bn-slider-btn bn-slider-next" id="slider-next-btn" aria-label="Next Slide">
+              <i class="ti ti-chevron-right"></i>
+            </button>
+          </div>
+
+          <!-- Slider Dots & Social Proof -->
+          <div class="bn-slider-dots" id="slider-dots-wrap">
+            <span class="bn-dot active" data-slide="0"></span>
+            <span class="bn-dot" data-slide="1"></span>
+            <span class="bn-dot" data-slide="2"></span>
+            <span class="bn-dot" data-slide="3"></span>
+          </div>
+
+          <div class="bn-slider-caption">
+            ⭐ <strong style="color: #0f172a;">4.9/5</strong> <%= t("slider.rating_caption") %>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ======= 2. CATEGORY & SUBCATEGORY SHOWCASE ======= -->
+  <section class="bn-section" id="categories">
+    <div class="bn-section-header">
+      <div>
+        <div class="bn-pill-tag">
+          <i class="ti ti-grid"></i> <%= t("categories.tag") %>
+        </div>
+        <h2 class="bn-section-title"><%= t("categories.title") %></h2>
+        <p class="bn-section-sub"><%= t("categories.sub") %></p>
+      </div>
+      <%= link_to "/categories", class: "bn-view-all-link" do %>
+        <%= t("categories.see_all") %>
+      <% end %>
+    </div>
+
+    <!-- 3 Large Featured Category Cards -->
+    <div class="bn-cat-trio">
+      <!-- 1. Spa & Wellness -->
+      <%= link_to "/categories", class: "bn-trio-card bn-trio-spa" do %>
+        <div class="bn-trio-info">
+          <span class="bn-trio-badge" style="background:#ffffff; color:#15803d;"><%= t("categories.spa_tag") %></span>
+          <h3 class="bn-trio-title"><%= t("categories.spa_title") %></h3>
+          <p class="bn-trio-desc"><%= t("categories.spa_desc") %></p>
+          <span class="bn-trio-btn" style="color:#15803d;"><%= t("categories.spa_btn") %></span>
+        </div>
+        <div class="bn-trio-img-wrap">
+          <img src="/slider/slide4.png" alt="Spa and Wellness">
+        </div>
+      <% end %>
+
+      <!-- 2. Beauty & Salon -->
+      <%= link_to "/categories", class: "bn-trio-card bn-trio-beauty" do %>
+        <div class="bn-trio-info">
+          <span class="bn-trio-badge" style="background:#ffffff; color:#db2777;"><%= t("categories.beauty_tag") %></span>
+          <h3 class="bn-trio-title"><%= t("categories.beauty_title") %></h3>
+          <p class="bn-trio-desc"><%= t("categories.beauty_desc") %></p>
+          <span class="bn-trio-btn" style="color:#db2777;"><%= t("categories.beauty_btn") %></span>
+        </div>
+        <div class="bn-trio-img-wrap">
+          <img src="/slider/slide1.png" alt="Beauty and Salon">
+        </div>
+      <% end %>
+
+      <!-- 3. Makeup & Bridal -->
+      <%= link_to "/categories", class: "bn-trio-card bn-trio-bridal" do %>
+        <div class="bn-trio-info">
+          <span class="bn-trio-badge" style="background:#ffffff; color:#b45309;"><%= t("categories.bridal_tag") %></span>
+          <h3 class="bn-trio-title"><%= t("categories.bridal_title") %></h3>
+          <p class="bn-trio-desc"><%= t("categories.bridal_desc") %></p>
+          <span class="bn-trio-btn" style="color:#b45309;"><%= t("categories.bridal_btn") %></span>
+        </div>
+        <div class="bn-trio-img-wrap">
+          <img src="/slider/slide3.png" alt="Makeup and Bridal">
+        </div>
+      <% end %>
+    </div>
+
+    <!-- 14 Subcategory Icon Grid (2 rows of 7) -->
+    <div class="bn-subcat-grid">
+      <% subcats = [
+        { key: "facial_cleanup",   img: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=200&q=80" },
+        { key: "bleach_dtan",      img: "https://images.unsplash.com/photo-1512290900672-1f5076abf08f?w=200&q=80" },
+        { key: "threading",        img: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=200&q=80" },
+        { key: "waxing",           img: "https://images.unsplash.com/photo-1560750588-73207b1ef5b8?w=200&q=80" },
+        { key: "manicure",         img: "https://images.unsplash.com/photo-1632345031435-8727f6897d53?w=200&q=80" },
+        { key: "pedicure",         img: "https://images.unsplash.com/photo-1519014816548-bf5fe059798b?w=200&q=80" },
+        { key: "hair_care",        img: "/slider/slide2.png" },
+        { key: "spa",              img: "/slider/slide4.png" },
+        { key: "body_polishing",   img: "/slider/slide1.png" },
+        { key: "premium",          img: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=200&q=80" },
+        { key: "make_up",          img: "/slider/slide3.png" },
+        { key: "pre_bridal",       img: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=200&q=80" },
+        { key: "nails",            img: "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=200&q=80" },
+        { key: "special_occasion", img: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=200&q=80" }
+      ] %>
+
+      <% subcats.each do |sc| %>
+        <%= link_to "/categories", class: "bn-subcat-item" do %>
+          <div class="bn-subcat-squircle">
+            <img src="<%= sc[:img] %>" alt="<%= t("subcategories.#{sc[:key]}") %>" loading="lazy">
+          </div>
+          <span class="bn-subcat-label"><%= t("subcategories.#{sc[:key]}") %></span>
+        <% end %>
+      <% end %>
+    </div>
+  </section>
+
+
+  <!-- ======= 3. TRENDING DOORSTEP SALON RITUALS (SERVICES) ======= -->
+  <section class="bn-section pt-0" id="trending">
+    <div class="bn-section-header">
+      <div>
+        <div class="bn-pill-tag">
+          <i class="ti ti-flame"></i> <%= t("trending.tag") %>
+        </div>
+        <h2 class="bn-section-title"><%= t("trending.title") %></h2>
+        <p class="bn-section-sub"><%= t("trending.sub") %></p>
+      </div>
+      <%= link_to "/categories", class: "bn-view-all-link" do %>
+        <%= t("trending.browse_all") %>
+      <% end %>
+    </div>
+
+    <div class="bn-services-grid">
+      <% 
+        catalog_services = [
+          { name: t_bilingual("Classic Facial & Cleanup", "क्लासिक फेशियल एवं क्लीन-अप"), price: 799, mrp: 999, disc: "20% OFF", time: "60 #{t('trending.min')}", rating: "4.9 (140+)", img: "/slider/slide4.png", badge: "HOT DEAL", desc: t_bilingual("Deep pore cleansing, fruit scrub, herbal steam & mask.", "गहरी सफाई, फ्रूट स्क्रब, हर्बल स्टीम एवं सूथिंग फेस मास्क।") },
+          { name: t_bilingual("Fruit Cleanup & Glow", "फ्रूट क्लीन-अप एवं ग्लो"), price: 599, mrp: 799, disc: "25% OFF", time: "45 #{t('trending.min')}", rating: "4.8 (95+)", img: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=500&q=80", badge: "BESTSELLER", desc: t_bilingual("Organic fruit enzymes for instant brightness and radiant skin.", "प्राकृतिक फ्रूट एंजाइम्स से पाएं तुरंत निखार व चमकदार त्वचा।") },
+          { name: t_bilingual("De-Tan Glow Ritual", "डी-टैन ग्लो रिचुअल"), price: 999, mrp: 1299, disc: "23% OFF", time: "60 #{t('trending.min')}", rating: "4.9 (180+)", img: "/slider/slide3.png", badge: "POPULAR", desc: t_bilingual("Milk and honey de-tan pack with gentle exfoliation.", "दूध और शहद आधारित डी-टैन पैक से टैनिंग का प्रभावी निवारण।") },
+          { name: t_bilingual("Korean Glass Skin Facial", "कोरियन ग्लास स्किन फेशियल"), price: 1899, mrp: 2499, disc: "24% OFF", time: "75 #{t('trending.min')}", rating: "5.0 (220+)", img: "/slider/slide1.png", badge: "EXCLUSIVE", desc: t_bilingual("7-step Korean hydration ritual with hyaluronic serum.", "7-चरणीय हाइड्रेशन फेशियल हयालूरोनिक सीरम के साथ।") },
+          { name: t_bilingual("Hair Spa & Deep Conditioning", "हेयर स्पा एवं डीप कंडीशनिंग"), price: 799, mrp: 1099, disc: "27% OFF", time: "60 #{t('trending.min')}", rating: "4.8 (110+)", img: "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=500&q=80", badge: "HOT DEAL", desc: t_bilingual("Argan oil deep conditioning treatment for silky hair.", "आर्गन ऑयल युक्त डीप कंडीशनिंग से पाएं सिल्की और सुलझे बाल।") },
+          { name: t_bilingual("Diamond Glow Bridal Facial", "डायमंड ग्लो ब्राइडल फेशियल"), price: 1499, mrp: 1999, disc: "25% OFF", time: "90 #{t('trending.min')}", rating: "4.9 (160+)", img: "/slider/slide2.png", badge: "PREMIUM", desc: t_bilingual("Diamond dust infused polish with collagen boosting massage.", "डायमंड डस्ट आधारित स्किन पॉलिश और कोलाजेन बूस्टिंग मसाज।") }
+        ]
+      %>
+
+      <% catalog_services.each_with_index do |svc, idx| %>
+        <% db_svc = @trending_services[idx] rescue nil %>
+        <% actual_price = db_svc ? db_svc.effective_price.to_i : svc[:price] %>
+        <div class="bn-service-card">
+          <div class="bn-scard-media">
+            <img src="<%= svc[:img] %>" alt="<%= svc[:name] %>" loading="lazy">
+            <span class="bn-scard-deal-badge"><%= svc[:badge] %></span>
+            <button class="bn-scard-fav" aria-label="Favorite"><i class="ti ti-heart"></i></button>
+            <div class="bn-scard-duration"><i class="ti ti-clock"></i> <%= svc[:time] %></div>
+          </div>
+          <div class="bn-scard-body">
+            <div class="bn-scard-rating">★ <%= svc[:rating] %></div>
+            <h3 class="bn-scard-title"><%= svc[:name] %></h3>
+            <p class="bn-scard-desc"><%= svc[:desc] %></p>
+            <div class="bn-scard-footer">
+              <div class="bn-scard-price-box">
+                <span class="bn-scard-price">&#8377;<%= number_with_delimiter(actual_price) %></span>
+                <span class="bn-scard-mrp">&#8377;<%= number_with_delimiter(svc[:mrp]) %></span>
+                <span class="bn-scard-discount"><%= svc[:disc] %></span>
+              </div>
+              <% if db_svc %>
+                <%= form_with url: add_item_cart_path, method: :post, local: true, style: "display: inline;" do %>
+                  <input type="hidden" name="service_id" value="<%= db_svc.id %>">
+                  <input type="hidden" name="quantity" value="1">
+                  <button type="submit" class="bn-btn-add">
+                    <i class="ti ti-plus"></i> <%= t("trending.add_btn") %>
+                  </button>
+                <% end %>
+              <% else %>
+                <%= link_to "/categories", class: "bn-btn-add" do %>
+                  <i class="ti ti-plus"></i> <%= t("trending.add_btn") %>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </section>
+
+
+  <!-- ======= 4. KOREAN BEAUTY RITUALS SPOTLIGHT ======= -->
+  <div class="bn-container">
+    <div class="bn-korean-banner">
+      <div>
+        <div class="bn-pill-tag" style="background: rgba(219,39,119,0.12);">
+          <i class="ti ti-sparkles"></i> <%= t("korean.tag") %>
+        </div>
+        <h2 style="font-family: 'Playfair Display', Georgia, serif; font-size: 2.2rem; font-weight: 700; color: #0f172a; margin: 0 0 1rem;">
+          <%= t("korean.title") %>
+        </h2>
+        <p style="font-size: 1rem; color: #4b5563; line-height: 1.7; max-width: 520px; margin: 0 0 2rem;">
+          <%= t("korean.desc") %>
+        </p>
+        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+          <%= link_to "/categories", class: "bn-btn-hero-primary" do %>
+            <%= t("korean.book_now") %> <i class="ti ti-arrow-right"></i>
+          <% end %>
+          <div style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #0f172a; font-weight: 600;">
+            <span style="color: #f59e0b;">★★★★★</span>
+            <span><%= t("korean.verified_reviews") %></span>
+          </div>
+        </div>
+      </div>
+      <div class="bn-korean-img-wrap">
+        <img src="/slider/slide1.png" alt="Korean Beauty Rituals">
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ======= 5. TOP RATED BEAUTICIANS IN VARANASI ======= -->
+  <section class="bn-section" id="beauticians">
+    <div class="bn-section-header">
+      <div>
+        <div class="bn-pill-tag">
+          <i class="ti ti-award"></i> <%= t("beauticians.tag") %>
+        </div>
+        <h2 class="bn-section-title"><%= t("beauticians.title") %></h2>
+        <p class="bn-section-sub"><%= t("beauticians.sub") %></p>
+      </div>
+      <%= link_to "/categories", class: "bn-view-all-link" do %>
+        <%= t("beauticians.view_all") %>
+      <% end %>
+    </div>
+
+    <div class="bn-beauticians-grid">
+      <% 
+        beauticians_list = [
+          { name: "Sunita Sharma", spec: t_bilingual("Korean Facial & O3+ Specialist", "कोरियन फेशियल एवं O3+ विशेषज्ञ"), exp: "5+ #{t('beauticians.yrs_exp')}", rating: "★ 4.9 (480)", img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80", tags: [t("beauticians.verified_pro"), "5+ #{t('beauticians.yrs_exp')}", "250+ #{t('beauticians.jobs')}"] },
+          { name: "Pooja Maurya", spec: t_bilingual("Bridal HD Makeup Artist", "ब्राइडल एचडी मेकअप आर्टिस्ट"), exp: "6+ #{t('beauticians.yrs_exp')}", rating: "★ 4.9 (390)", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&q=80", tags: [t("beauticians.verified_pro"), "6+ #{t('beauticians.yrs_exp')}", "180+ Brides"] },
+          { name: "Anjali Gupta", spec: t_bilingual("Hair Botox & Keratin Expert", "हेयर बोटॉक्स एवं केराटिन एक्सपर्ट"), exp: "4+ #{t('beauticians.yrs_exp')}", rating: "★ 4.8 (310)", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80", tags: [t("beauticians.verified_pro"), "4+ #{t('beauticians.yrs_exp')}", "Hair Pro"] },
+          { name: "Rekha Vishwakarma", spec: t_bilingual("Skin Polish & Anti-Ageing", "स्किन पॉलिश एवं एंटी-एजिंग"), exp: "7+ #{t('beauticians.yrs_exp')}", rating: "★ 5.0 (610)", img: "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=400&q=80", tags: [t("beauticians.verified_pro"), "7+ #{t('beauticians.yrs_exp')}", "Master Artist"] },
+          { name: "Shikha Srivastava", spec: t_bilingual("Party Glam & Nail Art", "पार्टी ग्लैम एवं नेल आर्ट"), exp: "5+ #{t('beauticians.yrs_exp')}", rating: "★ 4.9 (280)", img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&q=80", tags: [t("beauticians.verified_pro"), "5+ #{t('beauticians.yrs_exp')}", "Nail Master"] },
+          { name: "Priya Tiwari", spec: t_bilingual("Spa & Full Body Relaxer", "स्पा एवं फुल बॉडी रिलैक्सर"), exp: "4+ #{t('beauticians.yrs_exp')}", rating: "★ 4.9 (240)", img: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&q=80", tags: [t("beauticians.verified_pro"), "4+ #{t('beauticians.yrs_exp')}", "Aroma Certified"] }
+        ]
+      %>
+
+      <% beauticians_list.each do |b| %>
+        <div class="bn-bcard-box">
+          <div class="bn-bcard-avatar">
+            <img src="<%= b[:img] %>" alt="<%= b[:name] %>" loading="lazy">
+          </div>
+          <div class="bn-bcard-info">
+            <div class="bn-bcard-header">
+              <h4><%= b[:name] %></h4>
+              <span class="bn-rating-pill"><%= b[:rating] %></span>
+            </div>
+            <div class="bn-bcard-spec"><%= b[:spec] %></div>
+            <div class="bn-bcard-badges">
+              <% b[:tags].each do |tag| %>
+                <span class="bn-bcard-badge-pill">✓ <%= tag %></span>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </section>
+
+
+  <!-- ======= 6. 3 EASY STEPS PROCESS ======= -->
+  <section class="bn-section pt-0" id="how-it-works">
+    <div class="bn-section-header text-center">
+      <div class="bn-pill-tag">
+        <i class="ti ti-help"></i> <%= t("how_it_works.tag") %>
+      </div>
+      <h2 class="bn-section-title"><%= t("how_it_works.title") %></h2>
+      <p class="bn-section-sub"><%= t("how_it_works.sub") %></p>
+    </div>
+
+    <div class="bn-steps-row">
+      <!-- Step 1 -->
+      <div class="bn-step-box">
+        <span class="bn-step-badge"><%= t("how_it_works.step1_badge") %></span>
+        <div class="bn-step-icon">
+          <i class="ti ti-calendar-plus"></i>
+        </div>
+        <h3><%= t("how_it_works.step1_title") %></h3>
+        <p><%= t("how_it_works.step1_desc") %></p>
+        <span class="bn-step-link"><%= t("how_it_works.step1_btn") %></span>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="bn-step-box">
+        <span class="bn-step-badge"><%= t("how_it_works.step2_badge") %></span>
+        <div class="bn-step-icon">
+          <i class="ti ti-sparkles"></i>
+        </div>
+        <h3><%= t("how_it_works.step2_title") %></h3>
+        <p><%= t("how_it_works.step2_desc") %></p>
+        <span class="bn-step-link" style="color: #16a34a;"><%= t("how_it_works.step2_badge_text") %></span>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="bn-step-box">
+        <span class="bn-step-badge"><%= t("how_it_works.step3_badge") %></span>
+        <div class="bn-step-icon">
+          <i class="ti ti-credit-card"></i>
+        </div>
+        <h3><%= t("how_it_works.step3_title") %></h3>
+        <p><%= t("how_it_works.step3_desc") %></p>
+        <span class="bn-step-link" style="color: #2563eb;"><%= t("how_it_works.step3_badge_text") %></span>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ======= 7. TRUST STATS & METRICS ======= -->
+  <div class="bn-container">
+    <div class="bn-stats-banner">
+      <div>
+        <div class="bn-stat-num">10k+</div>
+        <div class="bn-stat-lbl"><%= t("stats.happy_customers") %></div>
+      </div>
+      <div>
+        <div class="bn-stat-num">500+</div>
+        <div class="bn-stat-lbl"><%= t("stats.verified_beauticians") %></div>
+      </div>
+      <div>
+        <div class="bn-stat-num">4.9★</div>
+        <div class="bn-stat-lbl"><%= t("stats.avg_rating") %></div>
+      </div>
+      <div>
+        <div class="bn-stat-num">100%</div>
+        <div class="bn-stat-lbl"><%= t("stats.safe_hygienic") %></div>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin: 1.5rem 0 3rem;">
+      <span class="script-font" style="font-size: 1.4rem; color: #4b5563;">
+        <%= t("stats.script_quote") %>
+      </span>
+    </div>
+  </div>
+
+
+  <!-- ======= 8. CUSTOMER TESTIMONIALS ======= -->
+  <section class="bn-section pt-0" id="reviews">
+    <div class="bn-section-header text-center">
+      <div class="bn-pill-tag">
+        <i class="ti ti-heart"></i> <%= t("testimonials.tag") %>
+      </div>
+      <h2 class="bn-section-title"><%= t("testimonials.title") %></h2>
+      <p class="bn-section-sub"><%= t("testimonials.sub") %></p>
+    </div>
+
+    <div class="bn-reviews-grid">
+      <!-- Review 1 -->
+      <div class="bn-review-card">
+        <div>
+          <div class="bn-rev-stars">★★★★★</div>
+          <p class="bn-rev-text">
+            <%= t_bilingual(
+              "\"The Korean Glass Skin facial is pure magic! Sunita arrived exactly on time with a sealed sanitized kit. My skin was glowing for days. Truly five-star doorstep service!\"",
+              "\"कोरियन ग्लास स्किन फेशियल वाकई कमाल का है! सुनीता समय पर सीलबंद सैनिटाइज्ड किट के साथ आईं। मेरी त्वचा कई दिनों तक चमकती रही। घर पर बेहतरीन सैलून अनुभव!\""
+            ) %>
+          </p>
+        </div>
+        <div class="bn-rev-author">
+          <div class="bn-rev-avatar">
+            <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120&q=80" alt="Pooja Verma">
+          </div>
+          <div>
+            <div class="bn-rev-name">Pooja Verma</div>
+            <div class="bn-rev-city">Sigra, Varanasi</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review 2 -->
+      <div class="bn-review-card">
+        <div>
+          <div class="bn-rev-stars">★★★★★</div>
+          <p class="bn-rev-text">
+            <%= t_bilingual(
+              "\"Booked bridal HD makeup for my sister's engagement. Rekha was so polite, hygienic and experienced. Everyone at the party complimented her natural look.\"",
+              "\"मेरी बहन की सगाई के लिए एचडी ब्राइडल मेकअप बुक किया था। रेखा जी बहुत विनम्र और अनुभवी थीं। पार्टी में सबने उनके मेकअप की बहुत तारीफ की।\""
+            ) %>
+          </p>
+        </div>
+        <div class="bn-rev-author">
+          <div class="bn-rev-avatar">
+            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&q=80" alt="Dr. Meenakshi Sinha">
+          </div>
+          <div>
+            <div class="bn-rev-name">Dr. Meenakshi Sinha</div>
+            <div class="bn-rev-city">Gomti Nagar, Lucknow</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review 3 -->
+      <div class="bn-review-card">
+        <div>
+          <div class="bn-rev-stars">★★★★★</div>
+          <p class="bn-rev-text">
+            <%= t_bilingual(
+              "\"Hair spa and pedicure at home is such a blessing for working mothers. Safe, relaxing, and very reasonably priced. Never going back to physical salon waiting queues!\"",
+              "\"कामकाजी महिलाओं के लिए घर पर हेयर स्पा और पेडीक्योर किसी वरदान जैसा है। सुरक्षित, तनावमुक्त और किफायती। अब सैलून की लाइनों में लगने की कोई ज़रूरत नहीं!\""
+            ) %>
+          </p>
+        </div>
+        <div class="bn-rev-author">
+          <div class="bn-rev-avatar">
+            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&q=80" alt="Priya Sharma">
+          </div>
+          <div>
+            <div class="bn-rev-name">Priya Sharma</div>
+            <div class="bn-rev-city">Bhelupur, Varanasi</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ======= 9. LUXURY FOOTER ======= -->
+  <footer class="bn-luxury-footer">
+    <div class="bn-footer-grid">
+      <div>
+        <div class="bn-footer-brand">
+          <span style="color:#db2777;">✦</span> BeautyNest
+        </div>
+        <p class="bn-footer-desc">
+          <%= t("footer.desc") %>
+        </p>
+        <div class="script-font" style="font-size: 1.15rem; color: #f472b6;">
+          <%= t("footer.tagline") %>
+        </div>
+        <div style="margin-top: 1.25rem; font-size: 0.82rem; color: rgba(255,255,255,0.7); display:flex; flex-direction:column; gap:6px;">
+          <div><i class="ti ti-map-pin" style="color:#f472b6;"></i> Bhelupur &amp; Sigra, Varanasi, UP 221010</div>
+          <div><i class="ti ti-phone" style="color:#f472b6;"></i> +91 98765 43210 (Support 8AM - 9PM)</div>
+          <div><i class="ti ti-mail" style="color:#f472b6;"></i> care@beautynest.in</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="bn-footer-title"><%= t("footer.popular_services") %></div>
+        <ul class="bn-footer-links">
+          <li><a href="/categories">Korean Glass Skin Facial</a></li>
+          <li><a href="/categories">Bridal HD Makeup</a></li>
+          <li><a href="/categories">Fruit Cleanup &amp; De-Tan</a></li>
+          <li><a href="/categories">Aroma Body Spa Massage</a></li>
+          <li><a href="/categories">Hair Spa &amp; Keratin</a></li>
+          <li><a href="/categories">Rica Waxing Packages</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="bn-footer-title"><%= t("footer.explore") %></div>
+        <ul class="bn-footer-links">
+          <li><a href="/"><%= t("nav.home") %></a></li>
+          <li><a href="/categories"><%= t("nav.services") %></a></li>
+          <li><a href="/offers"><%= t("nav.offers") %></a></li>
+          <li><a href="/about"><%= t("nav.about") %></a></li>
+          <li><a href="/contact"><%= t("nav.contact") %></a></li>
+          <li><a href="/terms"><%= t("footer.terms") %></a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="bn-footer-title"><%= t("footer.get_app") %></div>
+        <p class="bn-footer-desc" style="margin-bottom: 1rem;">
+          <%= t("footer.app_desc") %>
+        </p>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <a href="#" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); border-radius:12px; padding:10px 16px; color:#fff; text-decoration:none; display:flex; align-items:center; gap:10px;">
+            <i class="ti ti-brand-apple fs-2" style="color:#fff;"></i>
+            <div>
+              <div style="font-size:0.65rem; opacity:0.7;">Download on the</div>
+              <div style="font-size:0.85rem; font-weight:700;">Apple App Store</div>
+            </div>
+          </a>
+          <a href="#" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); border-radius:12px; padding:10px 16px; color:#fff; text-decoration:none; display:flex; align-items:center; gap:10px;">
+            <i class="ti ti-brand-google-play fs-2" style="color:#22c55e;"></i>
+            <div>
+              <div style="font-size:0.65rem; opacity:0.7;">Get it on</div>
+              <div style="font-size:0.85rem; font-weight:700;">Google Play Store</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="bn-footer-bottom">
+      <div>&copy; <%= Time.current.year %> <%= t("footer.rights_reserved") %></div>
+      <div style="display:flex; gap:1.5rem;">
+        <a href="/privacy" style="color:rgba(255,255,255,0.5); text-decoration:none;"><%= t("footer.privacy") %></a>
+        <a href="/terms" style="color:rgba(255,255,255,0.5); text-decoration:none;"><%= t("footer.terms") %></a>
+        <a href="/refund" style="color:rgba(255,255,255,0.5); text-decoration:none;"><%= t("footer.refund") %></a>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<!-- Hero Slider Interactive Script -->
+<script>
+  (function() {
+    var currentSlide = 0;
+    var slides = document.querySelectorAll('.bn-slide-item');
+    var dots = document.querySelectorAll('.bn-dot');
+    var totalSlides = slides.length;
+    var sliderInterval = null;
+    var sliderEl = document.getElementById('bn-hero-slider');
+
+    if (!slides.length) return;
+
+    function goToSlide(index) {
+      if (index >= totalSlides) index = 0;
+      if (index < 0) index = totalSlides - 1;
+      
+      slides.forEach(function(s, idx) {
+        s.classList.toggle('active', idx === index);
+      });
+      dots.forEach(function(d, idx) {
+        d.classList.toggle('active', idx === index);
+      });
+      currentSlide = index;
+    }
+
+    function nextSlide() {
+      goToSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+      goToSlide(currentSlide - 1);
+    }
+
+    function startAutoPlay() {
+      stopAutoPlay();
+      sliderInterval = setInterval(nextSlide, 4200);
+    }
+
+    function stopAutoPlay() {
+      if (sliderInterval) clearInterval(sliderInterval);
+    }
+
+    // Prev / Next button listeners
+    var prevBtn = document.getElementById('slider-prev-btn');
+    var nextBtn = document.getElementById('slider-next-btn');
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        prevSlide();
+        startAutoPlay();
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        nextSlide();
+        startAutoPlay();
+      });
+    }
+
+    // Dot listeners
+    dots.forEach(function(dot) {
+      dot.addEventListener('click', function() {
+        var targetIndex = parseInt(this.getAttribute('data-slide'), 10);
+        goToSlide(targetIndex);
+        startAutoPlay();
+      });
+    });
+
+    // Pause on hover
+    if (sliderEl) {
+      sliderEl.addEventListener('mouseenter', stopAutoPlay);
+      sliderEl.addEventListener('mouseleave', startAutoPlay);
+
+      // Touch swipe support
+      var startX = 0;
+      sliderEl.addEventListener('touchstart', function(e) {
+        startX = e.touches[0].clientX;
+        stopAutoPlay();
+      }, { passive: true });
+
+      sliderEl.addEventListener('touchend', function(e) {
+        var diffX = e.changedTouches[0].clientX - startX;
+        if (Math.abs(diffX) > 40) {
+          if (diffX < 0) nextSlide();
+          else prevSlide();
+        }
+        startAutoPlay();
+      }, { passive: true });
+    }
+
+    startAutoPlay();
+  })();
+</script>

@@ -1,0 +1,744 @@
+<% content_for :page_title, "Privacy Policy — #{site_name} Data Protection & Security" %>
+
+<%= render "shared/public_nav", active: "privacy" %>
+
+<!-- Page Hero -->
+<section class="bc-page-hero" style="background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 45%, #f5f3ff 100%); border-bottom: 1px solid rgba(219,39,119,.12);">
+  <div class="bc-page-hero-inner" style="max-width: 820px;">
+    <span class="bc-page-pretitle" style="background: rgba(219,39,119,.12); color: #be185d; border-color: rgba(219,39,119,.25);">
+      <i class="ti ti-shield-lock"></i> PRIVACY &amp; DATA PROTECTION
+    </span>
+    <h1 style="color: #0f0a1e; margin-bottom: 0.85rem;">
+      Your Privacy is Our <span style="color: #db2777; font-style: italic;">Sanctuary</span>
+    </h1>
+    <p style="color: #374151; font-size: 1.08rem; line-height: 1.7; max-width: 680px; margin: 0 auto 1.25rem;">
+      At <%= site_name %>, we deliver luxury salon services to your doorstep while maintaining the highest confidentiality, safety, and security standards for you and your home.
+    </p>
+    <div style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #4b5563; background: rgba(255,255,255,0.8); padding: 6px 16px; border-radius: 50px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+      <i class="ti ti-calendar" style="color: #db2777;"></i>
+      <span>Effective Date: September 2026</span>
+      <span>•</span>
+      <span class="fw-semibold" style="color: #15803d;"><i class="ti ti-circle-check"></i> DPDP Act 2023 &amp; IT Act 2000 Compliant</span>
+    </div>
+  </div>
+</section>
+
+<!-- Trust Pillars Bar -->
+<section style="background: #ffffff; border-bottom: 1px solid rgba(0,0,0,0.06); padding: 2.25rem 0;">
+  <div style="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem;">
+      
+      <div style="display: flex; gap: 1rem; align-items: flex-start; padding: 1rem 1.25rem; background: #fff5f7; border-radius: 16px; border: 1px solid rgba(219,39,119,0.15);">
+        <div style="width: 44px; height: 44px; border-radius: 12px; background: #db2777; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.3rem;">
+          <i class="ti ti-shield-check"></i>
+        </div>
+        <div>
+          <div style="font-weight: 700; font-size: 0.95rem; color: #111827; margin-bottom: 2px;">Female-First Safety</div>
+          <div style="font-size: 0.82rem; color: #4b5563; line-height: 1.5;">100% Aadhaar &amp; background-cleared specialists for home visits.</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 1rem; align-items: flex-start; padding: 1rem 1.25rem; background: #f0fdf4; border-radius: 16px; border: 1px solid rgba(21,128,61,0.15);">
+        <div style="width: 44px; height: 44px; border-radius: 12px; background: #15803d; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.3rem;">
+          <i class="ti ti-ban"></i>
+        </div>
+        <div>
+          <div style="font-weight: 700; font-size: 0.95rem; color: #111827; margin-bottom: 2px;">Zero Data Resale</div>
+          <div style="font-size: 0.82rem; color: #4b5563; line-height: 1.5;">We never sell or lease your personal information to advertisers.</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 1rem; align-items: flex-start; padding: 1rem 1.25rem; background: #eff6ff; border-radius: 16px; border: 1px solid rgba(3,105,161,0.15);">
+        <div style="width: 44px; height: 44px; border-radius: 12px; background: #0284c7; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.3rem;">
+          <i class="ti ti-lock"></i>
+        </div>
+        <div>
+          <div style="font-weight: 700; font-size: 0.95rem; color: #111827; margin-bottom: 2px;">Bank-Grade Encryption</div>
+          <div style="font-size: 0.82rem; color: #4b5563; line-height: 1.5;">All transactions and data are protected with 256-bit TLS encryption.</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 1rem; align-items: flex-start; padding: 1rem 1.25rem; background: #fefce8; border-radius: 16px; border: 1px solid rgba(202,138,4,0.2);">
+        <div style="width: 44px; height: 44px; border-radius: 12px; background: #ca8a04; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.3rem;">
+          <i class="ti ti-key"></i>
+        </div>
+        <div>
+          <div style="font-weight: 700; font-size: 0.95rem; color: #111827; margin-bottom: 2px;">Secret OTP Protocol</div>
+          <div style="font-size: 0.82rem; color: #4b5563; line-height: 1.5;">Services start only after you reveal your unique service passcode.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Main Privacy Content Section -->
+<section style="background: #faf9ff; padding: 3.5rem 0 5rem;">
+  <div style="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem;">
+    <div style="display: grid; grid-template-columns: 280px 1fr; gap: 3rem; align-items: flex-start;" class="bn-privacy-layout">
+
+      <!-- Left: Sticky Quick-Navigation Table of Contents -->
+      <div style="position: sticky; top: 90px; background: #ffffff; border-radius: 20px; border: 1px solid rgba(0,0,0,0.07); padding: 1.5rem; box-shadow: 0 4px 18px rgba(0,0,0,0.03);" class="bn-privacy-toc">
+        <div style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #9ca3af; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px;">
+          <i class="ti ti-list-details" style="color: #db2777;"></i> POLICY SECTIONS
+        </div>
+        <nav style="display: flex; flex-direction: column; gap: 0.4rem;">
+          <a href="#overview" class="bn-toc-link">1. Overview &amp; Scope</a>
+          <a href="#information-collected" class="bn-toc-link">2. Information We Collect</a>
+          <a href="#how-we-use" class="bn-toc-link">3. How We Use Your Data</a>
+          <a href="#doorstep-safety" class="bn-toc-link">4. Doorstep Safety &amp; Discretion</a>
+          <a href="#location-data" class="bn-toc-link">5. Location &amp; Addresses</a>
+          <a href="#payment-security" class="bn-toc-link">6. Payments &amp; Financial Security</a>
+          <a href="#cookies-session" class="bn-toc-link">7. Cookies &amp; Device Storage</a>
+          <a href="#data-rights" class="bn-toc-link">8. Your Rights &amp; Erasure</a>
+          <a href="#data-retention" class="bn-toc-link">9. Data Retention Policy</a>
+          <a href="#grievance-officer" class="bn-toc-link">10. Grievance Officer &amp; Contact</a>
+        </nav>
+
+        <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid rgba(0,0,0,0.06); text-align: center;">
+          <div style="font-size: 0.78rem; color: #6b7280; margin-bottom: 0.75rem;">Need privacy support?</div>
+          <a href="mailto:care@<%= site_name.parameterize %>.in" class="bc-btn-ghost" style="padding: 8px 16px; font-size: 0.8rem; border-radius: 50px; display: inline-flex; align-items: center; gap: 6px; color: #db2777; border-color: rgba(219,39,119,0.3);">
+            <i class="ti ti-mail"></i> Email Privacy Desk
+          </a>
+        </div>
+      </div>
+
+      <!-- Right: Detailed Policy Cards -->
+      <div style="display: flex; flex-direction: column; gap: 2rem;">
+
+        <!-- 1. Overview -->
+        <article id="overview" class="bn-policy-card">
+          <div class="bn-policy-card-header">
+            <span class="bn-policy-num">01</span>
+            <div>
+              <h2>Overview &amp; Scope</h2>
+              <div class="bn-policy-subtitle">Commitment to personal dignity, safety, and transparency</div>
+            </div>
+          </div>
+          <div class="bn-policy-body">
+            <p>
+              Welcome to <strong><%= site_name %></strong> (operated by BeautyNest Technologies Private Limited, hereinafter referred to as <em>"BeautyNest"</em>, <em>"we"</em>, <em>"us"</em>, or <em>"our"</em>). This Privacy Policy explains how we collect, use, process, and protect your personal data when you visit our website, mobile application, or book our in-home salon and personal care services.
+            </p>
+            <p>
+              By accessing our platform or booking an appointment, you acknowledge that you have read and agreed to the practices outlined in this policy. We comply strictly with the <strong>Digital Personal Data Protection Act, 2023 (DPDP Act)</strong>, the <strong>Information Technology Act, 2000</strong>, and applicable Consumer Protection rules in the Republic of India.
+            </p>
+            <div class="bn-policy-note">
+              <i class="ti ti-info-circle"></i>
+              <span><strong>Scope:</strong> This policy applies to all registered customers, prospective clients requesting quotes, and individuals engaging with our customer concierge across India.</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- 2. Information We Collect -->
+        <article id="information-collected" class="bn-policy-card">
+          <div class="bn-policy-card-header">
+            <span class="bn-policy-num">02</span>
+            <div>
+              <h2>Information We Collect</h2>
+              <div class="bn-policy-subtitle">The data points necessary to deliver safe doorstep care</div>
+            </div>
+          </div>
+          <div class="bn-policy-body">
+            <p>We only collect information directly relevant to scheduling, personalizing, and securely executing your requested treatments:</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin: 1.25rem 0;">
+              <div class="bn-sub-card">
+                <div class="bn-sc-icon" style="background: rgba(219,39,119,0.1); color: #db2777;"><i class="ti ti-user"></i></div>
+                <h4>Personal Identification</h4>
+                <ul>
+                  <li>Full legal name</li>
+                  <li>Mobile phone number (for OTPs &amp; alerts)</li>
+                  <li>Email address (for booking receipts &amp; invoices)</li>
+                  <li>Optional profile avatar</li>
+                </ul>
+              </div>
+
+              <div class="bn-sub-card">
+                <div class="bn-sc-icon" style="background: rgba(14,165,233,0.1); color: #0284c7;"><i class="ti ti-home-pin"></i></div>
+                <h4>Service Destination</h4>
+                <ul>
+                  <li>House / Flat / Villa number</li>
+                  <li>Street, society, or apartment name</li>
+                  <li>Nearby landmark &amp; City</li>
+                  <li>PIN code for service route planning</li>
+                </ul>
+              </div>
+
+              <div class="bn-sub-card">
+                <div class="bn-sc-icon" style="background: rgba(168,85,247,0.1); color: #9333ea;"><i class="ti ti-calendar-heart"></i></div>
+                <h4>Booking Preferences</h4>
+                <ul>
+                  <li>Selected treatments, add-ons, or bridal packs</li>
+                  <li>Scheduled date &amp; chosen time slot</li>
+                  <li>Beautician preferences &amp; service ratings</li>
+                  <li>Customer service chat notes</li>
+                </ul>
+              </div>
+
+              <div class="bn-sub-card">
+                <div class="bn-sc-icon" style="background: rgba(34,197,94,0.1); color: #16a34a;"><i class="ti ti-receipt-2"></i></div>
+                <h4>Transaction Records</h4>
+                <ul>
+                  <li>Payment transaction reference IDs</li>
+                  <li>Payment method (UPI, Netbanking, COD)</li>
+                  <li>Discount coupon codes applied</li>
+                  <li><em>We never store raw credit/debit card numbers or CVVs</em></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- 3. How We Use Your Data -->
+        <article id="how-we-use" class="bn-policy-card">
+          <div class="bn-policy-card-header">
+            <span class="bn-policy-num">03</span>
+            <div>
+              <h2>How We Use Your Information</h2>
+              <div class="bn-policy-subtitle">Purpose-bound processing aligned with your service request</div>
+            </div>
+          </div>
+          <div class="bn-policy-body">
+            <p>Your data is processed strictly for the execution and enhancement of your experience:</p>
+            <ul class="bn-policy-list">
+              <li>
+                <strong>Fulfilling Home Appointments:</strong> Enabling your assigned certified specialist to reach your residence on time with the appropriate monodose treatment kits and tools.
+              </li>
+              <li>
+                <strong>One-Time Passcode (OTP) Verification:</strong> Generating instant SMS and WhatsApp passcodes to ensure that home treatments begin only with your verified consent.
+              </li>
+              <li>
+                <strong>Real-Time Updates:</strong> Sending booking confirmations, beautician dispatch notices, and digital GST invoices directly to your phone and email.
+              </li>
+              <li>
+                <strong>Customer Assistance:</strong> Resolving service inquiries, rescheduling requests, or skin/hair suitability consultations with our support team.
+              </li>
+              <li>
+                <strong>Platform Integrity &amp; Security:</strong> Preventing fraud, verifying promotional coupon limits, and defending our infrastructure against unauthorized intrusion.
+              </li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- 4. Doorstep Safety & Discretion -->
+        <article id="doorstep-safety" class="bn-policy-card">
+          <div class="bn-policy-card-header">
+            <span class="bn-policy-num">04</span>
+            <div>
+              <h2>Doorstep Safety &amp; Discretion Protocol</h2>
+              <div class="bn-policy-subtitle">Protecting the privacy and sanctuary of Indian households</div>
+            </div>
+          </div>
+          <div class="bn-policy-body">
+            <p>
+              We understand that inviting a service professional into your private home requires uncompromised trust. <%= site_name %> has engineered strict operational privacy safeguards:
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-top: 1rem;">
+              <div class="bn-safety-row">
+                <div class="bn-sr-badge"><i class="ti ti-fingerprint"></i></div>
+                <div>
+                  <strong>Aadhaar &amp; Background Verification:</strong>
+                  Every beautician undergoes physical identity verification, criminal background scrutiny, and continuous skill assessment before being certified on <%= site_name %>.
+                </div>
+              </div>
+
+              <div class="bn-safety-row">
+                <div class="bn-sr-badge"><i class="ti ti-lock-access"></i></div>
+                <div>
+                  <strong>Temporary Address Access:</strong>
+                  Your complete address is visible to the assigned specialist only 60 minutes prior to your scheduled appointment and is archived after service completion.
+                </div>
+              </div>
+
+              <div class="bn-safety-row">
+                <div class="bn-sr-badge"><i class="ti ti-phone-call"></i></div>
+                <div>
+                  <strong>Private Communication:</strong>
+                  Where possible, beauticians contact you through our internal platform channels to avoid unnecessary disclosure of personal phone numbers.
+                </div>
+              </div>
+
+              <div class="bn-safety-row">
+                <div class="bn-sr-badge"><i class="ti ti-package"></i></div>
+                <div>
+                  <strong>Single-Use Monodose Disposables:</strong>
+                  All wax strips, bedsheets, facial wipes, and treatment creams come in pre-sealed single-use packets opened in front of you — ensuring zero cross-household contamination.
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- 5. Location & Addresses -->
+        <article id="location-data" class="bn-policy-card">
+          <div class="bn-policy-card-header">
+            <span class="bn-policy-num">05</span>
+            <div>
+              <h2>Location &amp; Address Handling</h2>
+              <div class="bn-policy-subtitle">How physical delivery locations are stored and managed</div>
+            </div>
+          </div>
+          <div class="bn-policy-body">
+            <p>
+              When you save addresses (e.g. <em>Home</em>, <em>Office</em>, <em>Parents</em>) in your <a href="/profile" style="color: #db2777; font-weight: 600;">Customer Profile</a>, they are encrypted and stored in our database for convenience during checkout.
+            </p>
+            <ul class="bn-policy-list">
+              <li><strong>You Maintain Control:</strong> You can edit, modify landmarks, or delete any saved address at any time from your account dashboard.</li>
+              <li><strong>GPS Coordinates:</strong> When you allow location access in your browser or app, we use it solely to auto-fill the closest service locality and verify if our specialists operate in your sector.</li>
+              <li><strong>No Continuous Background Tracking:</strong> <%= site_name %> does not track your location in the background when the platform is closed.</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- 6. Payments & Financial Security -->
+        <article id="payment-security" class="bn-policy-card">
+          <div class="bn-policy-card-header">
+            <span class="bn-policy-num">06</span>
+            <div>
+              <h2>Payments &amp; Financial Security</h2>
+              <div class="bn-policy-subtitle">PCI-DSS compliance and Reserve Bank of India (RBI) mandates</div>
+            </div>
+          </div>
+          <div class="bn-policy-body">
+            <p>
+              Your financial transactions are handled with the highest level of encryption:
+            </p>
+            <ul class="bn-policy-list">
+              <li>
+                <strong>Authorized Payment Gateways:</strong> Online transactions are handled directly through RBI-licensed, PCI-DSS Level 1 certified gateways (Razorpay / PayU / Cashfree).
+              </li>
+              <li>
+                <strong>Zero Card Storage:</strong> <%= site_name %> does <strong>not</strong> collect, process, or store raw 16-digit debit/credit card numbers, CVVs, or card PINs on our servers.
+              </li>
+              <li>
+                <strong>Cash on Delivery (COD):</strong> For cash or post-service UPI payments, the specialist marks payment completion digitally, triggering an immediate electronic receipt for your records.
+              </li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- 7. Cookies & Device Storage -->
+        <article id="cookies-session" class="bn-policy-card">
+          <div class="bn-policy-card-header">
+            <span class="bn-policy-num">07</span>
+            <div>
+              <h2>Cookies &amp; Device Storage</h2>
+              <div class="bn-policy-subtitle">Essential session cookies and UI preferences</div>
+            </div>
+          </div>
+          <div class="bn-policy-body">
+            <p>We use lightweight browser storage mechanisms for essential website operations:</p>
+            <div style="overflow-x: auto;">
+              <table class="bn-policy-table">
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>Identifier</th>
+                    <th>Purpose</th>
+                    <th>Duration</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Session Cookie</strong></td>
+                    <td><code>_beauty_connect_session</code></td>
+                    <td>Maintains your authenticated login state and cart items securely.</td>
+                    <td>Session / 30 Days</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Preferences</strong></td>
+                    <td><code>bc-theme</code></td>
+                    <td>Remembers your visual preference (Light or Dark mode).</td>
+                    <td>Persistent Local</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Security</strong></td>
+                    <td><code>csrf_token</code></td>
+                    <td>Protects forms against cross-site request forgery attacks.</td>
+                    <td>Session</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p style="margin-top: 1rem; font-size: 0.88rem; color: #4b5563;">
+              You may configure your browser to reject cookies; however, note that core features like adding beauty packages to your cart or signing into your dashboard may be degraded.
+            </p>
+          </div>
+        </article>
+
+        <!-- 8. Your Rights & Erasure -->
+        <article id="data-rights" class="bn-policy-card">
+          <div class="bn-policy-card-header">
+            <span class="bn-policy-num">08</span>
+            <div>
+              <h2>Your Rights &amp; Data Erasure</h2>
+              <div class="bn-policy-subtitle">Empowering you with complete ownership of your personal profile</div>
+            </div>
+          </div>
+          <div class="bn-policy-body">
+            <p>In accordance with the DPDP Act 2023, you enjoy full sovereignty over your personal data:</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1.25rem 0;">
+              <div class="bn-right-pill">
+                <i class="ti ti-eye"></i>
+                <strong>Right to Access:</strong> View all saved addresses, service orders, and invoices in your profile.
+              </div>
+              <div class="bn-right-pill">
+                <i class="ti ti-edit"></i>
+                <strong>Right to Rectify:</strong> Update your name, phone number, email, or password at any time.
+              </div>
+              <div class="bn-right-pill">
+                <i class="ti ti-trash"></i>
+                <strong>Right to Erasure:</strong> Request permanent removal of your account and personal history.
+              </div>
+              <div class="bn-right-pill">
+                <i class="ti ti-bell-off"></i>
+                <strong>Opt-Out of Marketing:</strong> Unsubscribe from promotional SMS or newsletters with one click.
+              </div>
+            </div>
+            <p>
+              To exercise your right to erasure, simply email <a href="mailto:care@<%= site_name.parameterize %>.in?subject=Account%20Deletion%20Request" style="color: #db2777; font-weight: 600;">care@<%= site_name.parameterize %>.in</a> from your registered email address. We verify identity and complete account deletion within <strong>7 business days</strong>.
+            </p>
+          </div>
+        </article>
+
+        <!-- 9. Data Retention Policy -->
+        <article id="data-retention" class="bn-policy-card">
+          <div class="bn-policy-card-header">
+            <span class="bn-policy-num">09</span>
+            <div>
+              <h2>Data Retention Policy</h2>
+              <div class="bn-policy-subtitle">Retaining records only as long as legally or operationally mandated</div>
+            </div>
+          </div>
+          <div class="bn-policy-body">
+            <p>
+              We adhere to strict data minimization principles. Active user profiles and past service histories are maintained to allow recurring bookings, warranty coverage on bridal/hair services, and tax/invoicing compliance under Indian GST laws (which require transaction record maintenance for 7 years). Inactive accounts with no booking history may be purged periodically after notice.
+            </p>
+          </div>
+        </article>
+
+        <!-- 10. Grievance Officer & Contact -->
+        <article id="grievance-officer" class="bn-policy-card" style="border: 1.5px solid rgba(219,39,119,0.3); background: #ffffff;">
+          <div class="bn-policy-card-header">
+            <span class="bn-policy-num" style="background: #db2777; color: #fff;">10</span>
+            <div>
+              <h2>Grievance Officer &amp; Statutory Redressal</h2>
+              <div class="bn-policy-subtitle">Direct point of contact for privacy queries and data protection concerns</div>
+            </div>
+          </div>
+          <div class="bn-policy-body">
+            <p>
+              In accordance with the <strong>Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021</strong> and the <strong>Digital Personal Data Protection Act, 2023</strong>, the details of our designated Grievance Officer are published below:
+            </p>
+
+            <div style="background: #faf5ff; border: 1px solid rgba(147,51,234,0.15); border-radius: 16px; padding: 1.5rem; margin: 1.25rem 0;">
+              <div style="font-size: 1.1rem; font-weight: 700; color: #0f0a1e; margin-bottom: 4px;">
+                Nodal Grievance &amp; Privacy Officer
+              </div>
+              <div style="font-size: 0.88rem; color: #6b7280; margin-bottom: 1.25rem;">
+                BeautyNest Technologies Private Limited
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; font-size: 0.88rem; color: #374151;">
+                <div>
+                  <div style="font-weight: 600; color: #111827; margin-bottom: 2px;"><i class="ti ti-mail" style="color: #db2777;"></i> Dedicated Email:</div>
+                  <a href="mailto:privacy@<%= site_name.parameterize %>.in" style="color: #db2777; font-weight: 600; text-decoration: underline;">
+                    privacy@<%= site_name.parameterize %>.in
+                  </a>
+                </div>
+
+                <div>
+                  <div style="font-weight: 600; color: #111827; margin-bottom: 2px;"><i class="ti ti-clock" style="color: #db2777;"></i> Turnaround Time:</div>
+                  <div>Acknowledgment within 24 hours; Resolution within 15 days</div>
+                </div>
+
+                <div>
+                  <div style="font-weight: 600; color: #111827; margin-bottom: 2px;"><i class="ti ti-map-pin" style="color: #db2777;"></i> Registered Office:</div>
+                  <div>Varanasi, Uttar Pradesh – 221005, India</div>
+                </div>
+
+                <div>
+                  <div style="font-weight: 600; color: #111827; margin-bottom: 2px;"><i class="ti ti-phone" style="color: #db2777;"></i> Customer Helpline:</div>
+                  <div>+91 98765 43210 (8:00 AM – 9:00 PM IST)</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 1.5rem;">
+              <a href="mailto:privacy@<%= site_name.parameterize %>.in?subject=Privacy%20Inquiry%20-%20BeautyNest" class="bc-btn-pink" style="font-size: 0.9rem; padding: 10px 22px;">
+                <i class="ti ti-mail-forward"></i> Contact Grievance Officer
+              </a>
+              <a href="/contact" class="bc-btn-ghost" style="font-size: 0.9rem; padding: 10px 22px; color: #374151;">
+                <i class="ti ti-headset"></i> General Customer Support
+              </a>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action Banner -->
+<div style="max-width: 1200px; margin: 0 auto 4rem; padding: 0 1.5rem;">
+  <div class="bc-cta-section" style="border-radius: 24px;">
+    <h2>Experience Safe, Hygienic Doorstep Beauty</h2>
+    <p>Book with complete peace of mind. Background-verified specialists, single-use kits, and secure appointments.</p>
+    <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; position: relative; z-index: 1;">
+      <%= link_to "/categories", class: "bc-btn-white" do %>
+        <i class="ti ti-calendar-plus"></i> Explore Services
+      <% end %>
+      <a href="/about" style="background: rgba(255,255,255,0.18); color: #fff; border: 1.5px solid rgba(255,255,255,0.4); padding: 13px 28px; border-radius: 50px; font-weight: 600; font-size: 1rem; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+        <i class="ti ti-heart"></i> Why Choose <%= site_name %>
+      </a>
+    </div>
+  </div>
+</div>
+
+<%= render "shared/public_footer" %>
+
+<style>
+  /* ====================================================
+     BeautyNest Privacy Page Specific Styles
+     ==================================================== */
+  .bn-privacy-layout {
+    grid-template-columns: 280px 1fr;
+  }
+
+  @media (max-width: 991px) {
+    .bn-privacy-layout {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+    .bn-privacy-toc {
+      display: none;
+    }
+  }
+
+  .bn-toc-link {
+    display: block;
+    padding: 8px 12px;
+    font-size: 0.88rem;
+    color: #4b5563;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.15s ease;
+    font-weight: 500;
+  }
+
+  .bn-toc-link:hover {
+    color: #db2777;
+    background: #fff1f2;
+    padding-left: 16px;
+  }
+
+  .bn-policy-card {
+    background: #ffffff;
+    border-radius: 22px;
+    border: 1px solid rgba(0,0,0,0.07);
+    padding: 2.25rem 2.5rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    scroll-margin-top: 100px;
+  }
+
+  @media (max-width: 640px) {
+    .bn-policy-card {
+      padding: 1.5rem 1.25rem;
+      border-radius: 16px;
+    }
+  }
+
+  .bn-policy-card-header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+
+  .bn-policy-num {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(219,39,119,0.1);
+    color: #db2777;
+    font-weight: 800;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .bn-policy-card-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f0a1e;
+    margin: 0 0 3px;
+    letter-spacing: -0.015em;
+  }
+
+  .bn-policy-subtitle {
+    font-size: 0.85rem;
+    color: #6b7280;
+    font-weight: 500;
+  }
+
+  .bn-policy-body {
+    font-size: 0.95rem;
+    color: #374151;
+    line-height: 1.8;
+  }
+
+  .bn-policy-body p {
+    margin-bottom: 1rem;
+  }
+
+  .bn-policy-body p:last-child {
+    margin-bottom: 0;
+  }
+
+  .bn-policy-note {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 1rem 1.25rem;
+    background: #fdf2f8;
+    border-left: 4px solid #db2777;
+    border-radius: 0 12px 12px 0;
+    font-size: 0.88rem;
+    color: #4b5563;
+    margin-top: 1.25rem;
+  }
+
+  .bn-policy-note i {
+    color: #db2777;
+    font-size: 1.2rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .bn-sub-card {
+    background: #fafafa;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 16px;
+    padding: 1.25rem;
+  }
+
+  .bn-sc-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .bn-sub-card h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 0.5rem;
+  }
+
+  .bn-sub-card ul {
+    margin: 0;
+    padding-left: 1.25rem;
+    font-size: 0.82rem;
+    color: #4b5563;
+    line-height: 1.6;
+  }
+
+  .bn-policy-list {
+    margin: 0;
+    padding-left: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .bn-policy-list li {
+    line-height: 1.65;
+  }
+
+  .bn-safety-row {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 1rem;
+    background: #fdfafb;
+    border-radius: 12px;
+    border: 1px solid rgba(219,39,119,0.08);
+    font-size: 0.9rem;
+    color: #374151;
+    line-height: 1.6;
+  }
+
+  .bn-sr-badge {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #fff;
+    color: #db2777;
+    border: 1px solid rgba(219,39,119,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  }
+
+  .bn-policy-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.88rem;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 0.75rem;
+  }
+
+  .bn-policy-table th {
+    background: #f9fafb;
+    color: #111827;
+    font-weight: 700;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .bn-policy-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    color: #374151;
+  }
+
+  .bn-policy-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .bn-right-pill {
+    background: #fafafa;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 14px;
+    padding: 1rem;
+    font-size: 0.85rem;
+    color: #374151;
+    line-height: 1.5;
+  }
+
+  .bn-right-pill i {
+    display: block;
+    color: #db2777;
+    font-size: 1.4rem;
+    margin-bottom: 6px;
+  }
+</style>

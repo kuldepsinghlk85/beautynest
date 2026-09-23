@@ -1,0 +1,903 @@
+<% content_for :page_title, "My Bookings — #{current_user.name}" %>
+
+<%= render "shared/public_nav", active: "bookings" %>
+
+<div class="bc-cust-container">
+  <!-- Breadcrumb -->
+  <nav class="bc-breadcrumb" aria-label="breadcrumb">
+    <a href="/"><i class="ti ti-home"></i> Home</a>
+    <span class="bc-crumb-sep">/</span>
+    <span class="bc-crumb-active">My Bookings</span>
+  </nav>
+
+  <!-- Flash Messages -->
+  <% if notice.present? %>
+    <div class="bc-alert bc-alert-success">
+      <i class="ti ti-circle-check fs-2"></i>
+      <div><%= notice %></div>
+    </div>
+  <% end %>
+  <% if alert.present? %>
+    <div class="bc-alert bc-alert-danger">
+      <i class="ti ti-alert-circle fs-2"></i>
+      <div><%= alert %></div>
+    </div>
+  <% end %>
+
+  <!-- Page Header -->
+  <div class="bc-page-header-row">
+    <div>
+      <div class="bc-header-pretitle"><i class="ti ti-calendar-event"></i> Doorstep Beauty Services</div>
+      <h1>My Bookings</h1>
+      <p class="bc-header-sub">Track real-time status, manage appointments, and view receipts for all your beauty services.</p>
+    </div>
+    <div class="bc-header-actions">
+      <%= link_to "/categories", class: "bc-btn-pink" do %>
+        <i class="ti ti-sparkles"></i> Book New Service
+      <% end %>
+    </div>
+  </div>
+
+  <!-- KPI Metrics Row -->
+  <div class="bc-metrics-grid">
+    <div class="bc-metric-card">
+      <div class="bc-metric-icon"><i class="ti ti-calendar"></i></div>
+      <div class="bc-metric-info">
+        <div class="num"><%= @total_count %></div>
+        <div class="lbl">Total Appointments</div>
+      </div>
+    </div>
+
+    <div class="bc-metric-card active">
+      <div class="bc-metric-icon text-pink"><i class="ti ti-clock-play"></i></div>
+      <div class="bc-metric-info">
+        <div class="num text-pink"><%= @upcoming_count + @in_progress_count %></div>
+        <div class="lbl">Upcoming / Active</div>
+      </div>
+    </div>
+
+    <div class="bc-metric-card">
+      <div class="bc-metric-icon text-success"><i class="ti ti-circle-check"></i></div>
+      <div class="bc-metric-info">
+        <div class="num text-success"><%= @completed_count %></div>
+        <div class="lbl">Completed Sessions</div>
+      </div>
+    </div>
+
+    <div class="bc-metric-card">
+      <div class="bc-metric-icon text-muted"><i class="ti ti-ban"></i></div>
+      <div class="bc-metric-info">
+        <div class="num text-muted"><%= @cancelled_count %></div>
+        <div class="lbl">Cancelled</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="bc-filter-tabs-bar">
+    <div class="bc-ftabs-track">
+      <%= link_to customer_bookings_path(status: "all"), class: "bc-ftab #{'active' if @status_filter == 'all'}" do %>
+        All Appointments <span class="count"><%= @total_count %></span>
+      <% end %>
+
+      <%= link_to customer_bookings_path(status: "upcoming"), class: "bc-ftab #{'active' if @status_filter == 'upcoming'}" do %>
+        Upcoming & Confirmed <span class="count"><%= @upcoming_count %></span>
+      <% end %>
+
+      <%= link_to customer_bookings_path(status: "in_progress"), class: "bc-ftab #{'active' if @status_filter == 'in_progress'}" do %>
+        In Progress <span class="count"><%= @in_progress_count %></span>
+      <% end %>
+
+      <%= link_to customer_bookings_path(status: "completed"), class: "bc-ftab #{'active' if @status_filter == 'completed'}" do %>
+        Completed <span class="count"><%= @completed_count %></span>
+      <% end %>
+
+      <%= link_to customer_bookings_path(status: "cancelled"), class: "bc-ftab #{'active' if @status_filter == 'cancelled'}" do %>
+        Cancelled <span class="count"><%= @cancelled_count %></span>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Bookings List -->
+  <% if @bookings.any? %>
+    <div class="bc-bookings-list">
+      <% @bookings.each do |booking| %>
+        <div class="bc-bcard-box">
+          <!-- Card Header -->
+          <div class="bc-bcard-header">
+            <div class="bc-bcard-ref">
+              <span class="ref-num"><i class="ti ti-receipt"></i> Booking #<%= booking.display_id %></span>
+              <span class="ref-date">• Booked <%= booking.display_booked_on %></span>
+            </div>
+            <div class="bc-bcard-badges">
+              <%= booking_status_badge(booking.booking_status) %>
+              <% if booking.service_status == "in_progress" %>
+                <%= service_status_badge("in_progress") %>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- Card Body Grid -->
+          <div class="bc-bcard-body">
+            <!-- Col 1: Service Overview -->
+            <div class="bc-bcard-svc">
+              <div class="svc-icon"><i class="ti ti-sparkles"></i></div>
+              <div class="svc-details">
+                <h3 class="svc-title"><%= booking.display_service %></h3>
+                <% extra_items = booking.booking_items.count - 1 %>
+                <% if extra_items > 0 %>
+                  <p class="svc-extra">+ <%= pluralize(extra_items, "additional service") %></p>
+                <% end %>
+                <div class="svc-chips">
+                  <% duration = booking.total_duration_minutes %>
+                  <% if duration > 0 %>
+                    <span class="chip"><i class="ti ti-clock"></i> <%= duration %> mins</span>
+                  <% end %>
+                  <span class="chip"><i class="ti ti-currency-rupee"></i> <%= booking.display_amount %></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Col 2: Date & Slot -->
+            <div class="bc-bcard-timing">
+              <div class="timing-row">
+                <i class="ti ti-calendar text-pink"></i>
+                <div>
+                  <div class="label">Appointment Date</div>
+                  <div class="val"><%= booking.display_date %></div>
+                </div>
+              </div>
+              <div class="timing-row">
+                <i class="ti ti-clock text-pink"></i>
+                <div>
+                  <div class="label">Time Slot</div>
+                  <div class="val"><%= booking.display_time_slot %></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Col 3: Beautician & Location -->
+            <div class="bc-bcard-worker-loc">
+              <!-- Beautician info -->
+              <div class="worker-snippet">
+                <% if booking.worker.present? %>
+                  <div class="worker-avatar-xs">
+                    <% if booking.worker.avatar_url.present? %>
+                      <%= image_tag booking.worker.avatar_url, alt: booking.worker.name, class: "w-img", onerror: "this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';" %>
+                      <span style="display: none;"><%= booking.worker.initials %></span>
+                    <% else %>
+                      <span><%= booking.worker.initials %></span>
+                    <% end %>
+                  </div>
+                  <div>
+                    <div class="w-name"><%= booking.worker.name %></div>
+                    <div class="w-role">Assigned Beautician</div>
+                  </div>
+                <% else %>
+                  <div class="unassigned-pill">
+                    <span class="pulse-dot"></span>
+                    <span>Assigning Beautician...</span>
+                  </div>
+                <% end %>
+              </div>
+
+              <!-- Location info -->
+              <div class="loc-snippet">
+                <i class="ti ti-map-pin text-muted"></i>
+                <span class="loc-text truncate" title="<%= booking.address&.full_address %>">
+                  <%= booking.address&.line1.presence || "Doorstep Address" %>, <%= booking.address&.city || booking.city&.name %>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Footer Actions -->
+          <div class="bc-bcard-footer">
+            <div class="bc-bcard-payment">
+              <span class="pay-label">Payment:</span>
+              <%= payment_status_badge(booking.payment_status) %>
+              <span class="pay-amount"><%= booking.display_amount %></span>
+            </div>
+
+            <div class="bc-bcard-btns">
+              <%= link_to customer_booking_path(booking), class: "bc-btn-ghost-sm" do %>
+                <i class="ti ti-eye"></i> View Details
+              <% end %>
+
+              <%# Cancellation %>
+              <% if %w[pending assigned confirmed accepted].include?(booking.booking_status) %>
+                <button type="button" class="bc-btn-danger-outline-sm" onclick="openCancelModal('<%= booking.id %>', '<%= booking.display_id %>');">
+                  <i class="ti ti-x"></i> Cancel
+                </button>
+              <% end %>
+
+              <%# Leave Review %>
+              <% if booking.completed? %>
+                <% if booking.reviewed? %>
+                  <span class="bc-reviewed-badge" title="Reviewed on <%= booking.review.created_at&.strftime('%d %b %Y') %>">
+                    <i class="ti ti-star-filled text-warning"></i> Rated <%= booking.review.rating %>/5
+                  </span>
+                <% else %>
+                  <button type="button" class="bc-btn-review-sm" onclick="openReviewModal('<%= booking.id %>', '<%= booking.display_id %>', '<%= j(booking.display_service) %>');">
+                    <i class="ti ti-star"></i> Leave Review
+                  </button>
+                <% end %>
+              <% end %>
+
+              <%= link_to "/categories", class: "bc-btn-pink-sm" do %>
+                <i class="ti ti-refresh"></i> Book Again
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+  <% else %>
+    <div class="bc-empty-state">
+      <div class="bc-empty-icon"><i class="ti ti-calendar-off"></i></div>
+      <h3>No <%= @status_filter == 'all' ? '' : @status_filter.humanize.downcase %> bookings found</h3>
+      <p>
+        <% if @status_filter == 'all' %>
+          You haven't scheduled any doorstep beauty treatments yet.
+        <% else %>
+          You do not have any appointments matching the "<%= @status_filter.humanize %>" filter.
+        <% end %>
+      </p>
+      <%= link_to "/categories", class: "bc-btn-pink" do %>
+        <i class="ti ti-sparkles"></i> Explore Services & Book
+      <% end %>
+    </div>
+  <% end %>
+
+</div>
+
+<!-- Cancel Booking Modal -->
+<div id="bc-cancel-modal" class="bc-modal-backdrop d-none" style="display: none;" onclick="if(event.target === this) closeCancelModal();">
+  <div class="bc-modal-card">
+    <div class="bc-modal-header">
+      <h3><i class="ti ti-alert-triangle text-danger me-2"></i> Cancel Appointment</h3>
+      <button type="button" class="bc-close-btn" onclick="closeCancelModal();" aria-label="Close modal">&times;</button>
+    </div>
+    <div class="bc-modal-body">
+      <p>Are you sure you want to cancel booking <strong id="cancel-booking-num"></strong>?</p>
+      <p class="small text-muted mb-3">Our beauticians reserve their time slot specifically for you. Free cancellation is permitted before the specialist departs.</p>
+
+      <%= form_with url: "#", id: "cancel-booking-form", method: :patch, local: true do |f| %>
+        <div class="mb-3">
+          <label class="bc-label">Reason for Cancellation (Optional)</label>
+          <textarea name="cancellation_reason" class="bc-input" rows="3" placeholder="Please let us know why you are cancelling..."></textarea>
+        </div>
+        <div class="bc-form-actions">
+          <button type="submit" class="bc-btn-danger">Confirm Cancellation</button>
+          <button type="button" class="bc-btn-ghost" onclick="closeCancelModal();">Keep Appointment</button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- Review Modal -->
+<div id="bc-review-modal" class="bc-modal-backdrop d-none" style="display: none;" onclick="if(event.target === this) closeReviewModal();">
+  <div class="bc-modal-card bc-review-modal-card">
+    <div class="bc-rm-header">
+      <div class="bc-rm-title-group">
+        <div class="bc-rm-icon-circle">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+        <div>
+          <h3>Rate Your Experience</h3>
+          <p class="bc-rm-header-sub">Share feedback to help other customers and reward top specialists</p>
+        </div>
+      </div>
+      <button type="button" class="bc-close-btn" onclick="closeReviewModal();" aria-label="Close modal">&times;</button>
+    </div>
+
+    <div class="bc-rm-body">
+      <!-- Service Banner -->
+      <div class="bc-rm-svc-banner">
+        <div class="bc-rm-svc-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <div>
+          <div class="bc-rm-svc-name" id="review-service-name">Service Appointment</div>
+          <div class="bc-rm-svc-sub"><i class="ti ti-circle-check"></i> Doorstep Beauty Treatment • Verified Appointment</div>
+        </div>
+      </div>
+
+      <%= form_with url: "#", id: "review-booking-form", method: :post, local: true do |f| %>
+        <input type="hidden" name="return_to" value="index">
+
+        <!-- STEP 1: Star Rating with Clear Labels -->
+        <div class="bc-rm-step-block">
+          <div class="bc-rm-step-header">
+            <span class="bc-rm-step-num">1</span>
+            <span class="bc-rm-step-title">How would you rate this service?</span>
+          </div>
+
+          <div class="bc-rm-rating-section">
+            <div class="bc-rm-stars-container" id="rm-stars-row">
+              <button type="button" class="bc-rm-star-btn filled" data-rating="1" onclick="setReviewRating(1)" onmouseenter="previewReviewRating(1)" onmouseleave="resetReviewRatingPreview()" aria-label="1 Star - Poor">
+                <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <span class="bc-star-word">Poor</span>
+              </button>
+              <button type="button" class="bc-rm-star-btn filled" data-rating="2" onclick="setReviewRating(2)" onmouseenter="previewReviewRating(2)" onmouseleave="resetReviewRatingPreview()" aria-label="2 Stars - Fair">
+                <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <span class="bc-star-word">Fair</span>
+              </button>
+              <button type="button" class="bc-rm-star-btn filled" data-rating="3" onclick="setReviewRating(3)" onmouseenter="previewReviewRating(3)" onmouseleave="resetReviewRatingPreview()" aria-label="3 Stars - Good">
+                <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <span class="bc-star-word">Good</span>
+              </button>
+              <button type="button" class="bc-rm-star-btn filled" data-rating="4" onclick="setReviewRating(4)" onmouseenter="previewReviewRating(4)" onmouseleave="resetReviewRatingPreview()" aria-label="4 Stars - Very Good">
+                <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <span class="bc-star-word">Very Good</span>
+              </button>
+              <button type="button" class="bc-rm-star-btn filled" data-rating="5" onclick="setReviewRating(5)" onmouseenter="previewReviewRating(5)" onmouseleave="resetReviewRatingPreview()" aria-label="5 Stars - Excellent">
+                <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <span class="bc-star-word">Excellent</span>
+              </button>
+            </div>
+            <input type="hidden" name="rating" id="review-rating-input" value="5">
+            <div id="rm-rating-feedback" class="bc-rm-rating-pill rm-pill-5">
+              <span class="pill-stars">★★★★★</span>
+              <span class="pill-text">5.0 / 5.0 • Outstanding Experience!</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2: Quick Compliments -->
+        <div class="bc-rm-step-block">
+          <div class="bc-rm-step-header">
+            <span class="bc-rm-step-num">2</span>
+            <span class="bc-rm-step-title">What did you like best? <span class="bc-rm-opt">(Tap to add)</span></span>
+          </div>
+          <div class="bc-rm-chips-row">
+            <button type="button" class="bc-rm-chip" onclick="toggleReviewTag(this, 'Punctual and arrived on time')">⏱️ Punctual & On Time</button>
+            <button type="button" class="bc-rm-chip" onclick="toggleReviewTag(this, 'Hygienic and sealed kit used')">🧼 Clean & Sealed Kit</button>
+            <button type="button" class="bc-rm-chip" onclick="toggleReviewTag(this, 'Highly skilled specialist')">💆 Highly Skilled</button>
+            <button type="button" class="bc-rm-chip" onclick="toggleReviewTag(this, 'Polite and courteous behavior')">😊 Polite & Friendly</button>
+            <button type="button" class="bc-rm-chip" onclick="toggleReviewTag(this, 'Loved the results!')">✨ Loved Results</button>
+          </div>
+        </div>
+
+        <!-- STEP 3: Detailed Comments -->
+        <div class="bc-rm-step-block">
+          <div class="bc-rm-step-header">
+            <span class="bc-rm-step-num">3</span>
+            <span class="bc-rm-step-title">Write your review comments <span class="bc-rm-opt">(Optional)</span></span>
+          </div>
+          <div class="bc-rm-textarea-group">
+            <textarea name="comment" id="review-comment-input" class="bc-rm-textarea" rows="3" placeholder="Tell other customers about the beautician's punctuality, service hygiene, technique, and demeanor..."></textarea>
+            <div class="bc-rm-hint">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              Reviews can only be submitted once per completed appointment.
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Actions -->
+        <div class="bc-rm-actions">
+          <button type="submit" class="bc-rm-submit-btn" id="rm-submit-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <span>Submit Review</span>
+          </button>
+          <button type="button" class="bc-rm-cancel-btn" onclick="closeReviewModal();">Cancel</button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* World-Class Review Modal Styles */
+  .bc-review-modal-card {
+    max-width: 520px !important;
+    width: 92% !important;
+    border-radius: 20px !important;
+    background: #ffffff !important;
+    box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    overflow: hidden !important;
+    animation: bcModalIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .bc-rm-header {
+    padding: 1.25rem 1.75rem !important;
+    background: #ffffff !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+
+  .bc-rm-title-group {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+
+  .bc-rm-icon-circle {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 12px !important;
+    background: #fef3c7 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+  }
+
+  .bc-rm-title-group h3 {
+    font-size: 1.15rem !important;
+    font-weight: 800 !important;
+    color: #111827 !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-family: 'Inter', -apple-system, sans-serif !important;
+  }
+
+  .bc-rm-header-sub {
+    font-size: 0.78rem !important;
+    color: #64748b !important;
+    margin: 2px 0 0 0 !important;
+    font-weight: 500 !important;
+  }
+
+  /* Step Blocks */
+  .bc-rm-step-block {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .bc-rm-step-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  .bc-rm-step-num {
+    width: 22px !important;
+    height: 22px !important;
+    border-radius: 50% !important;
+    background: #db2777 !important;
+    color: #ffffff !important;
+    font-size: 0.74rem !important;
+    font-weight: 800 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+  }
+
+  .bc-rm-step-title {
+    font-size: 0.88rem !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+  }
+
+  .bc-rm-opt {
+    font-size: 0.78rem !important;
+    font-weight: 500 !important;
+    color: #64748b !important;
+  }
+
+  .bc-star-word {
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    color: #64748b !important;
+    line-height: 1 !important;
+    transition: color 0.15s ease !important;
+  }
+
+  .bc-rm-star-btn.filled .bc-star-word {
+    color: #d97706 !important;
+    font-weight: 700 !important;
+  }
+
+  .bc-rm-body {
+    padding: 1.5rem 1.75rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1.25rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .bc-rm-body form {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1.2rem !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Service Banner */
+  .bc-rm-svc-banner {
+    background: linear-gradient(135deg, #fdf2f8 0%, #fff1f2 100%) !important;
+    border: 1px solid rgba(219, 39, 119, 0.18) !important;
+    border-radius: 14px !important;
+    padding: 0.9rem 1.1rem !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .bc-rm-svc-icon {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 10px !important;
+    background: #ffffff !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    box-shadow: 0 2px 8px rgba(219, 39, 119, 0.12) !important;
+  }
+
+  .bc-rm-svc-name {
+    font-size: 0.98rem !important;
+    font-weight: 800 !important;
+    color: #111827 !important;
+    line-height: 1.3 !important;
+  }
+
+  .bc-rm-svc-sub {
+    font-size: 0.78rem !important;
+    color: #db2777 !important;
+    font-weight: 600 !important;
+  }
+
+  /* Rating Box */
+  .bc-rm-rating-section {
+    background: #f8fafc !important;
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 16px !important;
+    padding: 1.25rem 1rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+  }
+
+  .bc-rm-section-label {
+    font-size: 0.76rem !important;
+    font-weight: 800 !important;
+    color: #64748b !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    margin: 0 !important;
+    display: block !important;
+  }
+
+  .bc-rm-stars-container {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    padding: 4px 0 !important;
+  }
+
+  .bc-rm-star-btn {
+    background: transparent !important;
+    border: none !important;
+    padding: 4px !important;
+    cursor: pointer !important;
+    color: #cbd5e1 !important;
+    transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    outline: none !important;
+  }
+
+  .bc-rm-star-btn svg {
+    width: 36px !important;
+    height: 36px !important;
+    fill: currentColor !important;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.08)) !important;
+    transition: transform 0.15s ease !important;
+  }
+
+  .bc-rm-star-btn:hover {
+    transform: scale(1.22) !important;
+  }
+
+  .bc-rm-star-btn.filled {
+    color: #f59e0b !important;
+  }
+
+  /* Rating feedback pill */
+  .bc-rm-rating-pill {
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    padding: 5px 16px !important;
+    border-radius: 50px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    transition: all 0.2s ease !important;
+  }
+
+  .rm-pill-5 { background: #fef3c7 !important; color: #92400e !important; border: 1px solid #fde68a !important; }
+  .rm-pill-4 { background: #ecfdf5 !important; color: #065f46 !important; border: 1px solid #a7f3d0 !important; }
+  .rm-pill-3 { background: #fefce8 !important; color: #854d0e !important; border: 1px solid #fef08a !important; }
+  .rm-pill-2 { background: #fff7ed !important; color: #9a3412 !important; border: 1px solid #fed7aa !important; }
+  .rm-pill-1 { background: #fef2f2 !important; color: #991b1b !important; border: 1px solid #fecaca !important; }
+
+  /* Quick tags */
+  .bc-rm-tags-section {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .bc-rm-sublabel {
+    font-size: 0.82rem !important;
+    font-weight: 700 !important;
+    color: #334155 !important;
+    margin: 0 !important;
+    display: block !important;
+  }
+
+  .bc-rm-chips-row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .bc-rm-chip {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 50px !important;
+    padding: 6px 14px !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+  }
+
+  .bc-rm-chip:hover {
+    background: #e2e8f0 !important;
+    color: #1e293b !important;
+    transform: translateY(-1px) !important;
+  }
+
+  .bc-rm-chip.active {
+    background: #fdf2f8 !important;
+    color: #db2777 !important;
+    border-color: #f472b6 !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 6px rgba(219, 39, 119, 0.15) !important;
+  }
+
+  /* Textarea group */
+  .bc-rm-textarea-group {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .bc-rm-textarea {
+    width: 100% !important;
+    min-height: 95px !important;
+    padding: 12px 14px !important;
+    font-size: 0.92rem !important;
+    line-height: 1.5 !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 12px !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-family: inherit !important;
+    resize: vertical !important;
+    box-sizing: border-box !important;
+    outline: none !important;
+    display: block !important;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease !important;
+  }
+
+  .bc-rm-textarea:focus {
+    border-color: #db2777 !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(219, 39, 119, 0.18) !important;
+  }
+
+  .bc-rm-hint {
+    font-size: 0.74rem !important;
+    color: #64748b !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+  }
+
+  /* Actions */
+  .bc-rm-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    width: 100% !important;
+    margin-top: 4px !important;
+    box-sizing: border-box !important;
+  }
+
+  .bc-rm-submit-btn {
+    flex: 2 !important;
+    padding: 13px 24px !important;
+    background: linear-gradient(135deg, #ec4899 0%, #db2777 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 50px !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    transition: all 0.18s ease !important;
+    box-shadow: 0 6px 18px rgba(219, 39, 119, 0.35) !important;
+  }
+
+  .bc-rm-submit-btn:hover {
+    transform: translateY(-1.5px) !important;
+    box-shadow: 0 8px 22px rgba(219, 39, 119, 0.45) !important;
+  }
+
+  .bc-rm-cancel-btn {
+    flex: 1 !important;
+    padding: 13px 20px !important;
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 50px !important;
+    font-weight: 600 !important;
+    font-size: 0.92rem !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    text-align: center !important;
+  }
+
+  .bc-rm-cancel-btn:hover {
+    background: #e2e8f0 !important;
+    color: #1e293b !important;
+  }
+</style>
+
+<script>
+  var currentSelectedRating = 5;
+  var ratingMeta = {
+    5: { text: "5.0 / 5.0 • Outstanding Experience!", stars: "★★★★★", cssClass: "rm-pill-5" },
+    4: { text: "4.0 / 5.0 • Very Good Service", stars: "★★★★☆", cssClass: "rm-pill-4" },
+    3: { text: "3.0 / 5.0 • Satisfactory / Met Expectations", stars: "★★★☆☆", cssClass: "rm-pill-3" },
+    2: { text: "2.0 / 5.0 • Needs Improvement", stars: "★★☆☆☆", cssClass: "rm-pill-2" },
+    1: { text: "1.0 / 5.0 • Unsatisfactory Experience", stars: "★☆☆☆☆", cssClass: "rm-pill-1" }
+  };
+
+  function updateStarsUI(rating) {
+    var btns = document.querySelectorAll('#rm-stars-row .bc-rm-star-btn');
+    btns.forEach(function(btn) {
+      var r = parseInt(btn.getAttribute('data-rating'), 10);
+      if (r <= rating) {
+        btn.classList.add('filled');
+      } else {
+        btn.classList.remove('filled');
+      }
+    });
+
+    var feedback = document.getElementById('rm-rating-feedback');
+    if (feedback && ratingMeta[rating]) {
+      feedback.className = 'bc-rm-rating-pill ' + ratingMeta[rating].cssClass;
+      feedback.innerHTML = '<span class="pill-stars">' + ratingMeta[rating].stars + '</span><span class="pill-text">' + ratingMeta[rating].text + '</span>';
+    }
+  }
+
+  function setReviewRating(rating) {
+    currentSelectedRating = rating;
+    var input = document.getElementById('review-rating-input');
+    if (input) input.value = rating;
+    updateStarsUI(rating);
+  }
+
+  function previewReviewRating(rating) {
+    updateStarsUI(rating);
+  }
+
+  function resetReviewRatingPreview() {
+    updateStarsUI(currentSelectedRating);
+  }
+
+  function toggleReviewTag(btn, tagText) {
+    var ta = document.getElementById('review-comment-input');
+    if (!ta) return;
+    btn.classList.toggle('active');
+    var currentText = ta.value.trim();
+    if (btn.classList.contains('active')) {
+      if (currentText.length > 0 && !currentText.endsWith('.') && !currentText.endsWith(',')) {
+        ta.value = currentText + '. ' + tagText;
+      } else if (currentText.length > 0) {
+        ta.value = currentText + ' ' + tagText;
+      } else {
+        ta.value = tagText;
+      }
+    } else {
+      ta.value = currentText.replace(tagText, '').replace(/\.\s*\./g, '.').replace(/^\s*\.\s*/, '').trim();
+    }
+  }
+
+  function openCancelModal(bookingId, bookingNum) {
+    document.getElementById('cancel-booking-num').textContent = '#' + bookingNum;
+    var form = document.getElementById('cancel-booking-form');
+    form.action = '/my-bookings/' + bookingId + '/cancel';
+    var modal = document.getElementById('bc-cancel-modal');
+    modal.classList.remove('d-none');
+    modal.classList.add('open');
+    modal.style.display = 'flex';
+  }
+
+  function closeCancelModal() {
+    var modal = document.getElementById('bc-cancel-modal');
+    modal.classList.add('d-none');
+    modal.classList.remove('open');
+    modal.style.display = 'none';
+  }
+
+  function openReviewModal(bookingId, bookingNum, serviceName) {
+    document.getElementById('review-service-name').textContent = serviceName || 'Beauty Service';
+    var form = document.getElementById('review-booking-form');
+    form.action = '/my-bookings/' + bookingId + '/review';
+
+    setReviewRating(5);
+    var ta = document.getElementById('review-comment-input');
+    if (ta) ta.value = '';
+    document.querySelectorAll('.bc-rm-chip').forEach(function(c) { c.classList.remove('active'); });
+
+    var modal = document.getElementById('bc-review-modal');
+    modal.classList.remove('d-none');
+    modal.classList.add('open');
+    modal.style.display = 'flex';
+  }
+
+  function closeReviewModal() {
+    var modal = document.getElementById('bc-review-modal');
+    modal.classList.add('d-none');
+    modal.classList.remove('open');
+    modal.style.display = 'none';
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeCancelModal();
+      closeReviewModal();
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    closeCancelModal();
+    closeReviewModal();
+  });
+  document.addEventListener('turbo:load', function() {
+    closeCancelModal();
+    closeReviewModal();
+  });
+</script>

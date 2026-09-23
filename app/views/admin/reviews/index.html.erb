@@ -1,0 +1,90 @@
+<% content_for :page_title, "Reviews" %>
+
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">Quality & Moderation</div>
+      <h2 class="page-title fs-1 fw-bold">Customer Reviews</h2>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-header border-bottom py-3">
+    <div class="row g-2 align-items-center w-100">
+      <div class="col-md-5">
+        <div class="input-icon">
+          <span class="input-icon-addon">
+            <i class="ti ti-search text-secondary fs-3"></i>
+          </span>
+          <input class="form-control" type="text" placeholder="Search feedback text, customer, worker...">
+        </div>
+      </div>
+      <div class="col-md-3">
+        <select class="form-select">
+          <option>All Ratings</option>
+          <option>5 Stars</option>
+          <option>4 Stars</option>
+          <option>3 Stars</option>
+          <option>2 Stars & below</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select class="form-select">
+          <option>All Moderation Statuses</option>
+          <option>Published</option>
+          <option>Flagged</option>
+          <option>Hidden</option>
+        </select>
+      </div>
+      <div class="col-auto ms-auto text-secondary small">
+        <span class="fw-bold text-reset"><%= @reviews.length %></span> reviews
+      </div>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-vcenter card-table table-hover table-striped-columns">
+      <thead>
+        <tr>
+          <th>Customer</th>
+          <th>Service Specialist</th>
+          <th>Service</th>
+          <th>Rating</th>
+          <th>Feedback Comment</th>
+          <th>Submitted Date</th>
+          <th>Status</th>
+          <th class="text-end pe-3">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @reviews.each do |r| %>
+          <tr>
+            <td>
+              <span class="fw-semibold text-reset"><%= r[:customer] %></span>
+            </td>
+            <td class="text-secondary"><%= r[:worker] %></td>
+            <td><span class="badge bg-secondary-lt"><%= r[:service] %></span></td>
+            <td><%= stars_html(r[:rating]) %></td>
+            <td class="text-secondary small" style="max-width: 280px;">
+              <div class="text-truncate">"<%= r[:comment] %>"</div>
+            </td>
+            <td class="text-secondary small"><%= r[:date] %></td>
+            <td><%= review_status_badge(r[:status]) %></td>
+            <td class="text-end pe-3">
+              <div class="btn-list justify-content-end">
+                <%= link_to admin_review_path(r[:id]), class: "btn btn-icon btn-ghost-secondary btn-sm", title: "View Review" do %>
+                  <i class="ti ti-eye fs-3"></i>
+                <% end %>
+                <%= link_to edit_admin_review_path(r[:id]), class: "btn btn-icon btn-ghost-secondary btn-sm", title: "Moderate Review" do %>
+                  <i class="ti ti-edit fs-3"></i>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <%= render_pagination %>
+</div>

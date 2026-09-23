@@ -1,0 +1,205 @@
+<% content_for :page_title, "Subcategories" %>
+
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">Catalog</div>
+      <h2 class="page-title fs-1 fw-bold"><%= @category ? "#{@category.name} › Subcategories" : "Subcategories" %></h2>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <div class="btn-list">
+        <% if @category %>
+          <%= link_to admin_category_path(@category), class: "btn btn-outline-secondary" do %>
+            <i class="ti ti-arrow-left me-1 fs-3"></i> Back to Category
+          <% end %>
+        <% end %>
+        <% if policy(Subcategory).create? %>
+          <%= link_to (@category ? new_admin_category_subcategory_path(@category) : new_admin_subcategory_path), class: "btn btn-primary" do %>
+            <i class="ti ti-plus me-1 fs-3"></i> New Subcategory
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- KPI Cards -->
+<div class="row row-cards mb-4">
+  <div class="col-sm-6 col-lg-3">
+    <div class="card card-sm shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-md rounded-3 bg-azure-lt text-azure me-3"><i class="ti ti-subtask fs-1"></i></span>
+          <div>
+            <div class="text-secondary small fw-medium">Total Subcategories</div>
+            <div class="fs-2 fw-bold"><%= @subcategories.size %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card card-sm shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-md rounded-3 bg-green-lt text-green me-3"><i class="ti ti-check fs-1"></i></span>
+          <div>
+            <div class="text-secondary small fw-medium">Active</div>
+            <div class="fs-2 fw-bold text-success"><%= @subcategories.count { |s| s.status == "active" } %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card card-sm shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-md rounded-3 bg-yellow-lt text-yellow me-3"><i class="ti ti-star fs-1"></i></span>
+          <div>
+            <div class="text-secondary small fw-medium">Featured</div>
+            <div class="fs-2 fw-bold text-warning"><%= @subcategories.count(&:featured?) %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card card-sm shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-md rounded-3 bg-purple-lt text-purple me-3"><i class="ti ti-category fs-1"></i></span>
+          <div>
+            <div class="text-secondary small fw-medium">Parent Categories</div>
+            <div class="fs-2 fw-bold text-purple"><%= @subcategories.map(&:category_id).uniq.compact.size %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Table Card -->
+<div class="card shadow-sm">
+  <div class="card-header border-bottom py-3">
+    <%= form_with url: (@category ? admin_category_subcategories_path(@category) : admin_subcategories_path), method: :get, class: "w-100" do %>
+      <div class="row g-2 align-items-center">
+        <div class="col-md-4">
+          <div class="input-icon">
+            <span class="input-icon-addon"><i class="ti ti-search text-secondary fs-3"></i></span>
+            <input class="form-control" type="text" name="search" value="<%= params[:search] %>"
+                   placeholder="Search subcategories..." autocomplete="off">
+          </div>
+        </div>
+        <% unless @category %>
+          <div class="col-md-3">
+            <select class="form-select" name="category_id">
+              <option value="">All Categories</option>
+              <% @categories.each do |cat| %>
+                <option value="<%= cat.id %>" <%= "selected" if params[:category_id] == cat.id.to_s %>><%= cat.name %></option>
+              <% end %>
+            </select>
+          </div>
+        <% end %>
+        <div class="col-md-2">
+          <select class="form-select" name="status">
+            <option value="">All Statuses</option>
+            <option value="active" <%= "selected" if params[:status] == "active" %>>Active</option>
+            <option value="inactive" <%= "selected" if params[:status] == "inactive" %>>Inactive</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" name="featured">
+            <option value="">All</option>
+            <option value="true" <%= "selected" if params[:featured] == "true" %>>Featured Only</option>
+          </select>
+        </div>
+        <div class="col-auto">
+          <button type="submit" class="btn btn-outline-secondary">Filter</button>
+          <%= link_to "Reset", (@category ? admin_category_subcategories_path(@category) : admin_subcategories_path), class: "btn btn-link text-secondary" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @subcategories.empty? %>
+    <div class="card-body text-center py-5">
+      <div class="avatar avatar-xl rounded-circle bg-light-subtle text-secondary mx-auto mb-3">
+        <i class="ti ti-subtask fs-1"></i>
+      </div>
+      <h3 class="fw-bold mb-1">No subcategories found</h3>
+      <p class="text-secondary mb-3">Get started by creating your first subcategory in the catalog.</p>
+      <% if policy(Subcategory).create? %>
+        <%= link_to new_admin_subcategory_path, class: "btn btn-primary" do %>
+          <i class="ti ti-plus me-1"></i> New Subcategory
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="table-responsive">
+      <table class="table table-vcenter card-table table-hover">
+        <thead>
+          <tr>
+            <th>Subcategory Name</th>
+            <th>Parent Category</th>
+            <th>Services</th>
+            <th>Position</th>
+            <th>Featured</th>
+            <th>Status</th>
+            <th class="w-1 text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @subcategories.each do |sub| %>
+            <tr>
+              <td>
+                <div class="fw-bold text-reset">
+                  <%= link_to sub.name, admin_subcategory_path(sub), class: "text-reset text-decoration-none" %>
+                </div>
+                <div class="text-secondary small font-monospace"><%= sub.slug %></div>
+              </td>
+              <td>
+                <%= link_to sub.category.name, admin_category_path(sub.category), class: "badge bg-azure-lt text-azure text-decoration-none" %>
+              </td>
+              <td>
+                <span class="badge bg-secondary-lt fw-semibold"><%= sub.service_count %> services</span>
+              </td>
+              <td class="text-secondary font-monospace"><%= sub.position %></td>
+              <td>
+                <% if sub.featured? %>
+                  <span class="badge bg-yellow-lt text-yellow"><i class="ti ti-star me-1"></i>Featured</span>
+                <% else %>
+                  <span class="text-secondary">—</span>
+                <% end %>
+              </td>
+              <td>
+                <%= active_status_badge(sub.status) %>
+              </td>
+              <td class="text-end">
+                <div class="btn-list flex-nowrap justify-content-end">
+                  <%= link_to admin_subcategory_path(sub), class: "btn btn-sm btn-icon btn-ghost-secondary", title: "View" do %>
+                    <i class="ti ti-eye fs-3"></i>
+                  <% end %>
+                  <% if policy(sub).update? %>
+                    <%= link_to edit_admin_subcategory_path(sub), class: "btn btn-sm btn-icon btn-ghost-primary", title: "Edit" do %>
+                      <i class="ti ti-pencil fs-3"></i>
+                    <% end %>
+                  <% end %>
+                  <% if policy(sub).destroy? %>
+                    <%= button_to admin_subcategory_path(sub), method: :delete,
+                          class: "btn btn-sm btn-icon btn-ghost-danger",
+                          title: "Delete",
+                          data: { turbo_confirm: "Are you sure you want to delete subcategory '#{sub.name}'?" } do %>
+                      <i class="ti ti-trash fs-3"></i>
+                    <% end %>
+                  <% end %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+  <%= render_pagination %>
+</div>

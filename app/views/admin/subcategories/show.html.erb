@@ -1,0 +1,156 @@
+<% content_for :page_title, @subcategory.name %>
+
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">
+        <%= link_to "Catalog", admin_categories_path, class: "text-secondary text-decoration-none" %> ›
+        <%= link_to @subcategory.category.name, admin_category_path(@subcategory.category), class: "text-secondary text-decoration-none" %> ›
+        Subcategories
+      </div>
+      <h2 class="page-title fs-1 fw-bold"><%= @subcategory.name %></h2>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <div class="btn-list">
+        <%= link_to admin_subcategories_path, class: "btn btn-outline-secondary" do %>
+          <i class="ti ti-arrow-left me-1 fs-3"></i> Back
+        <% end %>
+        <% if policy(@subcategory).update? %>
+          <%= link_to edit_admin_subcategory_path(@subcategory), class: "btn btn-outline-primary" do %>
+            <i class="ti ti-pencil me-1 fs-3"></i> Edit
+          <% end %>
+        <% end %>
+        <%= link_to new_admin_service_path(subcategory_id: @subcategory.id), class: "btn btn-primary" do %>
+          <i class="ti ti-plus me-1 fs-3"></i> Add Service
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Subcategory Info -->
+  <div class="col-lg-4">
+    <div class="card shadow-sm mb-4">
+      <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+        <h3 class="card-title fw-bold mb-0">Subcategory Details</h3>
+        <div class="d-flex gap-2">
+          <%= active_status_badge(@subcategory.status) %>
+          <% if @subcategory.featured? %>
+            <span class="badge bg-yellow-lt text-yellow"><i class="ti ti-star me-1"></i>Featured</span>
+          <% end %>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          <div class="text-secondary small fw-medium">Parent Category</div>
+          <div class="mt-1">
+            <%= link_to admin_category_path(@subcategory.category), class: "badge bg-azure-lt text-azure fs-4 p-2 text-decoration-none" do %>
+              <i class="ti ti-category me-1"></i> <%= @subcategory.category.name %>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <div class="text-secondary small fw-medium">Slug</div>
+          <div class="font-monospace fw-semibold mt-1"><%= @subcategory.slug %></div>
+        </div>
+
+        <div class="mb-3">
+          <div class="text-secondary small fw-medium">Display Position</div>
+          <div class="fw-semibold mt-1"><%= @subcategory.position %></div>
+        </div>
+
+        <div class="mb-3">
+          <div class="text-secondary small fw-medium">Active Services</div>
+          <div class="fw-bold fs-2 text-primary mt-1"><%= @subcategory.service_count %></div>
+        </div>
+
+        <% if @subcategory.description.present? %>
+          <div>
+            <div class="text-secondary small fw-medium">Description</div>
+            <div class="mt-1 text-secondary"><%= @subcategory.description %></div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Services in this Subcategory -->
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+        <div>
+          <h3 class="card-title fw-bold mb-0">Services in <%= @subcategory.name %></h3>
+          <div class="text-secondary small">Directly attached services</div>
+        </div>
+        <%= link_to new_admin_service_path(subcategory_id: @subcategory.id), class: "btn btn-sm btn-primary" do %>
+          <i class="ti ti-plus me-1"></i> New Service
+        <% end %>
+      </div>
+
+      <% if @services.empty? %>
+        <div class="card-body text-center py-5">
+          <div class="avatar avatar-lg rounded-circle bg-light-subtle text-secondary mx-auto mb-3">
+            <i class="ti ti-cut fs-2"></i>
+          </div>
+          <h4 class="fw-bold mb-1">No services in this subcategory</h4>
+          <p class="text-secondary small mb-3">Create services that belong specifically to <%= @subcategory.name %>.</p>
+          <%= link_to new_admin_service_path(subcategory_id: @subcategory.id), class: "btn btn-sm btn-primary" do %>
+            <i class="ti ti-plus me-1"></i> Add First Service
+          <% end %>
+        </div>
+      <% else %>
+        <div class="table-responsive">
+          <table class="table table-vcenter card-table table-hover">
+            <thead>
+              <tr>
+                <th>Service</th>
+                <th>Tag</th>
+                <th>Base Price</th>
+                <th>Duration</th>
+                <th>Status</th>
+                <th class="w-1 text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @services.each do |svc| %>
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <% s_img = svc.image_url.presence || (svc.image.attached? && ((svc.image.url rescue nil) || (rails_blob_path(svc.image, only_path: true) rescue nil))) %>
+                      <% if s_img.present? %>
+                        <img src="<%= s_img %>" class="avatar avatar-sm rounded-2 me-2" style="object-fit:cover;" alt="" />
+                      <% else %>
+                        <span class="avatar avatar-sm rounded-2 bg-azure-lt text-azure me-2"><i class="ti ti-cut"></i></span>
+                      <% end %>
+                      <div>
+                        <div class="fw-semibold"><%= link_to svc.name, admin_service_path(svc), class: "text-reset" %></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge bg-purple-lt"><%= svc.tag_label %></span>
+                  </td>
+                  <td>
+                    <div class="fw-bold"><%= svc.display_price %></div>
+                    <% if svc.on_sale? %>
+                      <div class="text-secondary text-decoration-line-through small"><%= svc.display_base_price %></div>
+                    <% end %>
+                  </td>
+                  <td class="text-secondary"><%= svc.duration_minutes %> mins</td>
+                  <td><%= active_status_badge(svc.status) %></td>
+                  <td class="text-end">
+                    <%= link_to admin_service_path(svc), class: "btn btn-sm btn-icon btn-ghost-secondary", title: "View" do %>
+                      <i class="ti ti-eye fs-3"></i>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

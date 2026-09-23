@@ -1,0 +1,75 @@
+<%
+  obj = local_assigns[:collection] || local_assigns[:pagination] || @pagination
+  if obj != nil
+    is_kaminari  = obj.respond_to?(:total_count) && obj.respond_to?(:current_page)
+    current_page = is_kaminari ? obj.current_page : (obj[:page] || 1).to_i
+    per_page     = is_kaminari ? obj.limit_value   : (obj[:per_page] || 10).to_i
+    total_count  = is_kaminari ? obj.total_count   : (obj[:total_count] || 0).to_i
+    total_pages  = is_kaminari ? obj.total_pages   : (obj[:total_pages] || 1).to_i
+
+    if total_count > 0
+      # page window for non-kaminari fallback
+      window    = 5
+      half      = window / 2
+      win_start = [[current_page - half, 1].max, [total_pages - window + 1, 1].max].min
+      win_end   = [win_start + window - 1, total_pages].min
+%>
+<div class="bc-pagination-bar">
+  <!-- Left: Total count -->
+  <span class="bc-pagination-total">
+    Total: <strong><%= number_with_delimiter(total_count) %></strong>
+  </span>
+
+  <!-- Right: Page label + pager -->
+  <div class="bc-pagination-controls">
+    <span class="bc-pagination-label">
+      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" width="14" height="14">
+        <path d="M2 2h8l4 4v8H2V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+        <path d="M6 2v4H2" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+      </svg>
+      Page <%= current_page %> of <%= total_pages %>
+    </span>
+
+    <% if total_pages > 1 %>
+      <% if is_kaminari %>
+        <%# Kaminari renders bc-page-nav via app/views/kaminari/_paginator.html.erb %>
+        <%= paginate obj %>
+      <% else %>
+        <%# Manual fallback for non-AR collections %>
+        <nav class="bc-page-nav" aria-label="Pagination">
+          <% (win_start..win_end).each do |p| %>
+            <% if p == current_page %>
+              <span class="bc-page-btn bc-page-btn--active" aria-current="page"><%= p %></span>
+            <% else %>
+              <%= link_to p.to_s, url_for(request.query_parameters.merge(page: p)),
+                    class: "bc-page-btn",
+                    data: { turbo_action: "advance" } %>
+            <% end %>
+          <% end %>
+
+          <% if win_end < total_pages %>
+            <span class="bc-page-btn bc-page-btn--gap">&hellip;</span>
+          <% end %>
+
+          <% if current_page < total_pages %>
+            <%= link_to "›", url_for(request.query_parameters.merge(page: current_page + 1)),
+                  class: "bc-page-btn bc-page-btn--arrow",
+                  aria: { label: "Next page" },
+                  data: { turbo_action: "advance" } %>
+            <%= link_to "»", url_for(request.query_parameters.merge(page: total_pages)),
+                  class: "bc-page-btn bc-page-btn--arrow",
+                  aria: { label: "Last page" },
+                  data: { turbo_action: "advance" } %>
+          <% else %>
+            <span class="bc-page-btn bc-page-btn--arrow bc-page-btn--disabled" aria-disabled="true">›</span>
+            <span class="bc-page-btn bc-page-btn--arrow bc-page-btn--disabled" aria-disabled="true">»</span>
+          <% end %>
+        </nav>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+<%
+    end
+  end
+%>

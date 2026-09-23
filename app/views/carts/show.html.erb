@@ -1,0 +1,975 @@
+<% content_for :page_title, "My Cart — BeautyNest" %>
+
+<%= render "shared/public_nav", active: "cart" %>
+
+<div class="bn-cart-page">
+  <div class="bn-cart-container">
+    
+    <% if flash[:notice] %>
+      <div class="bn-flash-alert bn-flash-success">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span><%= flash[:notice] %></span>
+      </div>
+    <% end %>
+
+    <% if flash[:alert] %>
+      <div class="bn-flash-alert bn-flash-error">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span><%= flash[:alert] %></span>
+      </div>
+    <% end %>
+
+    <div class="bn-cart-header">
+      <div class="bn-cart-title-wrap">
+        <span class="bn-cart-pretitle">Order Review</span>
+        <h1 class="bn-cart-title">Your Service Cart (<%= @cart.item_count %> <%= 'service'.pluralize(@cart.item_count) %>)</h1>
+      </div>
+      <%= link_to "/categories#{@worker ? "?worker_id=#{@worker.id}" : ""}", class: "bn-cart-continue-link" do %>
+        <i class="ti ti-arrow-left"></i> Add More Services
+      <% end %>
+    </div>
+
+    <% if @cart.empty? %>
+      <!-- Empty Cart State -->
+      <div class="bn-cart-empty-card">
+        <div class="bn-empty-icon-wrap">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 0 1-8 0"/>
+          </svg>
+        </div>
+        <h2 class="bn-empty-title">Your Cart is Empty</h2>
+        <p class="bn-empty-desc">You haven't added any salon services yet. Choose from top-rated waxing, facials, haircuts, and more with verified beauticians at your doorstep.</p>
+        <div class="bn-empty-actions">
+          <%= link_to "Browse Categories", public_categories_path, class: "bn-btn-primary" %>
+          <%= link_to "Find Beauticians", public_beauticians_path, class: "bn-btn-secondary" %>
+        </div>
+      </div>
+    <% else %>
+      <!-- Cart Layout Grid -->
+      <div class="bn-cart-grid">
+        
+        <!-- Left Column: Assigned Specialist & Items -->
+        <div class="bn-cart-main">
+          
+          <!-- Assigned Beautician & Schedule Banner -->
+          <div class="bn-cart-worker-banner">
+            <div class="bn-cwb-header">
+              <span class="bn-cwb-tag"><i class="ti ti-calendar-event"></i> Scheduled Appointment</span>
+              <% if @worker %>
+                <span class="bn-cwb-badge"><i class="ti ti-badge-check"></i> Beautician Assigned</span>
+              <% else %>
+                <span class="bn-cwb-badge bn-cwb-badge-info"><i class="ti ti-user-check"></i> Auto-Assigned Specialist</span>
+              <% end %>
+            </div>
+
+            <div class="bn-cwb-body">
+              <div class="bn-cwb-profile">
+                <div class="bn-cwb-avatar-wrap">
+                  <% avatar_src = @worker ? @worker.display_avatar_url : ImageUrlResolver.fallback_for(:beautician) %>
+                  <img src="<%= avatar_src %>" alt="<%= @cart.display_worker_name %>" class="bn-cwb-avatar" onerror="this.src='<%= ImageUrlResolver.fallback_for(:beautician) %>'">
+                  <% if @worker %>
+                    <span class="bn-cwb-check" title="Verified Specialist">✓</span>
+                  <% end %>
+                </div>
+                <div class="bn-cwb-info">
+                  <h3 class="bn-cwb-name"><%= @cart.display_worker_name %></h3>
+                  <div class="bn-cwb-meta">
+                    <% if @worker %>
+                      <span class="bn-cwb-rating">★ <%= @worker.rating_display %></span>
+                      <span class="bn-cwb-dot">•</span>
+                      <span class="bn-cwb-exp"><%= @worker.experience_display %></span>
+                      <span class="bn-cwb-dot">•</span>
+                    <% end %>
+                    <span class="bn-cwb-city"><i class="ti ti-map-pin"></i> <%= @cart.display_city_name %></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bn-cwb-schedule">
+                <div class="bn-schedule-pill">
+                  <i class="ti ti-clock"></i>
+                  <span><%= @cart.formatted_schedule || "Schedule Selected at Checkout" %></span>
+                </div>
+                <%= link_to "/categories#{@worker ? "?worker_id=#{@worker.id}" : ""}", class: "bn-cwb-change-link" do %>
+                  Change Schedule
+                <% end %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Items Card List -->
+          <div class="bn-cart-items-card">
+            <div class="bn-cic-header">
+              <h2 class="bn-cic-title">Selected Services (<%= @cart.cart_items.count %>)</h2>
+              <%= button_to clear_cart_path, method: :delete, data: { turbo_confirm: "Clear all items from your cart?" }, class: "bn-cic-clear-btn" do %>
+                <i class="ti ti-trash"></i> Clear Cart
+              <% end %>
+            </div>
+
+            <div class="bn-items-list">
+              <% @cart_items.each do |item| %>
+                <% svc = item.service %>
+                <div class="bn-item-row" id="cart-item-<%= item.id %>">
+                  <div class="bn-item-thumb-wrap">
+                    <img src="<%= ImageUrlResolver.resolve_for_service(svc) %>" alt="<%= svc.name %>" class="bn-item-thumb" onerror="this.src='<%= ImageUrlResolver.fallback_for(:service) %>'">
+                  </div>
+
+                  <div class="bn-item-details">
+                    <span class="bn-item-cat"><%= svc.category&.name || 'Beauty Service' %></span>
+                    <h4 class="bn-item-name"><%= svc.name %></h4>
+                    <div class="bn-item-meta">
+                      <span class="bn-item-duration"><i class="ti ti-clock"></i> <%= svc.duration_minutes || 45 %> mins</span>
+                      <span class="bn-item-dot">•</span>
+                      <span class="bn-item-price-unit">₹<%= item.unit_price.to_i %> / service</span>
+                    </div>
+                    <% if item.scheduled? || item.formatted_schedule.present? %>
+                      <div class="bn-item-schedule-badge">
+                        <i class="ti ti-calendar-event"></i>
+                        <span><%= item.formatted_schedule %></span>
+                        <% if item.city.present? %>
+                          <span style="background: rgba(219,39,119,0.1); color: #db2777; padding: 1px 6px; border-radius: 4px; font-weight: 700; margin-left: 4px;">📍 <%= item.city.name %></span>
+                        <% end %>
+                        <% if item.worker.present? %>
+                          <span class="bn-item-sched-worker" style="margin-left: 4px;">• <i class="ti ti-user-check"></i> <%= item.worker.name %></span>
+                        <% else %>
+                          <span class="bn-item-sched-worker" style="margin-left: 4px; color: #6b7280;">• <i class="ti ti-sparkles"></i> Auto-Assigned Specialist</span>
+                        <% end %>
+                      </div>
+                    <% end %>
+                  </div>
+
+                  <div class="bn-item-actions">
+                    <!-- Quantity Modifier -->
+                    <div class="bn-qty-control">
+                      <%= button_to update_item_cart_path(item.id), method: :patch, params: { quantity: item.quantity - 1 }, class: "bn-qty-btn", title: "Decrease quantity" do %>
+                        -
+                      <% end %>
+                      <span class="bn-qty-num"><%= item.quantity %></span>
+                      <%= button_to update_item_cart_path(item.id), method: :patch, params: { quantity: item.quantity + 1 }, class: "bn-qty-btn", title: "Increase quantity" do %>
+                        +
+                      <% end %>
+                    </div>
+
+                    <!-- Line Total -->
+                    <div class="bn-item-total">
+                      ₹<%= item.line_total.to_i %>
+                    </div>
+
+                    <!-- Remove Item -->
+                    <%= button_to remove_item_cart_path(item.id), method: :delete, class: "bn-item-remove-btn", title: "Remove #{svc.name}" do %>
+                      <i class="ti ti-x"></i>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- Trust Badges Strip -->
+          <div class="bn-trust-strip">
+            <div class="bn-trust-item">
+              <i class="ti ti-shield-check"></i>
+              <div>
+                <strong>100% Sanitized Tools</strong>
+                <p>Single-use kits and medical-grade hygiene</p>
+              </div>
+            </div>
+            <div class="bn-trust-item">
+              <i class="ti ti-certificate"></i>
+              <div>
+                <strong>Background Checked</strong>
+                <p>Verified identity & certified professionals</p>
+              </div>
+            </div>
+            <div class="bn-trust-item">
+              <i class="ti ti-wallet"></i>
+              <div>
+                <strong>Pay After Service</strong>
+                <p>Pay cash or UPI after satisfaction</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Bill Summary & Checkout CTA -->
+        <div class="bn-cart-sidebar">
+          
+          <!-- Coupon Box -->
+          <div class="bn-coupon-card">
+            <div class="bn-coupon-header">
+              <i class="ti ti-tag"></i>
+              <span>Coupons & Offers</span>
+            </div>
+
+            <% if @cart.coupon.present? %>
+              <div class="bn-coupon-applied">
+                <div class="bn-ca-info">
+                  <span class="bn-ca-code">✓ <%= @cart.coupon.code %></span>
+                  <span class="bn-ca-savings">Saved ₹<%= @cart.discount_amount.to_i %></span>
+                </div>
+                <%= button_to remove_coupon_cart_path, method: :delete, class: "bn-ca-remove-btn", title: "Remove coupon" do %>
+                  Remove
+                <% end %>
+              </div>
+            <% else %>
+              <%= form_with url: apply_coupon_cart_path, method: :post, local: true, class: "bn-coupon-form" do |f| %>
+                <div class="bn-coupon-input-group">
+                  <%= f.text_field :code, placeholder: "Enter promo code", class: "bn-coupon-input", id: "bn-coupon-code" %>
+                  <%= f.submit "Apply", class: "bn-coupon-apply-btn" %>
+                </div>
+              <% end %>
+
+              <% if @available_coupons.present? && @available_coupons.any? %>
+                <div class="bn-coupon-chips">
+                  <span class="bn-chip-label">Available:</span>
+                  <% @available_coupons.each do |ac| %>
+                    <button type="button" class="bn-coupon-chip" onclick="applyPromo('<%= ac.code %>')">
+                      <%= ac.code %> (<%= ac.display_discount %>)
+                    </button>
+                  <% end %>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+
+          <!-- Bill Summary Card -->
+          <div class="bn-summary-card">
+            <h3 class="bn-summary-title">Bill Details</h3>
+            
+            <div class="bn-summary-rows">
+              <div class="bn-sr-row">
+                <span>Item Total (<%= @cart.item_count %> <%= 'item'.pluralize(@cart.item_count) %>)</span>
+                <span>₹<%= @cart.subtotal.to_i %></span>
+              </div>
+
+              <% if @cart.discount_amount > 0 %>
+                <div class="bn-sr-row bn-sr-discount">
+                  <span>Coupon Discount (<%= @cart.coupon.code %>)</span>
+                  <span class="bn-disc-val">-₹<%= @cart.discount_amount.to_i %></span>
+                </div>
+              <% end %>
+
+              <div class="bn-sr-row">
+                <span>Safety & Hygiene Fee</span>
+                <span class="bn-free-tag">FREE</span>
+              </div>
+
+              <div class="bn-sr-row">
+                <span>Taxes & Platform Charges</span>
+                <span class="bn-free-tag">FREE</span>
+              </div>
+
+              <div class="bn-sr-divider"></div>
+
+              <div class="bn-sr-row bn-sr-total">
+                <strong>Total Amount</strong>
+                <strong class="bn-total-price">₹<%= @cart.grand_total.to_i %></strong>
+              </div>
+            </div>
+
+            <div class="bn-summary-actions">
+              <%= link_to checkout_page_path, class: "bn-btn-checkout" do %>
+                <span>Proceed to Checkout</span>
+                <i class="ti ti-arrow-right"></i>
+              <% end %>
+            </div>
+
+            <div class="bn-cancellation-notice">
+              <i class="ti ti-info-circle"></i>
+              <span>Free cancellation up to 2 hours before scheduled slot.</span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    <% end %>
+
+  </div>
+</div>
+
+<style>
+  .bn-cart-page {
+    background: var(--bg, #f4f3f8);
+    min-height: 100vh;
+    padding-top: calc(68px + 1.5rem);
+    padding-bottom: 4rem;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
+    color: var(--text-1, #111827);
+  }
+
+  .bn-cart-container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 1.25rem;
+  }
+
+  /* Flash Alert */
+  .bn-flash-alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 18px;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    animation: bnFadeIn .18s ease-out;
+  }
+  .bn-flash-success {
+    background: #ecfdf5;
+    border: 1.5px solid #a7f3d0;
+    color: #065f46;
+  }
+  .bn-flash-error {
+    background: #fef2f2;
+    border: 1.5px solid #fecaca;
+    color: #991b1b;
+  }
+
+  /* Header */
+  .bn-cart-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .bn-cart-pretitle {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent, #db2777);
+    display: block;
+    margin-bottom: 2px;
+  }
+  .bn-cart-title {
+    font-size: clamp(1.4rem, 2.5vw, 1.85rem);
+    font-weight: 800;
+    color: var(--text-1, #111827);
+    margin: 0;
+    letter-spacing: -0.022em;
+  }
+  .bn-cart-continue-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--accent, #db2777);
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: color .15s;
+  }
+  .bn-cart-continue-link:hover { text-decoration: underline; }
+
+  /* Empty State */
+  .bn-cart-empty-card {
+    background: #ffffff;
+    border-radius: 18px;
+    border: 1px solid var(--border, rgba(0,0,0,0.07));
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));
+    padding: 3.5rem 1.5rem;
+    text-align: center;
+    max-width: 580px;
+    margin: 2rem auto;
+  }
+  .bn-empty-icon-wrap {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    background: #fdf2f8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    border: 1.5px solid #fbcfe8;
+  }
+  .bn-empty-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--text-1, #111827);
+    margin: 0 0 0.5rem;
+    letter-spacing: -0.02em;
+  }
+  .bn-empty-desc {
+    font-size: 0.88rem;
+    color: var(--text-3, #4b5563);
+    line-height: 1.55;
+    margin: 0 0 2rem;
+  }
+  .bn-empty-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .bn-btn-primary {
+    background: var(--accent, #db2777);
+    color: #ffffff;
+    padding: 10px 22px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background .16s ease;
+  }
+  .bn-btn-primary:hover { background: #be185d; color: #fff; }
+  .bn-btn-secondary {
+    background: #ffffff;
+    color: var(--text-2, #374151);
+    border: 1.5px solid var(--border-strong, rgba(0,0,0,0.14));
+    padding: 9px 20px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all .16s ease;
+  }
+  .bn-btn-secondary:hover { background: #f9fafb; color: #111827; }
+
+  /* Grid Layout */
+  .bn-cart-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 1.75rem;
+    align-items: flex-start;
+  }
+  @media (max-width: 960px) {
+    .bn-cart-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Main Column */
+  .bn-cart-main {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  /* Worker & Schedule Banner */
+  .bn-cart-worker-banner {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1.5px solid #fbcfe8;
+    box-shadow: 0 2px 8px rgba(219, 39, 119, 0.05);
+    overflow: hidden;
+  }
+  .bn-cwb-header {
+    background: #fdf2f8;
+    padding: 0.65rem 1.25rem;
+    border-bottom: 1px solid #fce7f3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.75rem;
+  }
+  .bn-cwb-tag { font-weight: 700; color: #9d174d; display: flex; align-items: center; gap: 5px; }
+  .bn-cwb-badge {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .bn-cwb-badge-info {
+    background: #eff6ff;
+    color: #1e40af;
+    border-color: #bfdbfe;
+  }
+  .bn-cwb-body {
+    padding: 1.1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .bn-cwb-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .bn-cwb-avatar-wrap {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid #f472b6;
+    flex-shrink: 0;
+    background: #fdf2f8;
+  }
+  .bn-cwb-avatar { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .bn-cwb-check {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    background: #10b981;
+    color: #fff;
+    border-radius: 50%;
+    width: 17px;
+    height: 17px;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid #fff;
+  }
+  .bn-cwb-name {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text-1, #111827);
+    margin: 0 0 2px;
+    letter-spacing: -0.015em;
+  }
+  .bn-cwb-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: var(--text-3, #4b5563);
+  }
+  .bn-cwb-rating { font-weight: 700; color: #b45309; }
+  .bn-cwb-exp {
+    font-weight: 700;
+    color: #059669;
+    background: #ecfdf5;
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+  .bn-cwb-dot { color: #d1d5db; }
+  .bn-cwb-city { font-weight: 600; color: var(--text-2, #374151); }
+
+  .bn-cwb-schedule {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
+  .bn-schedule-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-1, #111827);
+  }
+  .bn-cwb-change-link {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--accent, #db2777);
+    text-decoration: none;
+  }
+  .bn-cwb-change-link:hover { text-decoration: underline; }
+
+  /* Items Card */
+  .bn-cart-items-card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid var(--border, rgba(0,0,0,0.07));
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));
+    overflow: hidden;
+  }
+  .bn-cic-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .bn-cic-title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--text-1, #111827);
+    margin: 0;
+  }
+  .bn-cic-clear-btn {
+    background: none;
+    border: none;
+    color: #ef4444;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+  }
+  .bn-cic-clear-btn:hover { text-decoration: underline; }
+
+  .bn-items-list {
+    display: flex;
+    flex-direction: column;
+  }
+  .bn-item-row {
+    padding: 1.1rem 1.25rem;
+    border-bottom: 1px solid #f3f4f6;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .bn-item-row:last-child { border-bottom: none; }
+  .bn-item-thumb-wrap {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #f9fafb;
+    border: 1px solid #f3f4f6;
+  }
+  .bn-item-thumb { width: 100%; height: 100%; object-fit: cover; }
+  .bn-item-details { flex: 1; min-width: 0; }
+  .bn-item-cat {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--accent, #db2777);
+    display: block;
+    margin-bottom: 2px;
+  }
+  .bn-item-name {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--text-1, #111827);
+    margin: 0 0 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .bn-item-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.76rem;
+    color: var(--text-3, #4b5563);
+  }
+  .bn-item-schedule-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #fdf2f8;
+    color: #db2777;
+    border: 1px solid #fbcfe8;
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 0.73rem;
+    font-weight: 700;
+    margin-top: 5px;
+    width: fit-content;
+  }
+  .bn-item-sched-worker {
+    color: #4b5563;
+    font-weight: 600;
+  }
+  .bn-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+  .bn-qty-control {
+    display: inline-flex;
+    align-items: center;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #ffffff;
+  }
+  .bn-qty-btn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: #f9fafb;
+    color: var(--text-1, #111827);
+    font-weight: 800;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .12s;
+  }
+  .bn-qty-btn:hover { background: #fee2e2; color: #b91c1c; }
+  .bn-qty-num {
+    padding: 0 10px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--text-1, #111827);
+  }
+  .bn-item-total {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text-1, #111827);
+    min-width: 60px;
+    text-align: right;
+  }
+  .bn-item-remove-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1px solid #f3f4f6;
+    background: #f9fafb;
+    color: #9ca3af;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    transition: all .14s;
+  }
+  .bn-item-remove-btn:hover { background: #fee2e2; color: #ef4444; border-color: #fca5a5; }
+
+  /* Trust Strip */
+  .bn-trust-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    padding: 1.25rem;
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid var(--border, rgba(0,0,0,0.07));
+  }
+  @media (max-width: 640px) {
+    .bn-trust-strip { grid-template-columns: 1fr; }
+  }
+  .bn-trust-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .bn-trust-item i {
+    font-size: 1.35rem;
+    color: var(--accent, #db2777);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .bn-trust-item strong {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: var(--text-1, #111827);
+    margin-bottom: 2px;
+  }
+  .bn-trust-item p {
+    font-size: 0.74rem;
+    color: var(--text-4, #64748b);
+    margin: 0;
+    line-height: 1.35;
+  }
+
+  /* Right Sidebar */
+  .bn-cart-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    position: sticky;
+    top: calc(68px + 1.5rem);
+  }
+
+  /* Coupon Card */
+  .bn-coupon-card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid var(--border, rgba(0,0,0,0.07));
+    padding: 1.15rem;
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));
+  }
+  .bn-coupon-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: var(--text-1, #111827);
+    margin-bottom: 0.85rem;
+  }
+  .bn-coupon-header i { color: var(--accent, #db2777); }
+  .bn-coupon-input-group {
+    display: flex;
+    gap: 8px;
+  }
+  .bn-coupon-input {
+    flex: 1;
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1.5px solid #d1d5db;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .bn-coupon-input:focus { border-color: var(--accent, #db2777); }
+  .bn-coupon-apply-btn {
+    background: #111827;
+    color: #ffffff;
+    border: none;
+    padding: 0 16px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .bn-coupon-apply-btn:hover { background: #374151; }
+
+  .bn-coupon-applied {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    padding: 9px 12px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .bn-ca-info { display: flex; flex-direction: column; gap: 2px; }
+  .bn-ca-code { font-size: 0.82rem; font-weight: 800; color: #065f46; }
+  .bn-ca-savings { font-size: 0.72rem; font-weight: 700; color: #047857; }
+  .bn-ca-remove-btn {
+    background: none;
+    border: none;
+    color: #dc2626;
+    font-size: 0.74rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0;
+  }
+  .bn-ca-remove-btn:hover { text-decoration: underline; }
+
+  .bn-coupon-chips {
+    margin-top: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .bn-chip-label { font-size: 0.7rem; color: var(--text-4, #64748b); font-weight: 600; }
+  .bn-coupon-chip {
+    background: #fdf2f8;
+    border: 1px dashed #f472b6;
+    color: #db2777;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .12s;
+  }
+  .bn-coupon-chip:hover { background: #fce7f3; }
+
+  /* Summary Card */
+  .bn-summary-card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid var(--border, rgba(0,0,0,0.07));
+    padding: 1.25rem;
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));
+  }
+  .bn-summary-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text-1, #111827);
+    margin: 0 0 1rem;
+    letter-spacing: -0.015em;
+  }
+  .bn-summary-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+  .bn-sr-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--text-3, #4b5563);
+  }
+  .bn-sr-discount { color: #059669; font-weight: 700; }
+  .bn-disc-val { color: #059669; font-weight: 800; }
+  .bn-free-tag {
+    color: #059669;
+    font-size: 0.72rem;
+    font-weight: 800;
+    background: #ecfdf5;
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+  .bn-sr-divider {
+    height: 1px;
+    background: #f3f4f6;
+    margin: 4px 0;
+  }
+  .bn-sr-total {
+    font-size: 1.05rem;
+    color: var(--text-1, #111827);
+    padding-top: 4px;
+  }
+  .bn-total-price {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--accent, #db2777);
+  }
+
+  .bn-summary-actions { margin-bottom: 0.85rem; }
+  .bn-btn-checkout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 14px 20px;
+    background: var(--accent, #db2777);
+    color: #ffffff;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(219, 39, 119, 0.35);
+    transition: all .16s ease;
+  }
+  .bn-btn-checkout:hover {
+    background: #be185d;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(219, 39, 119, 0.45);
+  }
+
+  .bn-cancellation-notice {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    color: var(--text-4, #64748b);
+    line-height: 1.35;
+  }
+  .bn-cancellation-notice i { color: #9ca3af; font-size: 0.85rem; }
+</style>
+
+<script>
+  function applyPromo(code) {
+    var input = document.getElementById('bn-coupon-code');
+    if (input) {
+      input.value = code;
+      input.form.submit();
+    }
+  }
+</script>

@@ -1,0 +1,82 @@
+<%= form_with model: [:admin, service_city_price], class: "card shadow-sm" do |f| %>
+  <div class="card-header border-bottom">
+    <h3 class="card-title fw-bold mb-0"><%= service_city_price.persisted? ? "Edit City Price Override" : "New City Price Override" %></h3>
+  </div>
+
+  <% if service_city_price.errors.any? %>
+    <div class="card-body border-bottom">
+      <div class="alert alert-danger">
+        <ul class="mb-0">
+          <% service_city_price.errors.full_messages.each do |msg| %>
+            <li><%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="card-body">
+    <div class="row g-4">
+      <!-- Service -->
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Service <span class="text-danger">*</span></label>
+        <% if @service %>
+          <%= f.hidden_field :service_id, value: @service.id %>
+          <input class="form-control" type="text" value="<%= @service.name %> (Global Default: <%= @service.display_price %>)" disabled>
+        <% else %>
+          <%= f.collection_select :service_id,
+                @services || Service.active.ordered,
+                :id, :name,
+                { prompt: "Select a Service" },
+                { class: "form-select", required: true } %>
+        <% end %>
+      </div>
+
+      <!-- City -->
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Target City <span class="text-danger">*</span></label>
+        <%= f.collection_select :city_id,
+              @cities || City.active.ordered,
+              :id, :name,
+              { prompt: "Select a City" },
+              { class: "form-select", required: true, disabled: service_city_price.persisted? } %>
+        <% if service_city_price.persisted? %>
+          <%= f.hidden_field :city_id, value: service_city_price.city_id %>
+        <% end %>
+        <div class="form-hint">Pricing will only override bookings placed within this city.</div>
+      </div>
+
+      <!-- Base Price -->
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">City Base Price (₹) <span class="text-danger">*</span></label>
+        <%= f.number_field :base_price, class: "form-control", min: 0, step: "0.01",
+              placeholder: "e.g. 1599.00" %>
+        <div class="form-hint">Regular price applied for customers in this city.</div>
+      </div>
+
+      <!-- Discount Price -->
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">City Discount Price (₹)</label>
+        <%= f.number_field :discount_price, class: "form-control", min: 0, step: "0.01",
+              placeholder: "Leave empty for no sale" %>
+        <div class="form-hint">Optional sale price (must be strictly less than base price).</div>
+      </div>
+
+      <!-- Status -->
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Status <span class="text-danger">*</span></label>
+        <%= f.select :status,
+              [["Active", "active"], ["Inactive", "inactive"]],
+              {},
+              { class: "form-select" } %>
+        <div class="form-hint">Inactive overrides fall back to the service's global default price.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-footer border-top bg-light-subtle d-flex justify-content-between align-items-center">
+    <%= link_to "Cancel", (@service ? admin_service_path(@service) : admin_services_path), class: "btn btn-outline-secondary" %>
+    <%= f.submit (service_city_price.persisted? ? "Update Price Override" : "Save Price Override"),
+          class: "btn btn-primary px-4 fw-semibold" %>
+  </div>
+<% end %>

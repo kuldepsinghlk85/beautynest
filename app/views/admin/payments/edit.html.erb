@@ -1,0 +1,78 @@
+<% content_for :page_title, "Edit Payment #{@payment[:id]}" %>
+
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">Transaction Reconciliation</div>
+      <h2 class="page-title fs-1 fw-bold">Edit Payment: <%= @payment[:id] %></h2>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <%= link_to admin_payment_path(@payment[:id]), class: "btn btn-outline-secondary" do %>
+        <i class="ti ti-arrow-left me-1 fs-3"></i> Back to Details
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+        <h3 class="card-title fw-bold mb-0">Transaction Information</h3>
+        <div><%= payment_status_badge(@payment[:status]) %></div>
+      </div>
+      <%= form_with url: admin_payment_path(@payment[:id]), method: :patch, local: true do |f| %>
+        <div class="card-body">
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Payment Transaction ID</label>
+              <input type="text" class="form-control" value="<%= @payment[:id] %>" readonly disabled>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Associated Booking ID</label>
+              <input type="text" class="form-control" value="<%= @payment[:booking_id] %>" readonly disabled>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Customer Name</label>
+              <input type="text" class="form-control" value="<%= @payment[:customer] %>" readonly disabled>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Amount</label>
+              <input type="text" name="payment[amount]" class="form-control" value="<%= @payment[:amount] %>" required>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label" for="payment_method">Payment Method</label>
+              <select name="payment[method]" id="payment_method" class="form-select">
+                <% ["UPI", "Credit Card", "Debit Card", "Net Banking", "Cash on Service"].each do |m| %>
+                  <option value="<%= m %>" <%= "selected" if @payment[:method] == m %>><%= m %></option>
+                <% end %>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="payment_status">Transaction Status</label>
+              <select name="payment[status]" id="payment_status" class="form-select">
+                <option value="completed" <%= "selected" if @payment[:status] == "completed" %>>Completed (Settled)</option>
+                <option value="pending" <%= "selected" if @payment[:status] == "pending" %>>Pending Gateway Confirmation</option>
+                <option value="refunded" <%= "selected" if @payment[:status] == "refunded" %>>Refunded</option>
+                <option value="failed" <%= "selected" if @payment[:status] == "failed" %>>Failed</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-footer border-top d-flex justify-content-between align-items-center bg-transparent">
+          <%= link_to "Cancel", admin_payment_path(@payment[:id]), class: "btn btn-link link-secondary" %>
+          <button type="submit" class="btn btn-primary">
+            <i class="ti ti-check me-1 fs-3"></i> Save Changes
+          </button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

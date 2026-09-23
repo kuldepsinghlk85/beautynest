@@ -1,0 +1,473 @@
+<% content_for :page_title, "Booking ##{@booking.display_id} — #{current_user.name}" %>
+
+<%= render "shared/public_nav", active: "bookings" %>
+
+<div class="bc-cust-container">
+  <!-- Breadcrumb -->
+  <nav class="bc-breadcrumb" aria-label="breadcrumb">
+    <a href="/"><i class="ti ti-home"></i> Home</a>
+    <span class="bc-crumb-sep">/</span>
+    <%= link_to "My Bookings", customer_bookings_path %>
+    <span class="bc-crumb-sep">/</span>
+    <span class="bc-crumb-active">Booking #<%= @booking.display_id %></span>
+  </nav>
+
+  <!-- Flash Messages -->
+  <% if notice.present? %>
+    <div class="bc-alert bc-alert-success">
+      <i class="ti ti-circle-check fs-2"></i>
+      <div><%= notice %></div>
+    </div>
+  <% end %>
+  <% if alert.present? %>
+    <div class="bc-alert bc-alert-danger">
+      <i class="ti ti-alert-circle fs-2"></i>
+      <div><%= alert %></div>
+    </div>
+  <% end %>
+
+  <!-- Booking Details Header -->
+  <div class="bc-bdetail-header-card">
+    <div class="bc-bdetail-title-wrap">
+      <div class="bc-bdetail-num">
+        <h1>Booking #<%= @booking.display_id %></h1>
+        <div class="bc-bdetail-badges">
+          <%= booking_status_badge(@booking.booking_status) %>
+          <% if @booking.service_status == "in_progress" %>
+            <%= service_status_badge("in_progress") %>
+          <% end %>
+        </div>
+      </div>
+      <p class="bc-bdetail-date">
+        <i class="ti ti-calendar-event"></i> Placed on <%= @booking.display_booked_at %>
+      </p>
+    </div>
+
+    <div class="bc-bdetail-top-actions">
+      <%= link_to customer_bookings_path, class: "bc-btn-ghost-sm" do %>
+        <i class="ti ti-arrow-left"></i> All Bookings
+      <% end %>
+      <button type="button" class="bc-btn-ghost-sm" onclick="window.print();">
+        <i class="ti ti-printer"></i> Print Invoice
+      </button>
+      <% if %w[pending assigned confirmed accepted].include?(@booking.booking_status) %>
+        <button type="button" class="bc-btn-danger-outline-sm" onclick="openShowCancelModal();">
+          <i class="ti ti-x"></i> Cancel Booking
+        </button>
+      <% end %>
+      <% if @booking.completed? %>
+        <% if @booking.reviewed? %>
+          <span class="bc-reviewed-badge" title="Reviewed on <%= @booking.review.created_at&.strftime('%d %b %Y') %>">
+            <i class="ti ti-star-filled text-warning"></i> Rated <%= @booking.review.rating %>/5
+          </span>
+        <% else %>
+          <a href="#bc-review-card" class="bc-btn-review-sm">
+            <i class="ti ti-star"></i> Leave Review
+          </a>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Status Progress Stepper -->
+  <div class="bc-card mb-4">
+    <div class="bc-stepper-title">Appointment Status Timeline</div>
+    <div class="bc-stepper">
+      <% 
+        status = @booking.booking_status.to_s.downcase
+        step = case status
+               when "pending" then 1
+               when "assigned", "confirmed", "accepted" then 2
+               when "in_progress" then 3
+               when "completed" then 4
+               when "cancelled", "rejected" then -1
+               else 1
+               end
+        step = 4 if @booking.completed?
+      %>
+      <% if step == -1 %>
+        <div class="bc-cancelled-alert">
+          <i class="ti ti-circle-x-filled text-danger fs-2"></i>
+          <div>
+            <strong>Appointment <%= status.humanize %></strong>
+            <p class="mb-0 text-muted">This booking was <%= status.downcase %>. If you require a service, you can book again anytime.</p>
+          </div>
+        </div>
+      <% else %>
+        <div class="bc-step <%= 'completed' if step >= 1 %> <%= 'active' if step == 1 %>">
+          <div class="bc-step-icon"><i class="ti ti-receipt"></i></div>
+          <div class="bc-step-label">Booking Placed</div>
+          <div class="bc-step-sub"><%= @booking.display_booked_on %></div>
+        </div>
+        <div class="bc-step-line <%= 'active' if step >= 2 %>"></div>
+
+        <div class="bc-step <%= 'completed' if step >= 2 %> <%= 'active' if step == 2 %>">
+          <div class="bc-step-icon"><i class="ti ti-user-check"></i></div>
+          <div class="bc-step-label">Confirmed & Assigned</div>
+          <div class="bc-step-sub"><%= @booking.worker ? @booking.worker.name : "Assigning..." %></div>
+        </div>
+        <div class="bc-step-line <%= 'active' if step >= 3 %>"></div>
+
+        <div class="bc-step <%= 'completed' if step >= 3 %> <%= 'active' if step == 3 %>">
+          <div class="bc-step-icon"><i class="ti ti-player-play"></i></div>
+          <div class="bc-step-label">Service In Progress</div>
+          <div class="bc-step-sub"><%= @booking.display_time_slot %></div>
+        </div>
+        <div class="bc-step-line <%= 'active' if step >= 4 %>"></div>
+
+        <div class="bc-step <%= 'completed' if step >= 4 %> <%= 'active' if step == 4 %>">
+          <div class="bc-step-icon"><i class="ti ti-circle-check"></i></div>
+          <div class="bc-step-label">Completed</div>
+          <div class="bc-step-sub"><%= step >= 4 ? "Service Delivered" : "Pending" %></div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- 2-Column Grid -->
+  <div class="bc-bdetail-grid">
+    <!-- Left Column: Services & Schedule & Specialist -->
+    <div class="bc-bdetail-left">
+
+      <!-- Appointment Slot & Location Card -->
+      <div class="bc-card mb-4">
+        <div class="bc-card-header">
+          <h3><i class="ti ti-calendar-time text-pink me-2"></i> Appointment Schedule & Address</h3>
+        </div>
+        <div class="bc-schedule-grid">
+          <div class="bc-sch-item">
+            <div class="lbl">Date</div>
+            <div class="val"><i class="ti ti-calendar text-pink me-1"></i> <%= @booking.display_date %></div>
+          </div>
+          <div class="bc-sch-item">
+            <div class="lbl">Time Slot</div>
+            <div class="val"><i class="ti ti-clock text-pink me-1"></i> <%= @booking.display_time_slot %></div>
+          </div>
+          <div class="bc-sch-item">
+            <div class="lbl">Estimated Duration</div>
+            <div class="val"><i class="ti ti-hourglass-empty text-pink me-1"></i> <%= @booking.total_duration_minutes %> Minutes</div>
+          </div>
+        </div>
+
+        <div class="bc-addr-box mt-3">
+          <div class="lbl mb-1"><i class="ti ti-map-pin text-pink me-1"></i> Doorstep Service Address:</div>
+          <div class="val fw-semibold"><%= @booking.address&.line1.presence || "Customer Residence" %></div>
+          <% if @booking.address&.line2.present? %>
+            <div class="text-muted small"><%= @booking.address.line2 %></div>
+          <% end %>
+          <div class="text-muted small">
+            <%= @booking.address&.city || @booking.city&.name %> <%= @booking.address&.pincode %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Assigned Specialist Card -->
+      <div class="bc-card mb-4">
+        <div class="bc-card-header">
+          <h3><i class="ti ti-sparkles text-pink me-2"></i> Assigned Beauty Professional</h3>
+        </div>
+        <% if @booking.worker.present? %>
+          <div class="bc-worker-detail-card">
+            <div class="bc-wdetail-avatar">
+              <% if @booking.worker.avatar_url.present? %>
+                <%= image_tag @booking.worker.avatar_url, alt: @booking.worker.name, class: "w-img", onerror: "this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';" %>
+                <span style="display: none;"><%= @booking.worker.initials %></span>
+              <% else %>
+                <span><%= @booking.worker.initials %></span>
+              <% end %>
+            </div>
+            <div class="bc-wdetail-info">
+              <h4><%= @booking.worker.name %></h4>
+              <div class="bc-wdetail-tags">
+                <span class="badge bg-success-lt"><i class="ti ti-shield-check"></i> Certified Specialist</span>
+                <% if @booking.worker.worker_profile&.experience_years.to_i > 0 %>
+                  <span class="badge bg-secondary-lt"><%= @booking.worker.worker_profile.experience_years %>+ Years Exp.</span>
+                <% end %>
+              </div>
+              <p class="text-muted small mt-1 mb-0">
+                <%= @booking.worker.worker_profile&.bio.presence || "Professional esthetician certified in hygiene and doorstep salon services." %>
+              </p>
+            </div>
+          </div>
+        <% else %>
+          <div class="bc-worker-unassigned-box">
+            <span class="pulse-dot"></span>
+            <div>
+              <strong>Assigning your beauty specialist</strong>
+              <p class="mb-0 text-muted small">We match your appointment with our top certified professional in <%= @booking.city&.name || "your area" %>.</p>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Itemized Services Table -->
+      <div class="bc-card">
+        <div class="bc-card-header">
+          <h3><i class="ti ti-list-details text-pink me-2"></i> Booked Services</h3>
+        </div>
+        <div class="table-responsive">
+          <table class="bc-table">
+            <thead>
+              <tr>
+                <th>Service</th>
+                <th class="text-center">Qty</th>
+                <th class="text-center">Duration</th>
+                <th class="text-end">Price</th>
+                <th class="text-end">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if @booking.booking_items.any? %>
+                <% @booking.booking_items.each do |item| %>
+                  <tr>
+                    <td>
+                      <div class="fw-bold"><%= item.service_name_snapshot %></div>
+                      <div class="small text-muted"><%= item.service&.category&.name || "Beauty Care" %></div>
+                    </td>
+                    <td class="text-center"><%= item.quantity %></td>
+                    <td class="text-center"><%= item.duration_minutes_snapshot * item.quantity %> min</td>
+                    <td class="text-end"><%= item.display_price %></td>
+                    <td class="text-end fw-bold">₹<%= item.line_total.to_i %></td>
+                  </tr>
+                <% end %>
+              <% else %>
+                <tr>
+                  <td>
+                    <div class="fw-bold"><%= @booking.display_service %></div>
+                  </td>
+                  <td class="text-center">1</td>
+                  <td class="text-center">60 min</td>
+                  <td class="text-end"><%= @booking.display_amount %></td>
+                  <td class="text-end fw-bold"><%= @booking.display_amount %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Receipt Breakdown & Review -->
+    <div class="bc-bdetail-right">
+
+      <!-- Invoice Summary Card -->
+      <div class="bc-card mb-4">
+        <div class="bc-card-header">
+          <h3><i class="ti ti-receipt-2 text-pink me-2"></i> Payment & Invoice</h3>
+        </div>
+
+        <div class="bc-invoice-rows">
+          <div class="bc-inv-row">
+            <span>Subtotal</span>
+            <span>₹<%= @booking.subtotal_amount.to_i %></span>
+          </div>
+
+          <% if @booking.discount_amount.to_f > 0 %>
+            <div class="bc-inv-row text-success">
+              <span>Coupon Discount <%= "(#{@booking.coupon.code})" if @booking.coupon %></span>
+              <span>-₹<%= @booking.discount_amount.to_i %></span>
+            </div>
+          <% end %>
+
+          <div class="bc-inv-row">
+            <span>Doorstep Safety & Hygiene Kit</span>
+            <span class="text-success fw-bold">FREE</span>
+          </div>
+
+          <div class="bc-inv-divider"></div>
+
+          <div class="bc-inv-total-row">
+            <span>Total Amount</span>
+            <span class="total"><%= @booking.display_amount %></span>
+          </div>
+
+          <div class="bc-inv-pay-status mt-3">
+            <span class="text-muted small">Payment Status:</span>
+            <%= payment_status_badge(@booking.payment_status) %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Customer Review Card -->
+      <div id="bc-review-card" class="bc-card mb-4">
+        <div class="bc-card-header d-flex align-items-center justify-content-between">
+          <h3><i class="ti ti-star text-warning me-2"></i> Appointment Review</h3>
+          <% if @booking.reviewed? %>
+            <span class="badge bg-success-lt"><i class="ti ti-circle-check"></i> Review Submitted</span>
+          <% end %>
+        </div>
+
+        <% if @booking.reviewed? %>
+          <div class="bc-review-display">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="bc-stars-rating text-warning fs-3">
+                <% @booking.review.rating.times do %>
+                  <i class="ti ti-star-filled"></i>
+                <% end %>
+                <% (5 - @booking.review.rating).times do %>
+                  <i class="ti ti-star text-muted"></i>
+                <% end %>
+                <span class="fs-6 fw-bold ms-2 text-dark"><%= sprintf("%.1f", @booking.review.rating) %> / 5.0</span>
+              </div>
+              <span class="text-muted small">Reviewed on <%= @booking.review.created_at&.strftime("%d %b %Y") %></span>
+            </div>
+            <% if @booking.review.comment.present? %>
+              <p class="bc-review-comment">"<%= @booking.review.comment %>"</p>
+            <% end %>
+            <div class="mt-3 pt-2 border-top text-muted small">
+              <i class="ti ti-lock me-1"></i> Reviews can only be submitted once per completed service.
+            </div>
+          </div>
+        <% elsif @booking.completed? %>
+          <div class="bc-review-prompt" style="display: flex; flex-direction: column; gap: 14px;">
+            <div style="background: #fdf2f8; border: 1px solid rgba(219,39,119,0.18); border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; color: #9d174d; font-weight: 600;">
+              <i class="ti ti-sparkles me-1"></i> Your appointment is completed! Please take a moment to rate your specialist.
+            </div>
+            <%= form_with url: review_customer_booking_path(@booking), method: :post, local: true, style: "display: flex; flex-direction: column; gap: 14px;" do |f| %>
+              <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 14px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                <span style="font-size: 0.74rem; font-weight: 800; color: #64748b; letter-spacing: 0.08em; text-transform: uppercase;">SELECT STAR RATING</span>
+                <div style="display: inline-flex; align-items: center; justify-content: center; gap: 8px;" id="show-stars-row">
+                  <% ratings_labels = { 1 => "Poor", 2 => "Fair", 3 => "Good", 4 => "Very Good", 5 => "Excellent" } %>
+                  <% (1..5).each do |i| %>
+                    <button type="button" class="show-star-btn <%= 'filled' if i <= 5 %>" data-rating="<%= i %>" onclick="setShowRating(<%= i %>)" style="background:none; border:none; padding:4px; cursor:pointer; color:#f59e0b; transition:transform 0.15s ease; display:flex; flex-direction:column; align-items:center; gap:3px;" title="<%= i %> Stars">
+                      <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                      <span class="show-star-word" style="font-size:0.7rem; font-weight:600; color:#d97706;"><%= ratings_labels[i] %></span>
+                    </button>
+                  <% end %>
+                </div>
+                <input type="hidden" name="rating" id="show-rating-input" value="5">
+                <div id="show-rating-feedback" style="font-size: 0.82rem; font-weight: 700; padding: 4px 14px; border-radius: 50px; background: #fef3c7; color: #92400e; border: 1px solid #fde68a;">
+                  ★★★★★ 5.0 / 5.0 • Outstanding Experience!
+                </div>
+              </div>
+
+              <!-- Quick tags -->
+              <div>
+                <label style="font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px; display: block;">Quick Tags (Tap to add):</label>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                  <button type="button" class="show-chip" onclick="addShowTag(this, 'Punctual & arrived on time')" style="background:#f1f5f9; border:1px solid #e2e8f0; border-radius:50px; padding:5px 12px; font-size:0.78rem; font-weight:600; color:#475569; cursor:pointer;">⏱️ Punctual</button>
+                  <button type="button" class="show-chip" onclick="addShowTag(this, 'Hygienic and sealed kit used')" style="background:#f1f5f9; border:1px solid #e2e8f0; border-radius:50px; padding:5px 12px; font-size:0.78rem; font-weight:600; color:#475569; cursor:pointer;">🧼 Hygienic Kit</button>
+                  <button type="button" class="show-chip" onclick="addShowTag(this, 'Highly skilled specialist')" style="background:#f1f5f9; border:1px solid #e2e8f0; border-radius:50px; padding:5px 12px; font-size:0.78rem; font-weight:600; color:#475569; cursor:pointer;">💆 Expert Skill</button>
+                  <button type="button" class="show-chip" onclick="addShowTag(this, 'Polite and friendly')" style="background:#f1f5f9; border:1px solid #e2e8f0; border-radius:50px; padding:5px 12px; font-size:0.78rem; font-weight:600; color:#475569; cursor:pointer;">😊 Polite</button>
+                </div>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label style="font-size: 0.8rem; font-weight: 700; color: #334155;">Your Comments & Feedback (Optional)</label>
+                <textarea name="comment" id="show-comment-input" style="width: 100%; min-height: 90px; padding: 12px; font-size: 0.9rem; border: 1.5px solid #cbd5e1; border-radius: 12px; outline: none; box-sizing: border-box;" placeholder="Tell us about the beautician's technique, service hygiene, and punctuality..."></textarea>
+                <span style="font-size: 0.74rem; color: #64748b;"><i class="ti ti-info-circle me-1"></i> Reviews can only be submitted once per appointment.</span>
+              </div>
+
+              <button type="submit" class="bc-btn-pink w-100" style="padding: 13px; font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                Submit Review
+              </button>
+            <% end %>
+          </div>
+
+          <script>
+            function setShowRating(val) {
+              document.getElementById('show-rating-input').value = val;
+              var btns = document.querySelectorAll('#show-stars-row .show-star-btn');
+              btns.forEach(function(btn) {
+                var r = parseInt(btn.getAttribute('data-rating'), 10);
+                btn.style.color = (r <= val) ? '#f59e0b' : '#cbd5e1';
+              });
+              var fb = document.getElementById('show-rating-feedback');
+              var meta = {
+                5: "★★★★★ 5.0 / 5.0 • Outstanding Experience!",
+                4: "★★★★☆ 4.0 / 5.0 • Very Good Service",
+                3: "★★★☆☆ 3.0 / 5.0 • Satisfactory Experience",
+                2: "★★☆☆☆ 2.0 / 5.0 • Needs Improvement",
+                1: "★☆☆☆☆ 1.0 / 5.0 • Unsatisfactory"
+              };
+              if (fb && meta[val]) fb.textContent = meta[val];
+            }
+
+            function addShowTag(btn, text) {
+              var ta = document.getElementById('show-comment-input');
+              if (!ta) return;
+              btn.style.background = '#fdf2f8';
+              btn.style.color = '#db2777';
+              btn.style.borderColor = '#f472b6';
+              var cur = ta.value.trim();
+              ta.value = cur.length > 0 ? (cur + '. ' + text) : text;
+            }
+          </script>
+        <% else %>
+          <p class="text-muted small mb-0">
+            <i class="ti ti-info-circle me-1"></i> Reviews can be submitted once your appointment is marked completed by your beautician.
+          </p>
+        <% end %>
+      </div>
+
+      <!-- Support Card -->
+      <div class="bc-card bc-support-card">
+        <div class="d-flex align-items-center gap-3">
+          <div class="bc-sup-icon"><i class="ti ti-headset"></i></div>
+          <div>
+            <h4>Need Help with this Booking?</h4>
+            <p class="text-muted small mb-2">Our customer support team is available from 8 AM to 9 PM.</p>
+            <%= link_to "/contact", class: "bc-btn-ghost-sm" do %>
+              <i class="ti ti-message-circle"></i> Contact Support
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Cancel Modal on Show page -->
+<div id="bc-show-cancel-modal" class="bc-modal-backdrop d-none" style="display: none;" onclick="if(event.target === this) closeShowCancelModal();">
+  <div class="bc-modal-card">
+    <div class="bc-modal-header">
+      <h3><i class="ti ti-alert-triangle text-danger me-2"></i> Cancel Appointment</h3>
+      <button type="button" class="bc-close-btn" onclick="closeShowCancelModal();" aria-label="Close modal">&times;</button>
+    </div>
+    <div class="bc-modal-body">
+      <p>Are you sure you want to cancel booking <strong>#<%= @booking.display_id %></strong>?</p>
+      <%= form_with url: cancel_customer_booking_path(@booking), method: :patch, local: true do |f| %>
+        <div class="mb-3">
+          <label class="bc-label">Cancellation Reason</label>
+          <textarea name="cancellation_reason" class="bc-input" rows="3" placeholder="Please let us know why you need to cancel..."></textarea>
+        </div>
+        <div class="bc-form-actions">
+          <button type="submit" class="bc-btn-danger">Confirm Cancellation</button>
+          <button type="button" class="bc-btn-ghost" onclick="closeShowCancelModal();">Keep Appointment</button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openShowCancelModal() {
+    var modal = document.getElementById('bc-show-cancel-modal');
+    modal.classList.remove('d-none');
+    modal.classList.add('open');
+    modal.style.display = 'flex';
+  }
+
+  function closeShowCancelModal() {
+    var modal = document.getElementById('bc-show-cancel-modal');
+    modal.classList.add('d-none');
+    modal.classList.remove('open');
+    modal.style.display = 'none';
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeShowCancelModal();
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    closeShowCancelModal();
+  });
+  document.addEventListener('turbo:load', function() {
+    closeShowCancelModal();
+  });
+</script>

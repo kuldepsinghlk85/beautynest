@@ -1,0 +1,1131 @@
+<% content_for :page_title, "Worker Profile — #{@worker.name}" %>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PAGE HEADER & ACTIONS
+═══════════════════════════════════════════════════════════════ -->
+<div class="page-header d-print-none mb-3">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">Workforce Management • Beautician Details</div>
+      <h2 class="page-title fs-1 fw-bold"><%= @worker.name %></h2>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <div class="btn-list">
+        <%= link_to admin_workers_path, class: "btn btn-outline-secondary" do %>
+          <i class="ti ti-arrow-left me-1 fs-3"></i> Back to Workers
+        <% end %>
+
+        <%= link_to edit_admin_worker_path(@worker), class: "btn btn-outline-primary" do %>
+          <i class="ti ti-edit me-1 fs-3"></i> Edit Worker
+        <% end %>
+
+        <!-- Protected Delete Button with Confirmation -->
+        <%= button_to admin_worker_path(@worker), method: :delete,
+              data: {
+                turbo_confirm: "Are you sure you want to permanently delete specialist '#{@worker.name}'? All profile records will be purged.",
+                confirm_title: "Delete Worker Profile",
+                confirm_btn: "Delete Worker",
+                confirm_theme: "danger",
+                confirm_icon: "ti-trash"
+              },
+              class: "btn btn-outline-danger" do %>
+          <i class="ti ti-trash me-1 fs-3"></i> Delete
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TOP COMPACT SUMMARY BAR ("Upar Halki Detail")
+═══════════════════════════════════════════════════════════════ -->
+<div class="card shadow-sm border mb-4">
+  <div class="card-body p-3 p-md-4">
+    <div class="row g-3 align-items-center">
+      <!-- Left: Identity & Contact Details (Never wraps or collides with KPIs) -->
+      <div class="col-12 col-xl-7">
+        <div class="d-flex align-items-start gap-3">
+          <% if @worker.avatar_url.present? %>
+            <img src="<%= @worker.avatar_url %>" alt="<%= @worker.name %>" class="avatar avatar-xl rounded-circle shadow-sm border object-cover flex-shrink-0">
+          <% else %>
+            <span class="avatar avatar-xl rounded-circle bg-indigo-lt text-indigo fs-1 fw-bold shadow-sm flex-shrink-0">
+              <%= @worker.initials %>
+            </span>
+          <% end %>
+
+          <div class="flex-grow-1 min-w-0">
+            <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
+              <h2 class="fs-1 fw-bold text-reset mb-0"><%= @worker.name %></h2>
+              <%= worker_tier_capsule_badge(@worker) %>
+              <%= active_status_badge(@worker.status) %>
+            </div>
+
+            <div class="text-secondary small d-flex flex-wrap align-items-center gap-2 mb-2">
+              <span class="badge bg-secondary-lt"><%= @profile.bio.presence || @worker[:speciality] || "Beauty Professional" %></span>
+              <span>•</span>
+              <span><i class="ti ti-map-pin text-primary me-1"></i><%= @worker.serving_city %></span>
+              <span>•</span>
+              <span>Partner since <%= @worker.joined %></span>
+            </div>
+
+            <!-- Contact & Aadhaar badges: clean wrap with no overlapping -->
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              <a href="mailto:<%= @worker.email %>" class="border rounded px-2 py-1 bg-surface-secondary text-reset small font-monospace text-decoration-none hover-bg-light" title="Worker Email">
+                <i class="ti ti-mail text-secondary me-1"></i><%= @worker.email %>
+              </a>
+              <a href="tel:<%= @worker.phone %>" class="border rounded px-2 py-1 bg-surface-secondary text-reset small font-monospace text-decoration-none hover-bg-light" title="Worker Phone">
+                <i class="ti ti-phone text-secondary me-1"></i><%= @worker.phone %>
+              </a>
+              <% aadhaar = @profile&.aadhaar_number.presence %>
+              <% if aadhaar %>
+                <div class="border rounded px-2 py-1 bg-surface-secondary text-reset small d-inline-flex align-items-center gap-1 font-monospace" title="Worker Aadhaar Number">
+                  <i class="ti ti-id text-secondary me-1"></i>
+                  <span id="aadhaar-display" data-masked="●●●● ●●●● <%= aadhaar.last(4) %>" data-plain="<%= aadhaar.scan(/.{4}/).join(' ') %>">
+                    ●●●● ●●●● <%= aadhaar.last(4) %>
+                  </span>
+                  <button type="button" class="btn btn-sm btn-ghost-secondary p-0 px-1 ms-1" id="aadhaar-toggle" title="Toggle visibility"
+                          onclick="var el = document.getElementById('aadhaar-display'); var icon = this.querySelector('i'); if (el.textContent.trim().startsWith('●')) { el.textContent = el.dataset.plain; icon.className = 'ti ti-eye-off'; } else { el.textContent = el.dataset.masked; icon.className = 'ti ti-eye'; }">
+                    <i class="ti ti-eye"></i>
+                  </button>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Performance Counters (Structured 4-box stat grid) -->
+      <div class="col-12 col-xl-5">
+        <div class="row g-2 text-center">
+          <!-- Rating -->
+          <div class="col-6 col-sm-3 col-xl-3">
+            <div class="p-2 rounded border bg-surface-secondary h-100 d-flex flex-column justify-content-center">
+              <div class="fs-2 fw-bold text-warning d-flex align-items-center justify-content-center">
+                <i class="ti ti-star-filled me-1"></i><%= sprintf("%.1f", @rating_avg) %>
+              </div>
+              <div class="text-secondary small mt-1" style="font-size: 0.72rem;"><%= @total_reviews_count %> <%= 'Review'.pluralize(@total_reviews_count) %></div>
+            </div>
+          </div>
+
+          <!-- Jobs Completed -->
+          <div class="col-6 col-sm-3 col-xl-3">
+            <div class="p-2 rounded border bg-surface-secondary h-100 d-flex flex-column justify-content-center">
+              <div class="fs-2 fw-bold text-primary"><%= @total_completed_jobs %></div>
+              <div class="text-secondary small mt-1" style="font-size: 0.72rem;">Jobs Done</div>
+            </div>
+          </div>
+
+          <!-- Total Revenue -->
+          <div class="col-6 col-sm-3 col-xl-3">
+            <div class="p-2 rounded border bg-surface-secondary h-100 d-flex flex-column justify-content-center">
+              <div class="fs-2 fw-bold text-success"><%= number_to_currency(@total_revenue, unit: '₹', precision: 0) %></div>
+              <div class="text-secondary small mt-1" style="font-size: 0.72rem;">Revenue</div>
+            </div>
+          </div>
+
+          <!-- Duty / Availability -->
+          <div class="col-6 col-sm-3 col-xl-3">
+            <div class="p-2 rounded border bg-surface-secondary h-100 d-flex flex-column justify-content-center">
+              <div><%= worker_availability_badge(@worker) %></div>
+              <div class="text-secondary small mt-1" style="font-size: 0.70rem;">
+                <%= @profile.is_available? ? 'Accepting' : 'On Leave' %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     UNIFIED APPLE SEGMENTED TABS
+═══════════════════════════════════════════════════════════════ -->
+<div class="card shadow-sm border mb-4">
+  <div class="card-header border-bottom py-2 d-flex align-items-center justify-content-between flex-wrap gap-2">
+    <div class="apple-segmented-switch">
+      <a href="<%= admin_worker_path(@worker, tab: 'schedule', date: @selected_date.strftime("%Y-%m-%d")) %>" 
+         class="seg-item <%= 'active' if @active_tab == 'schedule' %>">
+        <i class="ti ti-calendar-event fs-3"></i>
+        <span>7-Day Slot Schedule</span>
+        <span class="seg-badge"><%= @week_bookings.count %></span>
+      </a>
+
+      <a href="<%= admin_worker_path(@worker, tab: 'history') %>" 
+         class="seg-item <%= 'active' if @active_tab == 'history' %>">
+        <i class="ti ti-history fs-3"></i>
+        <span>Service History</span>
+        <span class="seg-badge"><%= @total_completed_jobs %></span>
+      </a>
+
+      <a href="<%= admin_worker_path(@worker, tab: 'reviews') %>" 
+         class="seg-item <%= 'active' if @active_tab == 'reviews' %>">
+        <i class="ti ti-star fs-3"></i>
+        <span>Customer Reviews</span>
+        <span class="seg-badge"><%= @total_reviews_count %></span>
+      </a>
+
+      <a href="<%= admin_worker_path(@worker, tab: 'profile') %>" 
+         class="seg-item <%= 'active' if @active_tab == 'profile' %>">
+        <i class="ti ti-id fs-3"></i>
+        <span>KYC & Profile</span>
+      </a>
+    </div>
+
+    <div class="text-secondary small d-none d-md-block">
+      Specialist: <strong class="text-reset"><%= @worker.name %></strong>
+    </div>
+  </div>
+
+  <div class="card-body p-4">
+    <% case @active_tab %>
+    <% when "schedule" %>
+      <!-- ═══════════════════════════════════════════════════════════════
+           TAB 1: 7-DAY CALENDAR SCHEDULE & TIME SLOTS (BOOKED VS KHALI)
+      ═══════════════════════════════════════════════════════════════ -->
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+        <div>
+          <h3 class="fw-bold fs-2 text-reset mb-1">
+            <i class="ti ti-calendar-stats text-primary me-2"></i>7-Day Appointment Calendar & Time Slots
+          </h3>
+          <div class="text-secondary small">
+            Inspect booked appointments, completed services, and open (khali) time slots.
+          </div>
+        </div>
+
+        <!-- Week Navigator & Jump to Date -->
+        <div class="d-flex align-items-center flex-wrap gap-2">
+          <div class="btn-group btn-group-sm shadow-xs">
+            <%= link_to admin_worker_path(@worker, tab: 'schedule', week_start: @prev_week_date.strftime("%Y-%m-%d"), date: @prev_week_date.strftime("%Y-%m-%d")),
+                  class: "btn btn-outline-secondary", title: "Previous 7 Days" do %>
+              <i class="ti ti-chevron-left me-1"></i> Prev 7 Days
+            <% end %>
+            <%= link_to admin_worker_path(@worker, tab: 'schedule', week_start: @current_week_date.strftime("%Y-%m-%d"), date: @current_week_date.strftime("%Y-%m-%d")),
+                  class: "btn btn-outline-secondary #{'active fw-bold' if @rolling_days.first == Date.current}", title: "Current Week" do %>
+              Today / Current
+            <% end %>
+            <%= link_to admin_worker_path(@worker, tab: 'schedule', week_start: @next_week_date.strftime("%Y-%m-%d"), date: @next_week_date.strftime("%Y-%m-%d")),
+                  class: "btn btn-outline-secondary", title: "Next 7 Days" do %>
+              Next 7 Days <i class="ti ti-chevron-right ms-1"></i>
+            <% end %>
+          </div>
+
+          <!-- Quick Date Jump -->
+          <%= form_with url: admin_worker_path(@worker), method: :get, class: "d-inline-flex align-items-center gap-1" do %>
+            <input type="hidden" name="tab" value="schedule">
+            <input type="date" name="date" value="<%= @selected_date.strftime('%Y-%m-%d') %>" class="form-control form-control-sm" style="width: 140px;" onchange="this.form.requestSubmit()" title="Jump to Date">
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Legend -->
+      <div class="d-flex align-items-center justify-content-end gap-3 mb-3">
+        <div class="d-flex align-items-center gap-1 small text-secondary">
+          <span class="badge bg-indigo text-white px-2 py-0" style="font-size: 0.65rem;">✔</span>
+          <span>Completed (सम्पन्न)</span>
+        </div>
+        <div class="d-flex align-items-center gap-1 small text-secondary">
+          <span class="badge bg-danger text-white px-2 py-0" style="font-size: 0.65rem;">●</span>
+          <span>Booked Slot</span>
+        </div>
+        <div class="d-flex align-items-center gap-1 small text-secondary">
+          <span class="badge bg-success text-white px-2 py-0" style="font-size: 0.65rem;">●</span>
+          <span>Available (Khali)</span>
+        </div>
+        <div class="d-flex align-items-center gap-1 small text-secondary">
+          <span class="badge bg-secondary-lt px-2 py-0" style="font-size: 0.65rem;">●</span>
+          <span>Off Duty / Past</span>
+        </div>
+      </div>
+
+      <!-- 7-Day Horizontal Date Selector Pills -->
+      <div class="row g-2 mb-4">
+        <% @rolling_days.each do |day_date| %>
+          <% is_selected = (day_date == @selected_date) %>
+          <% day_name = day_date.strftime("%A") %>
+          <% is_working = @profile.available_on_day?(day_name) %>
+          <% day_bks = @week_bookings.select { |b| b.scheduled_at&.to_date == day_date } %>
+          <% done_cnt = day_bks.count { |b| b.completed? || b.service_status == 'completed' } %>
+          <% act_cnt = day_bks.count - done_cnt %>
+          <div class="col">
+            <%= link_to admin_worker_path(@worker, tab: 'schedule', date: day_date.strftime("%Y-%m-%d"), week_start: @rolling_days.first.strftime("%Y-%m-%d")),
+                  class: "text-decoration-none d-block h-100" do %>
+              <div class="card text-center p-2 h-100 transition-all border <%= is_selected ? 'border-primary shadow-sm bg-primary-lt' : (is_working ? 'bg-surface' : 'bg-surface-secondary opacity-75') %>"
+                   style="border-radius: 12px; border-width: <%= is_selected ? '2px' : '1px' %> !important;">
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                  <span class="badge <%= is_selected ? 'bg-primary text-white' : 'bg-secondary-lt text-secondary' %>" style="font-size: 0.65rem; padding: 2px 6px;">
+                    <%= WorkerProfile::DAY_CODES[day_name] || day_date.strftime("%a") %>
+                  </span>
+                  <% if day_date == Date.current %>
+                    <span class="badge bg-indigo text-white" style="font-size: 0.60rem; padding: 2px 5px;">TODAY</span>
+                  <% end %>
+                </div>
+
+                <div class="fw-bold fs-3 text-reset"><%= day_date.strftime("%d %b") %></div>
+                <div class="text-secondary small" style="font-size: 0.72rem;"><%= day_name %></div>
+
+                <div class="mt-2 pt-1 border-top">
+                  <% if !is_working %>
+                    <span class="badge bg-secondary-lt text-secondary w-100" style="font-size: 0.68rem;">Off Duty</span>
+                  <% elsif done_cnt > 0 && act_cnt > 0 %>
+                    <span class="badge bg-indigo text-white w-100 fw-bold" style="font-size: 0.64rem;">
+                      ✔ <%= done_cnt %> | 🔴 <%= act_cnt %>
+                    </span>
+                  <% elsif done_cnt > 0 %>
+                    <span class="badge bg-indigo text-white w-100 fw-bold" style="font-size: 0.68rem;">
+                      ✔ <%= done_cnt %> Done
+                    </span>
+                  <% elsif act_cnt > 0 %>
+                    <span class="badge bg-danger text-white w-100 fw-bold" style="font-size: 0.68rem;">
+                      🔴 <%= act_cnt %> Booked
+                    </span>
+                  <% else %>
+                    <span class="badge bg-success-lt text-success w-100 fw-bold" style="font-size: 0.68rem;">
+                      🟢 Khali
+                    </span>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Selected Day Detail Header -->
+      <div class="card border bg-surface-secondary p-3 mb-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <div>
+            <div class="d-flex align-items-center gap-2">
+              <h3 class="fw-bold text-reset fs-2 mb-0">
+                <i class="ti ti-calendar text-primary me-1"></i>
+                <%= @selected_date.strftime("%A, %d %B %Y") %>
+              </h3>
+              <% if @selected_date == Date.current %>
+                <span class="badge bg-primary text-white">Today</span>
+              <% end %>
+              <% is_working_selected = @profile.available_on_day?(@selected_date.strftime("%A")) %>
+              <% if is_working_selected && @worker.active? && (@profile.is_available.nil? ? true : @profile.is_available) %>
+                <span class="badge bg-success-lt"><i class="ti ti-check me-1"></i>On Duty (Available)</span>
+              <% else %>
+                <span class="badge bg-danger-lt"><i class="ti ti-ban me-1"></i>Off Duty / Unavailable</span>
+              <% end %>
+            </div>
+            <div class="text-secondary small mt-1">
+              Time slot cards showing availability, completed appointments, and open booking slots.
+            </div>
+          </div>
+
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-indigo-lt px-3 py-2 fs-3">
+              <i class="ti ti-circle-check me-1"></i>
+              <strong><%= @slots_for_date.count { |s| s[:status] == "completed" } %></strong> Completed
+            </span>
+            <span class="badge bg-danger-lt px-3 py-2 fs-3">
+              <i class="ti ti-calendar-event me-1"></i>
+              <strong><%= @slots_for_date.count { |s| s[:status] == "booked" } %></strong> Booked
+            </span>
+            <span class="badge bg-success-lt px-3 py-2 fs-3">
+              <i class="ti ti-clock me-1"></i>
+              <strong><%= @slots_for_date.count { |s| s[:is_available] } %></strong> Khali
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Time Slot Boxes (Cards Form) -->
+      <div class="row g-3 mb-5">
+        <% @slots_for_date.each do |slot| %>
+          <div class="col-12 col-sm-6 col-lg-3">
+            <% case slot[:status] %>
+            <% when "completed" %>
+              <!-- 🔵 COMPLETED SERVICE SLOT BOX (सम्पन्न सर्विस एवं ग्राहक समीक्षा) -->
+              <% bk = slot[:booking] %>
+              <div class="card h-100 border shadow-xs" style="background: rgba(99, 102, 241, 0.04); border-color: rgba(99, 102, 241, 0.35) !important; border-radius: 12px;">
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                  <div>
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                      <span class="fw-bold fs-3 text-reset font-monospace">
+                        <i class="ti ti-clock text-indigo me-1"></i><%= slot[:slot] %>
+                      </span>
+                      <span class="badge bg-indigo text-white fw-bold px-2 py-1" style="font-size: 0.68rem;">
+                        ✔ Completed
+                      </span>
+                    </div>
+
+                    <% if bk.present? %>
+                      <div class="p-2 rounded bg-surface border mb-2">
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                          <span class="text-secondary small" style="font-size: 0.75rem;">Booking No.</span>
+                          <%= link_to bk.booking_number.presence || "##{bk.id.to_s[0..7]}", admin_booking_path(bk),
+                                class: "fw-bold text-primary text-decoration-none font-monospace small" %>
+                        </div>
+                        <div class="fw-bold text-reset text-truncate">
+                          <i class="ti ti-user text-muted me-1"></i><%= bk.customer_name %>
+                        </div>
+                        <% if bk.customer&.phone.present? %>
+                          <div class="text-secondary small font-monospace" style="font-size: 0.75rem;">
+                            <i class="ti ti-phone text-muted me-1"></i><%= bk.customer.phone %>
+                          </div>
+                        <% end %>
+
+                        <div class="mt-2 pt-2 border-top d-flex align-items-center justify-content-between">
+                          <span class="badge bg-purple-lt text-truncate" style="max-width: 130px;" title="<%= bk.display_service %>">
+                            <%= bk.display_service %>
+                          </span>
+                          <span class="fw-bold text-success small"><%= bk.display_amount %></span>
+                        </div>
+
+                        <!-- Customer Review & Rating if present -->
+                        <% if bk.review.present? %>
+                          <div class="mt-2 pt-2 border-top bg-warning-lt rounded p-1 small">
+                            <div class="d-flex align-items-center text-warning fw-bold">
+                              <% bk.review.rating.times do %><i class="ti ti-star-filled"></i><% end %>
+                              <span class="text-reset ms-1 fw-bold">(<%= bk.review.rating %>★)</span>
+                            </div>
+                            <% if bk.review.comment.present? %>
+                              <div class="text-secondary text-truncate fst-italic mt-1" style="font-size: 0.72rem;" title="<%= bk.review.comment %>">
+                                "<%= bk.review.comment %>"
+                              </div>
+                            <% end %>
+                          </div>
+                        <% end %>
+                      </div>
+
+                      <div class="d-flex align-items-center justify-content-between">
+                        <span class="badge bg-success-lt"><i class="ti ti-check me-1"></i>Service Done</span>
+                        <%= link_to admin_booking_path(bk), class: "btn btn-sm btn-ghost-primary px-2 py-0", title: "View Booking" do %>
+                          Details <i class="ti ti-chevron-right ms-1"></i>
+                        <% end %>
+                      </div>
+                    <% else %>
+                      <div class="text-secondary small">Service completed</div>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+
+            <% when "booked" %>
+              <!-- 🔴 BOOKED SLOT BOX -->
+              <% bk = slot[:booking] %>
+              <div class="card h-100 border shadow-xs" style="background: rgba(239, 68, 68, 0.04); border-color: rgba(239, 68, 68, 0.35) !important; border-radius: 12px;">
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                  <div>
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                      <span class="fw-bold fs-3 text-reset font-monospace">
+                        <i class="ti ti-clock text-danger me-1"></i><%= slot[:slot] %>
+                      </span>
+                      <span class="badge bg-danger text-white fw-bold px-2 py-1" style="font-size: 0.68rem;">
+                        🔴 Booked
+                      </span>
+                    </div>
+
+                    <% if bk.present? %>
+                      <% if bk.respond_to?(:has_pending_reschedule_request?) && bk.has_pending_reschedule_request? %>
+                        <div class="alert alert-warning py-1 px-2 mb-2 d-flex align-items-center gap-1 small" style="border-radius: 8px;">
+                          <i class="ti ti-alert-triangle text-warning fs-3"></i>
+                          <div>
+                            <div class="fw-bold text-dark" style="font-size: 0.74rem;">Cannot Reach Alert</div>
+                            <div class="text-secondary" style="font-size: 0.68rem;">Reschedule requested by worker</div>
+                          </div>
+                        </div>
+                      <% end %>
+                      <div class="p-2 rounded bg-surface border mb-2">
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                          <span class="text-secondary small" style="font-size: 0.75rem;">Booking No.</span>
+                          <%= link_to bk.booking_number.presence || "##{bk.id.to_s[0..7]}", admin_booking_path(bk),
+                                class: "fw-bold text-primary text-decoration-none font-monospace small" %>
+                        </div>
+                        <div class="fw-bold text-reset text-truncate">
+                          <i class="ti ti-user text-muted me-1"></i><%= bk.customer_name %>
+                        </div>
+                        <% if bk.customer&.phone.present? %>
+                          <div class="text-secondary small font-monospace" style="font-size: 0.75rem;">
+                            <i class="ti ti-phone text-muted me-1"></i><%= bk.customer.phone %>
+                          </div>
+                        <% end %>
+
+                        <div class="mt-2 pt-2 border-top d-flex align-items-center justify-content-between">
+                          <span class="badge bg-purple-lt text-truncate" style="max-width: 130px;" title="<%= bk.display_service %>">
+                            <%= bk.display_service %>
+                          </span>
+                          <span class="fw-bold text-reset small"><%= bk.display_amount %></span>
+                        </div>
+                      </div>
+
+                      <div class="d-flex align-items-center justify-content-between">
+                        <%= booking_status_badge(bk.booking_status) %>
+                        <%= link_to admin_booking_path(bk), class: "btn btn-sm btn-ghost-primary px-2 py-0", title: "View Booking" do %>
+                          Details <i class="ti ti-chevron-right ms-1"></i>
+                        <% end %>
+                      </div>
+                    <% else %>
+                      <div class="text-secondary small">Appointment scheduled</div>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+
+            <% when "transit" %>
+              <!-- 🚗 IN TRANSIT BUFFER SLOT BOX -->
+              <% tr_bk = slot[:transit_booking] %>
+              <div class="card h-100 border shadow-xs" style="background: rgba(245, 158, 11, 0.05); border-color: rgba(245, 158, 11, 0.4) !important; border-radius: 12px;">
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                  <div>
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                      <span class="fw-bold fs-3 text-reset font-monospace">
+                        <i class="ti ti-car text-warning me-1"></i><%= slot[:slot] %>
+                      </span>
+                      <span class="badge bg-warning text-dark fw-bold px-2 py-1" style="font-size: 0.68rem;">
+                        🚗 In Transit
+                      </span>
+                    </div>
+
+                    <div class="py-2 text-center">
+                      <div class="avatar avatar-md rounded-circle bg-warning-lt text-warning mb-2 mx-auto">
+                        <i class="ti ti-route fs-2"></i>
+                      </div>
+                      <div class="fw-bold text-warning fs-4">Travel Buffer</div>
+                      <div class="text-secondary small mt-1">30 min buffer after previous service</div>
+                    </div>
+
+                    <% if tr_bk.present? %>
+                      <div class="p-2 rounded bg-surface border small mt-2">
+                        <div class="text-secondary" style="font-size: 0.70rem;">Previous Service:</div>
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                          <%= link_to tr_bk.booking_number.presence || "##{tr_bk.id.to_s[0..7]}", admin_booking_path(tr_bk), class: "fw-bold text-primary font-monospace" %>
+                          <span class="badge bg-secondary-lt" style="font-size: 0.65rem;"><%= tr_bk.time_slot %></span>
+                        </div>
+                      </div>
+                    <% end %>
+                  </div>
+
+                  <div class="pt-2 border-top text-center text-secondary small">
+                    Reserved for travel & preparation
+                  </div>
+                </div>
+              </div>
+
+            <% when "available" %>
+              <!-- 🟢 AVAILABLE (KHALI) SLOT BOX -->
+              <div class="card h-100 border shadow-xs" style="background: rgba(34, 197, 94, 0.04); border-color: rgba(34, 197, 94, 0.35) !important; border-radius: 12px;">
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                  <div>
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                      <span class="fw-bold fs-3 text-reset font-monospace">
+                        <i class="ti ti-clock text-success me-1"></i><%= slot[:slot] %>
+                      </span>
+                      <span class="badge bg-success text-white fw-bold px-2 py-1" style="font-size: 0.68rem;">
+                        🟢 Khali Hai
+                      </span>
+                    </div>
+
+                    <div class="py-3 text-center">
+                      <div class="avatar avatar-md rounded-circle bg-success-lt text-success mb-2 mx-auto">
+                        <i class="ti ti-calendar-check fs-2"></i>
+                      </div>
+                      <div class="fw-bold text-success fs-3">Available Slot</div>
+                      <div class="text-secondary small mt-1">Open & free for customer booking</div>
+                    </div>
+                  </div>
+
+                  <div class="pt-2 border-top text-center">
+                    <span class="badge bg-success-lt text-success w-100 py-1">
+                      <i class="ti ti-sparkles me-1"></i>Ready for Appointment
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+            <% when "passed" %>
+              <!-- ⚪ PASSED SLOT BOX -->
+              <div class="card h-100 border bg-surface-secondary opacity-60" style="border-radius: 12px;">
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                  <div>
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                      <span class="fw-bold fs-3 text-muted font-monospace"><%= slot[:slot] %></span>
+                      <span class="badge bg-secondary-lt" style="font-size: 0.68rem;">Passed</span>
+                    </div>
+
+                    <div class="py-3 text-center text-muted">
+                      <i class="ti ti-clock-off fs-1 d-block mb-1 opacity-50"></i>
+                      <div class="small fw-semibold">Slot Passed</div>
+                      <div class="text-secondary small" style="font-size: 0.72rem;">Time has passed today</div>
+                    </div>
+                  </div>
+
+                  <div class="pt-2 border-top text-center text-secondary small">
+                    No booking recorded
+                  </div>
+                </div>
+              </div>
+
+            <% else %>
+              <!-- ⚪ OFF DUTY / INACTIVE SLOT BOX -->
+              <div class="card h-100 border bg-surface-secondary opacity-75" style="border-radius: 12px;">
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                  <div>
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                      <span class="fw-bold fs-3 text-muted font-monospace"><%= slot[:slot] %></span>
+                      <span class="badge bg-secondary-lt" style="font-size: 0.68rem;">Off Duty</span>
+                    </div>
+
+                    <div class="py-3 text-center text-muted">
+                      <i class="ti ti-bed fs-1 d-block mb-1 opacity-50"></i>
+                      <div class="small fw-semibold">Beautician Off Duty</div>
+                      <div class="text-secondary small" style="font-size: 0.72rem;">Weekly off day</div>
+                    </div>
+                  </div>
+
+                  <div class="pt-2 border-top text-center text-secondary small">
+                    Not scheduled for duty
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Full 7-Day Calendar Overview Matrix Table -->
+      <div class="card border mb-4">
+        <div class="card-header border-bottom py-2 d-flex align-items-center justify-content-between">
+          <h4 class="card-title fw-bold mb-0">
+            <i class="ti ti-table me-1 text-primary"></i>7-Day Weekly Calendar Overview Matrix
+          </h4>
+          <span class="text-secondary small">Complete schedule across all standard salon slots</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-bordered table-vcenter text-center card-table">
+            <thead>
+              <tr class="bg-surface-secondary">
+                <th style="width: 110px;" class="text-start ps-3">Time Slot</th>
+                <% @week_matrix.each do |m| %>
+                  <th class="<%= 'bg-primary-lt' if m[:date] == @selected_date %>">
+                    <div class="fw-bold text-reset"><%= m[:short] %></div>
+                    <div class="small text-secondary"><%= m[:date].strftime("%d %b") %></div>
+                    <% if m[:is_today] %>
+                      <span class="badge bg-indigo text-white mt-1" style="font-size: 0.55rem;">TODAY</span>
+                    <% end %>
+                  </th>
+                <% end %>
+              </tr>
+            </thead>
+            <tbody>
+              <% BookingAvailabilityService::STANDARD_TIME_SLOTS.each do |slot_info| %>
+                <tr>
+                  <td class="text-start ps-3 fw-bold font-monospace small bg-surface-secondary">
+                    <%= slot_info[:slot] %>
+                  </td>
+                  <% @week_matrix.each do |m| %>
+                    <% day_date = m[:date] %>
+                    <% slot_time_str = "#{day_date.strftime('%Y-%m-%d')} #{slot_info[:time]}:00" %>
+                    <% slot_dt = (Time.zone.parse(slot_time_str) rescue nil) %>
+                    <% is_past = slot_dt && slot_dt < Time.current %>
+                    <% match_bk = m[:bookings].find { |b| (b.time_slot.present? && b.time_slot.casecmp?(slot_info[:slot])) || (b.scheduled_at && slot_dt && (b.scheduled_at - slot_dt).abs < 45.minutes) } %>
+
+                    <td class="<%= 'bg-primary-lt' if day_date == @selected_date %>" style="min-width: 120px;">
+                      <% if !m[:is_working_day] || !m[:is_active] %>
+                        <span class="text-muted small">—</span>
+                      <% elsif match_bk.present? %>
+                        <% is_done = match_bk.completed? || match_bk.service_status == 'completed' %>
+                        <%= link_to admin_booking_path(match_bk), class: "badge #{is_done ? 'bg-indigo' : 'bg-danger'} text-white text-decoration-none d-block py-1", title: "Customer: #{match_bk.customer_name} • Service: #{match_bk.display_service} • Status: #{is_done ? 'Completed' : 'Booked'}" do %>
+                          <i class="ti <%= is_done ? 'ti-check' : 'ti-calendar-event' %> me-1"></i><%= is_done ? 'Completed' : 'Booked' %>
+                          <div class="small font-monospace opacity-90" style="font-size: 0.65rem;"><%= match_bk.booking_number.presence || "##{match_bk.id.to_s[0..6]}" %></div>
+                        <% end %>
+                      <% elsif is_past %>
+                        <span class="badge bg-secondary-lt text-muted py-1 d-block" style="font-size: 0.68rem;">Passed</span>
+                      <% else %>
+                        <span class="badge bg-success-lt text-success py-1 d-block fw-bold" style="font-size: 0.68rem;">
+                          🟢 Khali
+                        </span>
+                      <% end %>
+                    </td>
+                  <% end %>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════════
+           PREVIOUS COMPLETED SERVICE RECORDS & REVIEWS (सीधे स्क्रीन पर)
+      ═══════════════════════════════════════════════════════════════ -->
+      <div class="card border">
+        <div class="card-header border-bottom py-2 d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <div>
+            <h4 class="card-title fw-bold mb-0">
+              <i class="ti ti-history me-1 text-primary"></i>Previous Completed Service Records & Customer Feedback
+            </h4>
+            <div class="text-secondary small">
+              Services successfully delivered by <%= @worker.name %> with customer ratings & verified reviews.
+            </div>
+          </div>
+          <div>
+            <%= link_to admin_worker_path(@worker, tab: 'history'), class: "btn btn-sm btn-outline-primary" do %>
+              <i class="ti ti-list-details me-1"></i>View Full History (<%= @total_completed_jobs %>) →
+            <% end %>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-vcenter card-table table-hover">
+            <thead>
+              <tr class="bg-surface-secondary">
+                <th>Date & Time</th>
+                <th>Booking ID</th>
+                <th>Customer</th>
+                <th>Service Delivered</th>
+                <th>Amount</th>
+                <th>Customer Review</th>
+                <th class="text-end pe-3">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if @recent_completed_services.any? %>
+                <% @recent_completed_services.each do |b| %>
+                  <tr>
+                    <td>
+                      <div class="fw-semibold text-reset"><%= b.display_date %></div>
+                      <div class="text-secondary small font-monospace"><%= b.display_time_slot %></div>
+                    </td>
+                    <td>
+                      <%= link_to b.booking_number.presence || "##{b.id.to_s[0..7]}", admin_booking_path(b),
+                            class: "fw-bold text-primary font-monospace text-decoration-none" %>
+                    </td>
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <span class="avatar avatar-xs rounded-circle bg-secondary-lt me-2 fw-bold">
+                          <%= b.customer&.initials || "C" %>
+                        </span>
+                        <div>
+                          <div class="fw-semibold text-reset"><%= b.customer_name %></div>
+                          <% if b.customer&.phone.present? %>
+                            <div class="text-secondary small font-monospace"><%= b.customer.phone %></div>
+                          <% end %>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="badge bg-purple-lt"><%= b.display_service %></span>
+                    </td>
+                    <td class="fw-bold text-success"><%= b.display_amount %></td>
+                    <td>
+                      <% if b.review.present? %>
+                        <div class="d-flex align-items-center text-warning fw-bold">
+                          <% b.review.rating.times do %><i class="ti ti-star-filled"></i><% end %>
+                          <span class="ms-1 text-reset fw-bold"><%= b.review.rating %>★</span>
+                        </div>
+                        <% if b.review.comment.present? %>
+                          <div class="text-secondary small text-truncate" style="max-width: 180px;" title="<%= b.review.comment %>">
+                            "<%= b.review.comment %>"
+                          </div>
+                        <% end %>
+                      <% else %>
+                        <span class="text-muted small">No review left</span>
+                      <% end %>
+                    </td>
+                    <td class="text-end pe-3">
+                      <%= link_to admin_booking_path(b), class: "btn btn-sm btn-ghost-primary", title: "View Booking Details" do %>
+                        View <i class="ti ti-chevron-right ms-1"></i>
+                      <% end %>
+                    </td>
+                  </tr>
+                <% end %>
+              <% else %>
+                <tr>
+                  <td colspan="7" class="text-center py-4 text-secondary">
+                    <i class="ti ti-history-off fs-1 d-block mb-1 text-muted"></i>
+                    No completed service records recorded yet for this specialist.
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    <% when "history" %>
+      <!-- ═══════════════════════════════════════════════════════════════
+           TAB 2: COMPLETED SERVICE HISTORY & DATE FILTER
+      ═══════════════════════════════════════════════════════════════ -->
+      <div class="card border mb-4">
+        <div class="card-body p-3">
+          <%= form_with url: admin_worker_path(@worker), method: :get, class: "row g-2 align-items-center" do %>
+            <input type="hidden" name="tab" value="history">
+            
+            <div class="col-12 col-md-auto">
+              <label class="form-label fw-bold small text-secondary mb-0">
+                <i class="ti ti-calendar-filter text-primary me-1"></i>Filter Completed Services by Date:
+              </label>
+            </div>
+
+            <div class="col-12 col-md-3">
+              <input type="date" name="history_date" value="<%= params[:history_date] %>"
+                     class="form-control" onchange="this.form.requestSubmit()">
+            </div>
+
+            <div class="col-auto">
+              <button type="submit" class="btn btn-primary">
+                <i class="ti ti-filter me-1"></i> Apply Filter
+              </button>
+              <% if params[:history_date].present? %>
+                <%= link_to "Show All Completed", admin_worker_path(@worker, tab: 'history'), class: "btn btn-ghost-secondary ms-1" %>
+              <% end %>
+            </div>
+
+            <div class="col text-md-end text-secondary small">
+              <% if @filtered_history_date.present? %>
+                Showing completed jobs on <strong class="text-reset"><%= @filtered_history_date.strftime("%d %B %Y") %></strong>
+              <% else %>
+                Total <strong class="text-reset"><%= @total_completed_jobs %></strong> completed services delivered
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Completed Services Table -->
+      <div class="table-responsive border rounded mb-3">
+        <table class="table table-vcenter card-table table-hover">
+          <thead>
+            <tr>
+              <th>Date & Time</th>
+              <th>Booking ID</th>
+              <th>Customer</th>
+              <th>Service Delivered</th>
+              <th>Amount</th>
+              <th>Payment</th>
+              <th>Customer Review</th>
+              <th class="text-end pe-3">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if @completed_bookings.any? %>
+              <% @completed_bookings.each do |b| %>
+                <tr>
+                  <td>
+                    <div class="fw-semibold text-reset"><%= b.display_date %></div>
+                    <div class="text-secondary small font-monospace"><%= b.display_time_slot %></div>
+                  </td>
+
+                  <td>
+                    <%= link_to b.booking_number.presence || "##{b.id.to_s[0..7]}", admin_booking_path(b),
+                          class: "fw-bold text-primary font-monospace text-decoration-none" %>
+                  </td>
+
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <span class="avatar avatar-xs rounded-circle bg-secondary-lt me-2 fw-bold">
+                        <%= b.customer&.initials || "C" %>
+                      </span>
+                      <div>
+                        <div class="fw-semibold text-reset"><%= b.customer_name %></div>
+                        <% if b.customer&.phone.present? %>
+                          <div class="text-secondary small font-monospace"><%= b.customer.phone %></div>
+                        <% end %>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td>
+                    <span class="badge bg-purple-lt"><%= b.display_service %></span>
+                  </td>
+
+                  <td class="fw-bold text-reset"><%= b.display_amount %></td>
+
+                  <td>
+                    <%= payment_status_badge(b.payment_status) %>
+                  </td>
+
+                  <td>
+                    <% if b.review.present? %>
+                      <div class="d-flex align-items-center text-warning fw-bold">
+                        <i class="ti ti-star-filled me-1"></i><%= b.review.rating %>★
+                      </div>
+                      <% if b.review.comment.present? %>
+                        <div class="text-secondary small text-truncate" style="max-width: 160px;" title="<%= b.review.comment %>">
+                          "<%= b.review.comment %>"
+                        </div>
+                      <% end %>
+                    <% else %>
+                      <span class="text-muted small">No review left</span>
+                    <% end %>
+                  </td>
+
+                  <td class="text-end pe-3">
+                    <%= link_to admin_booking_path(b), class: "btn btn-sm btn-ghost-primary", title: "View Booking Details" do %>
+                      View <i class="ti ti-chevron-right ms-1"></i>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            <% else %>
+              <tr>
+                <td colspan="8" class="text-center py-5 text-secondary">
+                  <i class="ti ti-calendar-off fs-1 d-block mb-2 text-muted"></i>
+                  <% if @filtered_history_date.present? %>
+                    No completed services found for <strong><%= @filtered_history_date.strftime("%d %B %Y") %></strong>.
+                    <div class="mt-2">
+                      <%= link_to "Show All Completed Jobs", admin_worker_path(@worker, tab: 'history'), class: "btn btn-sm btn-outline-primary" %>
+                    </div>
+                  <% else %>
+                    No completed services recorded for this beautician yet.
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      <%= render_pagination %>
+
+    <% when "reviews" %>
+      <!-- ═══════════════════════════════════════════════════════════════
+           TAB 3: CUSTOMER REVIEWS & RATINGS HISTORY
+      ═══════════════════════════════════════════════════════════════ -->
+      <div class="row g-4 mb-4">
+        <!-- Average Rating Summary Card -->
+        <div class="col-md-4">
+          <div class="card border text-center p-4 h-100 bg-surface-secondary">
+            <div class="text-secondary small mb-1">Overall Customer Rating</div>
+            <div class="display-3 fw-bold text-warning mb-1">
+              <i class="ti ti-star-filled me-1"></i><%= sprintf("%.1f", @rating_avg) %>
+            </div>
+            <div class="text-secondary">
+              Based on <strong class="text-reset"><%= @total_reviews_count %></strong> verified <%= 'review'.pluralize(@total_reviews_count) %>
+            </div>
+            <div class="mt-3 pt-3 border-top">
+              <span class="badge bg-success-lt px-3 py-1">
+                <i class="ti ti-shield-check me-1"></i>100% Genuine User Reviews
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rating Overview / Quality Guarantee -->
+        <div class="col-md-8">
+          <div class="card border p-4 h-100">
+            <h4 class="fw-bold text-reset mb-2">
+              <i class="ti ti-certificate text-primary me-2"></i>Service Quality & Client Satisfaction
+            </h4>
+            <p class="text-secondary mb-3">
+              Feedback submitted by verified customers who booked appointments with <%= @worker.name %>. Each review is tied to an authentic service delivery.
+            </p>
+            <div class="d-flex flex-wrap gap-3">
+              <div class="border rounded p-2 text-center bg-surface-secondary" style="min-width: 120px;">
+                <div class="text-secondary small">Total Jobs</div>
+                <div class="fw-bold fs-2 text-primary"><%= @total_completed_jobs %></div>
+              </div>
+              <div class="border rounded p-2 text-center bg-surface-secondary" style="min-width: 120px;">
+                <div class="text-secondary small">Reviews Received</div>
+                <div class="fw-bold fs-2 text-warning"><%= @total_reviews_count %></div>
+              </div>
+              <div class="border rounded p-2 text-center bg-surface-secondary" style="min-width: 120px;">
+                <div class="text-secondary small">Tier Multiplier</div>
+                <div class="fw-bold fs-2 text-success"><%= '%.2f' % (@profile.worker_tier&.price_multiplier || 1.0) %>x</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Customer Reviews Cards -->
+      <h3 class="fw-bold fs-2 text-reset mb-3">
+        <i class="ti ti-messages text-primary me-2"></i>Customer Feedback & Reviews
+      </h3>
+
+      <% if @customer_reviews.any? %>
+        <div class="row g-3 mb-4">
+          <% @customer_reviews.each do |rev| %>
+            <div class="col-12 col-md-6">
+              <div class="card border shadow-xs h-100">
+                <div class="card-body p-3">
+                  <div class="d-flex align-items-center justify-content-between mb-2">
+                    <div class="d-flex align-items-center">
+                      <span class="avatar avatar-sm rounded-circle bg-primary-lt me-2 fw-bold">
+                        <%= rev.customer&.initials || "C" %>
+                      </span>
+                      <div>
+                        <div class="fw-bold text-reset"><%= rev.customer_name %></div>
+                        <div class="text-secondary small" style="font-size: 0.75rem;"><%= rev.display_date %></div>
+                      </div>
+                    </div>
+
+                    <!-- Stars -->
+                    <div class="text-warning">
+                      <% rev.rating.times do %>
+                        <i class="ti ti-star-filled"></i>
+                      <% end %>
+                      <% (5 - rev.rating).times do %>
+                        <i class="ti ti-star text-muted"></i>
+                      <% end %>
+                    </div>
+                  </div>
+
+                  <!-- Service Reviewed -->
+                  <div class="mb-2">
+                    <span class="badge bg-pink-lt"><i class="ti ti-sparkles me-1"></i><%= rev.service_name %></span>
+                    <% if rev.booking.present? %>
+                      <%= link_to "Booking #{rev.booking.booking_number.presence || "##{rev.booking_id.to_s[0..6]}"}", admin_booking_path(rev.booking),
+                            class: "badge bg-secondary-lt text-secondary font-monospace text-decoration-none ms-1" %>
+                    <% end %>
+                  </div>
+
+                  <!-- Comment -->
+                  <p class="text-reset mb-0" style="font-size: 0.95rem; line-height: 1.5;">
+                    <%= rev.comment.presence || "No written feedback provided. Rated #{rev.rating} stars." %>
+                  </p>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        <%= render_pagination %>
+      <% else %>
+        <div class="card border text-center py-5">
+          <i class="ti ti-star-off fs-1 d-block mb-2 text-muted"></i>
+          <div class="fw-bold text-reset fs-3">No customer reviews yet</div>
+          <div class="text-secondary small">Reviews will appear here as customers rate completed appointments.</div>
+        </div>
+      <% end %>
+
+    <% else %>
+      <!-- ═══════════════════════════════════════════════════════════════
+           TAB 4: FULL PROFILE, SKILLS & KYC DETAILS
+      ═══════════════════════════════════════════════════════════════ -->
+      <div class="row g-4">
+        <div class="col-md-7">
+          <div class="card border mb-4">
+            <div class="card-header border-bottom">
+              <h4 class="card-title fw-bold mb-0"><i class="ti ti-user-check me-2 text-primary"></i>Professional Profile</h4>
+            </div>
+            <div class="card-body">
+              <div class="row g-3 mb-4">
+                <div class="col-sm-6">
+                  <div class="card card-sm bg-surface-secondary border p-3">
+                    <div class="text-secondary small">Experience Level</div>
+                    <div class="fw-semibold text-reset mt-1"><%= @profile.experience_years %> years of field experience</div>
+                  </div>
+                </div>
+
+                <div class="col-sm-6">
+                  <div class="card card-sm bg-surface-secondary border p-3">
+                    <div class="text-secondary small">Worker Tier</div>
+                    <div class="mt-1">
+                      <%= worker_tier_capsule_badge(@worker) %>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-sm-6">
+                  <div class="card card-sm bg-surface-secondary border p-3">
+                    <div class="text-secondary small">Operating City</div>
+                    <div class="fw-semibold text-reset mt-1">
+                      <i class="ti ti-map-pin text-primary me-1"></i><%= @worker.serving_city %>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-sm-6">
+                  <div class="card card-sm bg-surface-secondary border p-3">
+                    <div class="text-secondary small">Working Time Slot</div>
+                    <div class="fw-semibold text-reset mt-1">
+                      <span class="badge bg-purple-lt"><i class="ti ti-clock me-1"></i>Full Day Schedule</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Skills -->
+              <div class="mb-4">
+                <div class="fw-bold text-reset mb-2">Specialized Skills & Treatments:</div>
+                <div class="d-flex flex-wrap gap-1">
+                  <% skills = @profile.skills_list %>
+                  <% if skills.any? %>
+                    <% skills.each do |sk| %>
+                      <span class="badge bg-pink-lt text-pink py-1 px-2"><%= sk %></span>
+                    <% end %>
+                  <% else %>
+                    <span class="text-secondary small">Standard Salon & Beauty Treatments</span>
+                  <% end %>
+                </div>
+              </div>
+
+              <!-- Bio -->
+              <% if @profile.bio.present? %>
+                <div class="card border p-3 mb-3 bg-surface-secondary">
+                  <div class="text-secondary small mb-1">Bio / Profile Summary:</div>
+                  <p class="mb-0 text-reset"><%= @profile.bio %></p>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-5">
+          <!-- KYC & Compliance Card -->
+          <div class="card border mb-4">
+            <div class="card-header border-bottom">
+              <h4 class="card-title fw-bold mb-0"><i class="ti ti-shield-lock me-2 text-primary"></i>KYC & Payout Details</h4>
+            </div>
+            <div class="card-body">
+              <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                <span class="text-secondary">KYC Status</span>
+                <span class="badge <%= @profile.kyc_badge_class %>"><%= @profile.kyc_label %></span>
+              </div>
+
+              <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                <span class="text-secondary">Aadhaar Card</span>
+                <% aadhaar = @profile&.aadhaar_number.presence %>
+                <% if aadhaar %>
+                  <span class="fw-semibold font-monospace text-reset">
+                    ●●●● ●●●● <%= aadhaar.last(4) %>
+                  </span>
+                <% else %>
+                  <span class="text-secondary small">Not provided</span>
+                <% end %>
+              </div>
+
+              <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                <span class="text-secondary">Payout UPI ID</span>
+                <% upi = @profile&.upi_id.presence %>
+                <% if upi %>
+                  <span class="fw-semibold font-monospace text-reset"><%= upi %></span>
+                <% else %>
+                  <span class="text-secondary small">Not registered</span>
+                <% end %>
+              </div>
+
+              <div class="d-flex align-items-center justify-content-between">
+                <span class="text-secondary">Account Status</span>
+                <%= active_status_badge(@worker.status) %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Working Days -->
+          <div class="card border">
+            <div class="card-header border-bottom">
+              <h4 class="card-title fw-bold mb-0"><i class="ti ti-calendar me-2 text-primary"></i>Scheduled Work Days</h4>
+            </div>
+            <div class="card-body">
+              <div class="d-flex flex-wrap gap-1">
+                <% %w[Monday Tuesday Wednesday Thursday Friday Saturday Sunday].each do |day_name| %>
+                  <% active = @profile.available_on_day?(day_name) %>
+                  <span class="badge <%= active ? 'bg-success-lt border border-success' : 'bg-secondary-lt text-muted opacity-50' %> px-2 py-1">
+                    <%= day_name %>
+                  </span>
+                <% end %>
+              </div>
+              <div class="text-secondary small mt-2">
+                Available throughout scheduled days for customer appointments.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

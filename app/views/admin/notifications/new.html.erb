@@ -1,0 +1,65 @@
+<% content_for :page_title, "Compose Notification" %>
+
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">Broadcast System</div>
+      <h2 class="page-title fs-1 fw-bold">Compose Notification</h2>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <%= link_to admin_notifications_path, class: "btn btn-outline-secondary" do %>
+        <i class="ti ti-arrow-left me-1 fs-3"></i> Back to Notifications
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-header border-bottom">
+        <h3 class="card-title fw-bold">Broadcast Composer</h3>
+      </div>
+      <%= form_with url: admin_notifications_path, method: :post, local: true do |f| %>
+        <div class="card-body">
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label" for="notif_type">Notification Channel <span class="text-danger">*</span></label>
+              <select name="notification[type]" id="notif_type" class="form-select">
+                <option value="push" selected>Push Notification (Mobile App)</option>
+                <option value="email">Email Broadcast</option>
+                <option value="sms">SMS Text Message</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="notif_recipient">Recipient Target <span class="text-danger">*</span></label>
+              <select name="notification[recipient]" id="notif_recipient" class="form-select">
+                <option value="All Customers">All Customers</option>
+                <option value="All Workers">All Active Specialists</option>
+                <option value="Pending Workers">Pending Approval Workers</option>
+                <option value="All Users">Entire Platform (Customers + Workers)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="notif_subject">Notification Subject / Title <span class="text-danger">*</span></label>
+            <input type="text" name="notification[subject]" id="notif_subject" class="form-control" placeholder="e.g. Weekend Special: 20% Off on Hair Care" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="notif_body">Message Body <span class="text-danger">*</span></label>
+            <textarea name="notification[body]" id="notif_body" class="form-control" rows="4" placeholder="Write your notification copy..." required></textarea>
+          </div>
+        </div>
+
+        <div class="card-footer border-top d-flex justify-content-between align-items-center bg-transparent">
+          <%= link_to "Cancel", admin_notifications_path, class: "btn btn-link link-secondary" %>
+          <button type="submit" class="btn btn-primary">
+            <i class="ti ti-send me-1 fs-3"></i> Send Broadcast Now
+          </button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

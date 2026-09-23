@@ -1,0 +1,625 @@
+<script>window.__FORCE_LIGHT__ = true;</script>
+<% content_for :page_title, "Beauticians — Verified Beauty Professionals — BeautyNest" %>
+
+<%= render "shared/public_nav", active: "beauticians" %>
+
+<script>
+  // Lock to light mode — override theme controller if it fires
+  (function applyLight() {
+    document.documentElement.setAttribute('data-bs-theme', 'light');
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.body.removeAttribute('data-bs-theme');
+    document.body.classList.remove('theme-dark');
+  })();
+  window.__CUSTOMER_TOKEN__ = "<%= @customer_token.presence || '' %>";
+  if (window.__CUSTOMER_TOKEN__) {
+    try { localStorage.setItem('customerToken', window.__CUSTOMER_TOKEN__); } catch(e) {}
+  }
+</script>
+
+
+<style>
+  :root {
+    --brand-primary: #e91e8c;
+    --brand-primary-dark: #c2185b;
+    --brand-primary-light: #fce4ec;
+    --brand-bg: #fff5f7;
+    --brand-charcoal: #2d2d2d;
+    --brand-muted: #6b7280;
+    --brand-border: #f8d7da;
+  }
+
+  /* ── Page Base ── */
+  .bn-prof-page {
+    background-color: var(--brand-bg, #fff5f7);
+    min-height: 100vh;
+    padding: calc(68px + 2.5rem) 1rem 4rem;
+  }
+  .bn-prof-container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  /* ── Header ── */
+  .bn-prof-header {
+    text-align: center;
+    max-width: 760px;
+    margin: 0 auto 2.5rem;
+  }
+  .bn-prof-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #fce7f3;
+    border: 1px solid rgba(233, 30, 140, 0.2);
+    padding: 4px 14px;
+    border-radius: 50px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--brand-primary, #e91e8c);
+    margin-bottom: 0.85rem;
+  }
+  .bn-prof-title {
+    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+    font-weight: 800;
+    color: #1f2937;
+    letter-spacing: -0.025em;
+    margin: 0 0 0.65rem;
+    line-height: 1.2;
+  }
+  .bn-prof-desc {
+    font-size: 0.92rem;
+    color: var(--brand-muted, #6b7280);
+    line-height: 1.6;
+    margin: 0 auto;
+    max-width: 620px;
+  }
+
+  /* ── Value Props (Trust Cards) ── */
+  .bn-value-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.1rem;
+    max-width: 920px;
+    margin: 0 auto 2.2rem;
+  }
+  .bn-value-card {
+    background: #ffffff;
+    padding: 1.15rem 1rem;
+    border-radius: 1rem;
+    border: 1px solid #fce7f3;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(233, 30, 140, 0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .bn-value-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(233, 30, 140, 0.08);
+  }
+  .bn-value-icon {
+    width: 26px;
+    height: 26px;
+    margin: 0 auto 0.45rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .bn-value-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #111827;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .bn-value-sub {
+    font-size: 0.72rem;
+    color: #6b7280;
+    line-height: 1.4;
+    display: block;
+  }
+
+  /* ── Filter Bar ── */
+  .bn-filter-bar {
+    background: #ffffff;
+    padding: 1rem 1.25rem;
+    border-radius: 1.5rem;
+    border: 1px solid #fce7f3;
+    box-shadow: 0 2px 12px rgba(233, 30, 140, 0.04);
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .bn-search-box {
+    position: relative;
+    flex: 1;
+    min-width: 260px;
+  }
+  .bn-search-box svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    pointer-events: none;
+  }
+  .bn-search-input {
+    width: 100%;
+    padding: 9px 14px 9px 40px;
+    font-size: 0.82rem;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 1rem;
+    outline: none;
+    color: #111827;
+    transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s;
+  }
+  .bn-search-input:focus {
+    background: #ffffff;
+    border-color: var(--brand-primary, #e91e8c);
+    box-shadow: 0 0 0 3px rgba(233, 30, 140, 0.12);
+  }
+
+  .bn-filter-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .bn-select-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .bn-select-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #374151;
+    white-space: nowrap;
+  }
+  .bn-select {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 1rem;
+    outline: none;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .bn-select:focus {
+    border-color: var(--brand-primary, #e91e8c);
+    background: #fff;
+  }
+  .bn-submit-btn {
+    padding: 8px 16px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    border-radius: 1rem;
+    border: 1px solid var(--brand-primary, #e91e8c);
+    background: #fff;
+    color: var(--brand-primary, #e91e8c);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .bn-submit-btn:hover {
+    background: var(--brand-primary, #e91e8c);
+    color: #fff;
+  }
+  .bn-reset-link {
+    font-size: 0.76rem;
+    color: #6b7280;
+    font-weight: 600;
+    text-decoration: underline;
+    padding: 6px 8px;
+  }
+  .bn-reset-link:hover {
+    color: var(--brand-primary, #e91e8c);
+  }
+
+  /* ── Beauticians Grid ── */
+  .bn-beauticians-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  /* ── Exact BeauticianCard UI from customer-website ── */
+  .bn-card {
+    background: #ffffff;
+    border-radius: 1.5rem;
+    padding: 1.25rem;
+    border: 1px solid #fce7f3;
+    box-shadow: 0 4px 20px rgba(233, 30, 140, 0.04);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+  }
+  .bn-card:hover {
+    border-color: #f472b6;
+    box-shadow: 0 12px 36px rgba(233, 30, 140, 0.12);
+    transform: translateY(-3px);
+  }
+
+  .bn-card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  /* Avatar with checkmark */
+  .bn-card-avatar-wrap {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    border-radius: 1rem;
+    overflow: hidden;
+    border: 2px solid #fbcfe8;
+    flex-shrink: 0;
+    background: #fdf2f8;
+  }
+  .bn-card-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .bn-card-verified-check {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    background: #ffffff;
+    border-radius: 50%;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Info */
+  .bn-card-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .bn-card-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+  }
+  .bn-card-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.01em;
+  }
+  .bn-card-rating-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #fffbeb;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #b45309;
+    flex-shrink: 0;
+  }
+  .bn-card-reviews {
+    font-size: 0.65rem;
+    color: #9ca3af;
+    font-weight: 500;
+  }
+  .bn-card-location {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--brand-primary, #e91e8c);
+    margin-top: 2px;
+  }
+  .bn-card-spec {
+    font-size: 0.78rem;
+    color: #6b7280;
+    margin: 5px 0 0;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Badges */
+  .bn-card-badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 0.85rem;
+    font-size: 0.7rem;
+    color: #4b5563;
+  }
+  .bn-badge-pink {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #fdf2f8;
+    color: var(--brand-primary, #e91e8c);
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 50px;
+  }
+  .bn-badge-gray {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #f3f4f6;
+    color: #374151;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 50px;
+  }
+  .bn-badge-tier {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #fef3c7;
+    color: #92400e;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 50px;
+    text-transform: uppercase;
+    font-size: 0.62rem;
+  }
+
+  /* Card Footer */
+  .bn-card-footer {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .bn-status-doorstep {
+    font-size: 0.72rem;
+    color: #059669;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .bn-live-ping {
+    position: relative;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #10b981;
+    display: inline-block;
+  }
+  .bn-live-ping::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    background-color: #10b981;
+    animation: bnPingAnim 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+    opacity: 0.75;
+  }
+  @keyframes bnPingAnim {
+    75%, 100% {
+      transform: scale(2.2);
+      opacity: 0;
+    }
+  }
+
+  .bn-book-btn {
+    font-size: 0.76rem;
+    font-weight: 700;
+    padding: 6px 16px;
+    border-radius: 50px;
+    text-decoration: none;
+    background: #fdf2f8;
+    color: var(--brand-primary, #e91e8c);
+    border: 1px solid rgba(233, 30, 140, 0.18);
+    transition: all 0.16s ease;
+    display: inline-block;
+  }
+  .bn-book-btn:hover {
+    background: var(--brand-primary, #e91e8c);
+    color: #ffffff;
+    border-color: var(--brand-primary, #e91e8c);
+    box-shadow: 0 4px 12px rgba(233, 30, 140, 0.25);
+    text-decoration: none;
+  }
+
+  /* ── Empty State ── */
+  .bn-empty-box {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3.5rem 1rem;
+    background: #ffffff;
+    border-radius: 1.5rem;
+    border: 1px solid #fce7f3;
+  }
+
+  @media (max-width: 980px) {
+    .bn-beauticians-grid { grid-template-columns: repeat(2, 1fr); gap: 1.1rem; }
+    .bn-value-grid { grid-template-columns: 1fr; max-width: 480px; }
+  }
+  @media (max-width: 640px) {
+    .bn-beauticians-grid { grid-template-columns: 1fr; }
+    .bn-filter-bar { flex-direction: column; align-items: stretch; }
+    .bn-filter-controls { justify-content: space-between; }
+  }
+</style>
+
+<div class="bn-prof-page">
+  <div class="bn-prof-container">
+
+    <!-- Header Section (Server-Side Rendered) -->
+    <div class="bn-prof-header">
+      <div class="bn-prof-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+        <span><%= @workers.size %> VERIFIED BEAUTICIANS</span>
+      </div>
+      <h1 class="bn-prof-title">Meet Our Top Beauticians</h1>
+      <p class="bn-prof-desc">
+        Aadhaar-verified, background-cleared, and trained in premium techniques. Serving your doorstep with 100% disposable hygienic kits.
+      </p>
+    </div>
+
+    <!-- 3 Value Props / Trust Cards -->
+    <div class="bn-value-grid">
+      <div class="bn-value-card">
+        <div class="bn-value-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+        </div>
+        <span class="bn-value-title">Aadhaar &amp; Background Verified</span>
+        <span class="bn-value-sub">Rigorous safety clearance for your peace of mind</span>
+      </div>
+      <div class="bn-value-card">
+        <div class="bn-value-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e91e8c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+        </div>
+        <span class="bn-value-title">Experienced Specialists</span>
+        <span class="bn-value-sub">Trained in O3+, Rica, Korean Facials &amp; Keratin</span>
+      </div>
+      <div class="bn-value-card">
+        <div class="bn-value-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="#f43f5e" stroke="#f43f5e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+        </div>
+        <span class="bn-value-title">4.8+ Customer Rating</span>
+        <span class="bn-value-sub">Loved by 10,000+ happy doorstep customers</span>
+      </div>
+    </div>
+
+    <!-- Filter Bar (Server-Side Form) -->
+    <form method="get" action="/beauticians" class="bn-filter-bar">
+      <!-- Search Input -->
+      <div class="bn-search-box">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" name="q" value="<%= params[:q] %>" class="bn-search-input" placeholder="Search by beautician name..." autocomplete="off">
+      </div>
+
+      <!-- City & Sort Controls -->
+      <div class="bn-filter-controls">
+        <div class="bn-select-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e91e8c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span class="bn-select-label">City:</span>
+          <select name="city" class="bn-select" onchange="this.form.submit()">
+            <option value="">All Cities</option>
+            <% @cities.each do |c| %>
+              <option value="<%= c.slug %>" <%= 'selected' if params[:city] == c.slug || params[:city] == c.id.to_s %>><%= c.name %></option>
+            <% end %>
+          </select>
+        </div>
+
+        <div class="bn-select-wrap">
+          <span class="bn-select-label">Sort:</span>
+          <select name="sort" class="bn-select" onchange="this.form.submit()">
+            <option value="rating" <%= 'selected' if params[:sort] != 'experience' && params[:sort] != 'newest' %>>Top Rated</option>
+            <option value="experience" <%= 'selected' if params[:sort] == 'experience' %>>Most Experienced</option>
+            <option value="newest" <%= 'selected' if params[:sort] == 'newest' %>>Newest</option>
+          </select>
+        </div>
+
+        <button type="submit" class="bn-submit-btn">Filter</button>
+
+        <% if params[:q].present? || params[:city].present? || params[:sort].present? %>
+          <a href="/beauticians" class="bn-reset-link">Reset</a>
+        <% end %>
+      </div>
+    </form>
+
+    <!-- Beauticians Cards Grid (Direct BeauticianCard.tsx replica via SSR) -->
+    <div class="bn-beauticians-grid">
+      <% if @workers.empty? %>
+        <div class="bn-empty-box">
+          <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5" style="margin:0 auto 0.75rem;display:block;"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          <h3 style="font-size:1.15rem;font-weight:700;color:#111827;margin:0 0 0.35rem;">No Beauticians Found</h3>
+          <p style="font-size:0.85rem;color:#6b7280;margin:0 0 1rem;">No verified professionals match your current search or city filter.</p>
+          <a href="/beauticians" style="background:#e91e8c;color:#fff;border:none;padding:7px 20px;border-radius:50px;font-size:0.8rem;font-weight:700;text-decoration:none;display:inline-block;">Reset Filters</a>
+        </div>
+      <% else %>
+        <% @workers.each do |w| %>
+          <div class="bn-card">
+            <div>
+              <div class="bn-card-top">
+                <!-- Avatar with safe zero-loop onerror fallback -->
+                <div class="bn-card-avatar-wrap">
+                  <img src="<%= w.display_avatar_url %>" alt="<%= w.name %>" class="bn-card-avatar" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'64\' height=\'64\' viewBox=\'0 0 24 24\' fill=\'%23fdf2f8\'><rect width=\'24\' height=\'24\' fill=\'%23fdf2f8\'/><path d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\' fill=\'%23db2777\'/></svg>';">
+                  <div class="bn-card-verified-check">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#10b981" stroke="#ffffff" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                  </div>
+                </div>
+                <!-- Info -->
+                <div class="bn-card-info">
+                  <div class="bn-card-header-row">
+                    <h4 class="bn-card-name"><%= w.name %></h4>
+                    <div class="bn-card-rating-badge">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                      <span><%= w.rating_display %></span>
+                      <span class="bn-card-reviews">(<%= w.reviews_count_display %>)</span>
+                    </div>
+                  </div>
+                  <div class="bn-card-location">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e91e8c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <span><%= w.serving_city %></span>
+                  </div>
+                  <p class="bn-card-spec"><%= w.specialization_display %></p>
+                </div>
+              </div>
+              <!-- Badges -->
+              <div class="bn-card-badges">
+                <span class="bn-badge-pink">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  <span>Aadhaar Verified</span>
+                </span>
+                <span class="bn-badge-gray">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+                  <span><%= w.experience_display %></span>
+                </span>
+                <span class="bn-badge-gray">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2.5"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                  <span><%= w.jobs_count_display %></span>
+                </span>
+                <% if w.tier_display.present? %>
+                  <span class="bn-badge-tier"><%= w.tier_display %> Tier</span>
+                <% end %>
+              </div>
+            </div>
+            <!-- Footer -->
+            <div class="bn-card-footer">
+              <span class="bn-status-doorstep">
+                <span class="bn-live-ping"></span>
+                Available for Doorstep
+              </span>
+              <a href="/categories?worker_id=<%= w.id %>" class="bn-book-btn" onclick="try{localStorage.setItem('selected_worker_id','<%= w.id %>');localStorage.setItem('selected_worker_name','<%= j(w.name) %>');}catch(e){}">
+                Book with <%= w.name.split.first %>
+              </a>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+
+  </div>
+</div>
+
+<%= render "shared/public_footer" %>

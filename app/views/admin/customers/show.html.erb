@@ -1,0 +1,521 @@
+<% content_for :page_title, "Customer Detail" %>
+
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">Customer Profile</div>
+      <h2 class="page-title fs-1 fw-bold"><%= @customer[:name] %></h2>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <div class="btn-list">
+        <%= link_to admin_customers_path, class: "btn btn-outline-secondary" do %>
+          <i class="ti ti-arrow-left me-1 fs-3"></i> Back
+        <% end %>
+        <%= button_to toggle_status_admin_customer_path(@customer[:id]), method: :patch, data: { turbo_confirm: "Are you sure you want to #{@customer.active? ? 'deactivate' : 'activate'} customer '#{@customer[:name]}'?" }, class: "btn btn-outline-#{@customer.active? ? 'warning' : 'success'}" do %>
+          <i class="ti ti-#{@customer.active? ? 'user-off' : 'user-check'} me-1 fs-3"></i>
+          <%= @customer.active? ? "Deactivate" : "Activate" %>
+        <% end %>
+        <%= button_to admin_customer_path(@customer[:id]), method: :delete, data: { turbo_confirm: "Are you sure you want to delete customer '#{@customer[:name]}'?" }, class: "btn btn-danger" do %>
+          <i class="ti ti-trash me-1 fs-3"></i> Delete Customer
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Left Main Column -->
+  <div class="col-lg-8">
+    <div class="card shadow-sm mb-4">
+      <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+        <h3 class="card-title fw-bold mb-0">Customer Information</h3>
+        <div><%= active_status_badge(@customer[:status]) %></div>
+      </div>
+      <div class="card-body">
+        <div class="d-flex align-items-center mb-4">
+          <%= user_avatar_tag(@customer, size: :xl, class_name: "me-3 shadow-sm", fallback_color: "bg-azure-lt text-azure fs-1") %>
+          <div>
+            <h3 class="fs-2 fw-bold text-reset mb-1"><%= @customer[:name] %></h3>
+            <div class="text-secondary small">Customer since <%= @customer[:joined] %></div>
+          </div>
+        </div>
+
+        <div class="subheader mb-2 text-uppercase fw-bold text-secondary" style="font-size: 0.75rem;">Contact Details</div>
+        <div class="row g-3">
+          <div class="col-sm-6">
+            <div class="card card-sm bg-surface-secondary border p-3">
+              <div class="text-secondary small">Email Address</div>
+              <div class="fw-semibold text-reset mt-1"><%= @customer[:email] %></div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="card card-sm bg-surface-secondary border p-3">
+              <div class="text-secondary small">Phone Number</div>
+              <div class="fw-semibold text-reset mt-1"><%= @customer[:phone] %></div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="card card-sm bg-surface-secondary border p-3">
+              <div class="text-secondary small">City / Region</div>
+              <div class="fw-semibold text-reset mt-1"><%= @customer[:city] %></div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="card card-sm bg-surface-secondary border p-3">
+              <div class="text-secondary small">Total Lifetime Bookings</div>
+              <div class="fw-bold fs-3 text-primary mt-1"><%= @customer[:bookings] %></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Saved Addresses & Location Map -->
+    <% saved_addrs = @addresses || [] %>
+    <% gps_addresses = saved_addrs.select { |a| a.latitude.present? && a.longitude.present? && a.latitude.to_f.nonzero? && a.longitude.to_f.nonzero? } %>
+    <% pin_colors = ["#0071e3", "#10b981", "#8b5cf6", "#f97316", "#ec4899", "#06b6d4", "#eab308"] %>
+    <% gps_index_map = {} %>
+    <% gps_addresses.each_with_index { |a, idx| gps_index_map[a.id] = idx + 1 } %>
+
+    <div class="card shadow-sm mb-4">
+      <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+          <div style="width:34px;height:34px;border-radius:8px;background:rgba(0,113,227,0.12);display:flex;align-items:center;justify-content:center;">
+            <i class="ti ti-map-pin fs-2 text-primary"></i>
+          </div>
+          <div>
+            <h3 class="card-title fw-bold mb-0">Saved Addresses</h3>
+            <div class="text-secondary small"><%= pluralize(saved_addrs.size, "saved address") %></div>
+          </div>
+        </div>
+        <% if gps_addresses.any? %>
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-success-lt fw-semibold px-2 py-1">
+              <i class="ti ti-satellite me-1"></i> <%= gps_addresses.size %> GPS Mapped
+            </span>
+          </div>
+        <% end %>
+      </div>
+
+      <% if saved_addrs.any? %>
+        <div class="card-body">
+          <div class="row g-3">
+            <% saved_addrs.each do |addr| %>
+              <% has_coords = addr.latitude.present? && addr.longitude.present? && addr.latitude.to_f.nonzero? && addr.longitude.to_f.nonzero? %>
+              <% pin_num = gps_index_map[addr.id] %>
+              <% pin_color = pin_num ? pin_colors[(pin_num - 1) % pin_colors.size] : "#64748b" %>
+              <div class="col-md-<%= saved_addrs.size > 1 ? '6' : '12' %>">
+                <div class="card card-sm bg-surface-secondary border p-3 h-100 position-relative" id="customer-addr-card-<%= addr.id %>" style="<%= "border-left: 4px solid #{pin_color} !important;" if pin_num %>">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="d-flex align-items-center gap-1 flex-wrap">
+                      <% if pin_num %>
+                        <span class="badge" style="background: <%= pin_color %>; color: #fff; font-weight: 800; font-size: 0.72rem; letter-spacing: 0.02em;">
+                          <i class="ti ti-map-pin me-1"></i>Pin #<%= pin_num %>
+                        </span>
+                      <% end %>
+                      <span class="badge bg-primary-lt fw-bold text-uppercase" style="font-size: 0.7rem;">
+                        <%= addr.display_label %>
+                      </span>
+                      <% if addr.is_default? %>
+                        <span class="badge bg-success-lt fw-bold" style="font-size: 0.7rem;">DEFAULT</span>
+                      <% end %>
+                    </div>
+                    <% if has_coords %>
+                      <span class="badge bg-green-lt" style="font-size: 0.7rem;">
+                        <i class="ti ti-satellite me-1"></i>GPS Mapped
+                      </span>
+                    <% else %>
+                      <span class="badge bg-secondary-lt" style="font-size: 0.7rem;">No GPS</span>
+                    <% end %>
+                  </div>
+
+                  <div class="fw-semibold text-reset mb-1 fs-4" style="line-height: 1.35;">
+                    <%= addr.line1 %>
+                    <% if addr.line2.present? %>
+                      <br><span class="text-secondary fs-5"><%= addr.line2 %></span>
+                    <% end %>
+                  </div>
+
+                  <div class="text-secondary small mb-2">
+                    <%= [addr.city, addr.state, (addr.respond_to?(:clean_pincode) ? addr.clean_pincode : addr.pincode)].compact_blank.join(", ") %>
+                  </div>
+
+                  <% if has_coords %>
+                    <div class="mt-auto pt-2 border-top d-flex align-items-center justify-content-between flex-wrap gap-2">
+                      <span class="badge bg-green-lt" style="font-size: 0.72rem;">
+                        <i class="ti ti-circle-check me-1"></i>Map Location Ready
+                      </span>
+                      <button type="button" 
+                              class="btn btn-sm text-white px-3 py-1" 
+                              style="background: <%= pin_color %>; border-color: <%= pin_color %>;" 
+                              onclick="openLocationModal(<%= addr.latitude.to_f %>, <%= addr.longitude.to_f %>, '<%= j addr.display_label %>', '<%= j addr.line1 %>', '<%= j addr.line2.to_s %>', '<%= j addr.full_address %>', '<%= pin_color %>', <%= pin_num || 1 %>)">
+                        <i class="ti ti-map-pin me-1"></i> View Location
+                      </button>
+                    </div>
+                  <% else %>
+                    <div class="mt-auto pt-2 border-top d-flex align-items-center justify-content-between flex-wrap gap-2">
+                      <span class="badge bg-secondary-lt" style="font-size: 0.75rem;">No GPS Coordinates</span>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+
+          <!-- Apple Glassmorphism Modal Popup for OpenStreetMap Street View -->
+          <div class="modal modal-blur fade" id="address-location-modal" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+            <div class="modal-dialog modal-lg modal-dialog-centered my-1" role="document" style="max-width: 800px;">
+              <div class="modal-content shadow-lg border" style="border-radius: 16px; overflow: hidden; background: var(--surface); border-color: var(--border-strong) !important; box-shadow: var(--shadow-lg); max-height: 94vh;">
+                
+                <!-- Compact Modal Header -->
+                <div class="modal-header border-bottom py-2 px-3 d-flex align-items-center justify-content-between" style="background: var(--surface-2);">
+                  <div class="d-flex align-items-center gap-2">
+                    <div id="modal-header-icon-box" style="width: 32px; height: 32px; border-radius: 8px; background: rgba(219,39,119,0.14); display: flex; align-items: center; justify-content: center;">
+                      <i class="ti ti-map-pin fs-3" id="modal-header-icon" style="color: var(--accent);"></i>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                      <h4 class="modal-title fw-bold mb-0 fs-4 text-reset" id="modal-address-title">Location Map</h4>
+                      <span id="modal-pin-badge" class="badge text-white fw-bold px-2 py-0" style="font-size: 0.68rem; border-radius: 6px;">Pin #1</span>
+                      <span class="badge bg-success-lt fw-semibold py-0 px-2" style="font-size: 0.68rem;">
+                        <i class="ti ti-circle-check me-1"></i> Verified
+                      </span>
+                    </div>
+                  </div>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="opacity: 0.75;"></button>
+                </div>
+
+                <!-- Compact Modal Body with Reduced Margin & Increased Map Height -->
+                <div class="modal-body p-2.5 px-3">
+                  <!-- Sleek Compact Address Bar -->
+                  <div class="card card-sm bg-surface-secondary border mb-2 p-2 px-3" style="border-radius: 10px; border-color: var(--border) !important;">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                      <div class="d-flex align-items-center gap-2 flex-grow-1">
+                        <i class="ti ti-building-community text-secondary fs-3 flex-shrink-0"></i>
+                        <div class="fw-semibold text-reset" id="modal-full-address" style="font-size: 0.88rem; line-height: 1.3;">—</div>
+                      </div>
+                      <div class="flex-shrink-0">
+                        <span class="badge bg-success-lt fw-semibold py-1 px-2" style="font-size: 0.72rem;">
+                          <i class="ti ti-map-pin me-1"></i> Location Map
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- OpenStreetMap Container with Increased 340px Height & Dark-Mode tile filter support -->
+                  <div class="position-relative">
+                    <div id="modal-openstreetmap" class="shadow-sm border" style="height: 340px; border-radius: 10px; overflow: hidden; background: var(--surface-2); border-color: var(--border) !important; position: relative; z-index: 1;"></div>
+                  </div>
+                </div>
+
+                <!-- Compact Modal Footer -->
+                <div class="modal-footer border-top py-2 px-3 d-flex align-items-center justify-content-end" style="background: var(--surface-2);">
+                  <button type="button" class="btn btn-sm btn-outline-secondary px-3 py-1" data-bs-dismiss="modal" style="font-size: 0.8rem;">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <style>
+            /* Sleek Apple-style Leaflet Popup & Controls */
+            .leaflet-popup-content-wrapper {
+              background: var(--surface) !important;
+              color: var(--text-1) !important;
+              border-radius: 12px !important;
+              box-shadow: var(--shadow-lg) !important;
+              border: 1px solid var(--border-strong) !important;
+              padding: 0 !important;
+            }
+            .leaflet-popup-content {
+              margin: 10px 14px !important;
+              line-height: 1.4 !important;
+            }
+            .leaflet-popup-tip {
+              background: var(--surface) !important;
+              border: 1px solid var(--border-strong) !important;
+              box-shadow: none !important;
+            }
+            .leaflet-container a.leaflet-popup-close-button {
+              color: var(--text-3) !important;
+              padding: 6px 8px 0 0 !important;
+            }
+            .leaflet-container a.leaflet-popup-close-button:hover {
+              color: var(--text-1) !important;
+            }
+            .leaflet-control-zoom {
+              border: none !important;
+              border-radius: 8px !important;
+              overflow: hidden;
+              box-shadow: var(--shadow-md) !important;
+            }
+            .leaflet-control-zoom a {
+              background: var(--surface) !important;
+              color: var(--text-1) !important;
+              border: 1px solid var(--border) !important;
+            }
+            .leaflet-control-zoom a:hover {
+              background: var(--surface-2) !important;
+            }
+            .leaflet-control-attribution {
+              display: none !important;
+            }
+
+            .bc-pulse-ring {
+              width: 38px;
+              height: 38px;
+              border-radius: 50%;
+              border: 2px solid #0071e3;
+              animation: bc-pulse 2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+            }
+
+            @keyframes bc-pulse {
+              0% { transform: translate(-50%, -50%) scale(0.6); opacity: 0.9; }
+              70% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
+              100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
+            }
+          </style>
+
+          <% if gps_addresses.any? %>
+            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+            <script>
+              (function () {
+                var modalMap = null;
+                var modalMarker = null;
+                var currentModalData = null;
+
+                window.openLocationModal = function(lat, lng, label, line1, line2, fullAddress, pinColor, pinNum) {
+                  currentModalData = {
+                    lat: Number(lat),
+                    lng: Number(lng),
+                    label: label || 'Saved Address',
+                    line1: line1 || '',
+                    line2: line2 || '',
+                    fullAddress: fullAddress || '',
+                    pinColor: pinColor || '#db2777',
+                    pinNum: pinNum || 1
+                  };
+
+                  // Update Modal Info Elements
+                  var pinBadge = document.getElementById('modal-pin-badge');
+                  var titleEl = document.getElementById('modal-address-title');
+                  var fullAddrEl = document.getElementById('modal-full-address');
+                  var iconBox = document.getElementById('modal-header-icon-box');
+                  var iconEl = document.getElementById('modal-header-icon');
+
+                  if (pinBadge) {
+                    pinBadge.style.background = currentModalData.pinColor;
+                    pinBadge.innerText = 'Pin #' + currentModalData.pinNum + ' • ' + currentModalData.label.toUpperCase();
+                  }
+                  if (iconBox) {
+                    iconBox.style.background = currentModalData.pinColor + '22';
+                  }
+                  if (iconEl) {
+                    iconEl.style.color = currentModalData.pinColor;
+                  }
+                  if (titleEl) titleEl.innerText = currentModalData.label + ' Location Map';
+                  if (fullAddrEl) fullAddrEl.innerText = currentModalData.fullAddress;
+
+                  // Open Bootstrap Modal
+                  var modalEl = document.getElementById('address-location-modal');
+                  if (!modalEl) return;
+
+                  if (window.bootstrap && window.bootstrap.Modal) {
+                    var bsModal = window.bootstrap.Modal.getOrCreateInstance(modalEl);
+                    bsModal.show();
+                  } else {
+                    modalEl.classList.add('show');
+                    modalEl.style.display = 'block';
+                  }
+
+                  // Render OpenStreetMap with smooth animation
+                  setTimeout(renderModalOpenStreetMap, 200);
+                };
+
+                function renderModalOpenStreetMap() {
+                  if (!currentModalData) return;
+                  var el = document.getElementById('modal-openstreetmap');
+                  if (!el) return;
+
+                  if (typeof L === 'undefined') {
+                    setTimeout(renderModalOpenStreetMap, 80);
+                    return;
+                  }
+
+                  var lat = currentModalData.lat;
+                  var lng = currentModalData.lng;
+                  var color = currentModalData.pinColor;
+                  var label = currentModalData.label;
+                  var pinNum = currentModalData.pinNum;
+                  var fullAddress = currentModalData.fullAddress;
+
+                  if (!modalMap) {
+                    if (el._leaflet_id) {
+                      el._leaflet_id = null;
+                      el.innerHTML = '';
+                    }
+
+                    modalMap = L.map(el, {
+                      scrollWheelZoom: true,
+                      zoomControl: true,
+                      attributionControl: false
+                    });
+
+                    // OpenStreetMap Carto Standard Layer
+                    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                      maxZoom: 19
+                    }).addTo(modalMap);
+                  }
+
+                  modalMap.setView([lat, lng], 16);
+
+                  if (modalMarker) {
+                    modalMap.removeLayer(modalMarker);
+                  }
+
+                  var customIcon = L.divIcon({
+                    className: '',
+                    html: '<div style="position:relative;display:flex;flex-direction:column;align-items:center;cursor:pointer;">' +
+                            '<div style="background:' + color + ';color:#fff;font-size:11px;font-weight:800;padding:3px 9px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.4);white-space:nowrap;margin-bottom:3px;border:1.5px solid rgba(255,255,255,0.8);">' +
+                              '📍 #' + pinNum + ' ' + label +
+                            '</div>' +
+                            '<div style="position:relative;width:34px;height:34px;display:flex;align-items:center;justify-content:center;">' +
+                              '<div class="bc-pulse-ring" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-color:' + color + ';background:rgba(0,113,227,0.25);"></div>' +
+                              '<div style="width:22px;height:22px;background:' + color + ';border-radius:50%;border:2.5px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:900;">' +
+                                pinNum +
+                              '</div>' +
+                            '</div>' +
+                          '</div>',
+                    iconSize: [110, 60],
+                    iconAnchor: [55, 56]
+                  });
+
+                  modalMarker = L.marker([lat, lng], { icon: customIcon }).addTo(modalMap);
+                  modalMarker.bindPopup(
+                    '<div style="min-width:190px;padding:2px;">' +
+                      '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">' +
+                        '<span style="background:' + color + ';color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:6px;">Pin #' + pinNum + '</span>' +
+                        '<span style="font-size:11px;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;color:var(--text-3);">' + label + '</span>' +
+                      '</div>' +
+                      '<div style="font-size:12px;font-weight:600;color:var(--text-1);line-height:1.4;">' + fullAddress + '</div>' +
+                    '</div>',
+                    { maxWidth: 280 }
+                  ).openPopup();
+
+                  [50, 150, 300, 500].forEach(function(delay) {
+                    setTimeout(function() {
+                      if (modalMap) {
+                        modalMap.invalidateSize();
+                        modalMap.setView([lat, lng], 16);
+                      }
+                    }, delay);
+                  });
+                }
+
+                // Handle Modal Shown event from Bootstrap
+                var modalEl = document.getElementById('address-location-modal');
+                if (modalEl) {
+                  modalEl.addEventListener('shown.bs.modal', function() {
+                    renderModalOpenStreetMap();
+                  });
+                }
+
+                document.addEventListener('turbo:before-cache', function() {
+                  if (modalMap) {
+                    modalMap.remove();
+                    modalMap = null;
+                    modalMarker = null;
+                  }
+                });
+              })();
+            </script>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="card-body text-center py-4 text-secondary">
+          <i class="ti ti-map-pin-off fs-1 d-block mb-2 text-muted"></i>
+          No saved addresses on record for this customer.
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Booking History -->
+    <div class="card shadow-sm">
+      <div class="card-header border-bottom">
+        <h3 class="card-title fw-bold">Booking History</h3>
+      </div>
+      <% if @bookings.any? %>
+        <div class="table-responsive">
+          <table class="table table-vcenter card-table table-hover">
+            <thead>
+              <tr>
+                <th>Booking ID</th>
+                <th>Booked On</th>
+                <th>Service</th>
+                <th>Scheduled Slot</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th class="text-end pe-3">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @bookings.each do |b| %>
+                <tr>
+                  <td class="font-monospace text-secondary fs-5">
+                    <%= link_to "##{b[:booking_number]}", admin_booking_path(b[:id]), data: { turbo_frame: "_top" }, class: "text-reset fw-semibold" %>
+                  </td>
+                  <td class="text-secondary small text-nowrap">
+                    <div class="d-flex align-items-center gap-1">
+                      <% if b.created_at && b.created_at > 10.minutes.ago %>
+                        <span class="badge bg-green-lt text-green fw-bold py-0 px-1" style="font-size: 0.65rem;">NEW</span>
+                      <% end %>
+                      <span class="fw-semibold text-reset"><%= b.respond_to?(:display_booked_on) ? b.display_booked_on : b[:booked_on] %></span>
+                    </div>
+                    <div class="text-muted" style="font-size: 0.72rem;">
+                      <%= b.created_at&.strftime("%d %b %Y, %I:%M %p") %>
+                    </div>
+                  </td>
+                  <td class="fw-semibold text-reset"><%= b[:service] %></td>
+                  <td class="text-secondary small"><%= b[:date] %> <span class="text-muted">at</span> <%= b[:time] %></td>
+                  <td class="fw-bold text-reset"><%= b[:amount] %></td>
+                  <td><%= booking_status_badge(b[:status]) %></td>
+                  <td class="text-end pe-3">
+                    <%= link_to admin_booking_path(b[:id]), data: { turbo_frame: "_top" }, class: "btn btn-icon btn-ghost-secondary btn-sm", title: "View Booking" do %>
+                      <i class="ti ti-eye fs-3"></i>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+
+      <% else %>
+        <div class="card-body text-center py-5 text-secondary">
+          <i class="ti ti-calendar-off fs-1 d-block mb-2 text-muted"></i>
+          No bookings placed yet by this customer.
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Right Sidebar Column -->
+  <div class="col-lg-4">
+    <div class="card shadow-sm mb-4">
+      <div class="card-header border-bottom">
+        <h3 class="card-title fw-bold">Communication & Actions</h3>
+      </div>
+      <div class="card-body d-flex flex-column gap-2">
+        <button class="btn btn-outline-secondary w-100 justify-content-start">
+          <i class="ti ti-mail me-2 fs-3 text-primary"></i> Send Direct Email
+        </button>
+        <button class="btn btn-outline-secondary w-100 justify-content-start">
+          <i class="ti ti-message-dots me-2 fs-3 text-azure"></i> Send SMS Notification
+        </button>
+        <%= link_to new_admin_booking_path(customer_id: @customer[:id]), class: "btn btn-outline-primary w-100 justify-content-start" do %>
+          <i class="ti ti-calendar-plus me-2 fs-3"></i> Create Booking for Customer
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

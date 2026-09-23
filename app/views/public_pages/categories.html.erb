@@ -1,0 +1,830 @@
+<script>window.__FORCE_LIGHT__ = true;</script>
+<% content_for :page_title, "Beauty & Wellness Categories — BeautyNest" %>
+
+<%= render "shared/public_nav", active: "categories" %>
+
+<script>
+  // Lock to light mode — override theme controller if it fires
+  (function applyLight() {
+    document.documentElement.setAttribute('data-bs-theme', 'light');
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.body.removeAttribute('data-bs-theme');
+    document.body.classList.remove('theme-dark');
+  })();
+  window.__CUSTOMER_TOKEN__ = "<%= @customer_token.presence || '' %>";
+  if (window.__CUSTOMER_TOKEN__) {
+    try { localStorage.setItem('customerToken', window.__CUSTOMER_TOKEN__); } catch(e) {}
+  }
+</script>
+
+<style>
+  /* ── Page wrapper ── */
+  .bn-cats-page {
+    background: var(--bg, #f4f3f8);
+    min-height: 100vh;
+    padding-top: 68px;
+  }
+
+  /* ── Grid ── */
+  .bn-cats-section {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+  .bn-cats-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    gap: .8rem;
+    flex-wrap: wrap;
+  }
+  .bn-cats-section-header h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-1, #111827);
+    letter-spacing: -.018em;
+    margin: 0;
+  }
+  .bn-cat-count-badge {
+    background: var(--accent-dim, rgba(219,39,119,.1));
+    color: var(--accent, #db2777);
+    border: 1px solid rgba(219,39,119,.18);
+    border-radius: 20px;
+    padding: 3px 13px;
+    font-size: .76rem;
+    font-weight: 600;
+  }
+  .bn-cats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 1.1rem;
+  }
+
+  /* ── Category Card ── */
+  .bn-cat-card {
+    background: var(--surface, #ffffff);
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid var(--border, rgba(0,0,0,.07));
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,.05));
+    cursor: pointer;
+    transition: transform .18s cubic-bezier(.16,1,.3,1), box-shadow .18s, border-color .18s;
+    text-decoration: none;
+    display: block;
+    position: relative;
+    color: inherit;
+  }
+  .bn-cat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md, 0 4px 20px -4px rgba(0,0,0,.08));
+    border-color: rgba(219,39,119,.3);
+    text-decoration: none;
+    color: inherit;
+  }
+  .bn-cat-card-img {
+    width: 100%; height: 152px;
+    object-fit: cover;
+    display: block;
+    background: var(--surface-3, #f0eef8);
+  }
+  .bn-cat-card-img-placeholder {
+    width: 100%; height: 152px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.8rem;
+    background: var(--surface-3, #f0eef8);
+    color: var(--accent, #db2777);
+  }
+  .bn-cat-card-body {
+    padding: 1rem 1.1rem 1.1rem;
+  }
+  .bn-cat-card-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-1, #111827);
+    letter-spacing: -.01em;
+    margin: 0 0 .3rem;
+    line-height: 1.3;
+  }
+  .bn-cat-card-desc {
+    font-size: .79rem;
+    color: var(--text-3, #4b5563);
+    margin: 0 0 .8rem;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .bn-cat-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .bn-cat-service-count {
+    background: var(--accent-dim, rgba(219,39,119,.08));
+    color: var(--accent, #db2777);
+    border: 1px solid rgba(219,39,119,.18);
+    border-radius: 20px;
+    padding: 3px 11px;
+    font-size: .73rem;
+    font-weight: 600;
+  }
+  .bn-cat-arrow {
+    width: 28px; height: 28px;
+    background: var(--accent, #db2777);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    flex-shrink: 0;
+    transition: background .15s, transform .15s;
+  }
+  .bn-cat-card:hover .bn-cat-arrow {
+    background: var(--accent-hover, #be185d);
+    transform: translateX(2px);
+  }
+  .bn-cat-featured-badge {
+    position: absolute;
+    top: 10px; right: 10px;
+    background: var(--accent, #db2777);
+    color: #fff;
+    font-size: .66rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 20px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* ── Empty State ── */
+  .bn-error-state {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 3.5rem 1rem;
+    color: var(--text-3, #4b5563);
+  }
+  .bn-error-state h3 { margin: .5rem 0 .35rem; color: var(--text-2,#374151); font-size: 1.05rem; }
+
+  @media (max-width: 640px) {
+    .bn-cats-grid { grid-template-columns: repeat(2,1fr); gap: .85rem; }
+    .bn-cat-card-img, .bn-cat-card-img-placeholder { height: 120px; }
+  }
+  @media (max-width: 380px) {
+    .bn-cats-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ════════════════════════════════════════
+     Featured Carousel — Immersive Edition
+     ════════════════════════════════════════ */
+  .bn-carousel-wrap {
+    position: relative;
+    width: 100%;
+    height: 420px;
+    overflow: hidden;
+    background: #fdf2f8;   /* light pink — site accent at ~4% opacity on white */
+    border-bottom: 1px solid rgba(219,39,119,.12);
+  }
+
+  /* ── Slides container (fade, not slide) ── */
+  .bn-cs-slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .5s ease;
+    z-index: 0;
+  }
+  .bn-cs-slide.active {
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 2;
+  }
+
+  /* ── Content card (right side) ── */
+  .bn-cs-card {
+    position: absolute;
+    right: 0;
+    top: 0; bottom: 0;
+    width: 46%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2.8rem 3rem 2.8rem 2rem;
+    z-index: 3;
+  }
+
+  /* ── Slide-in animations ── */
+  .bn-cs-slide.active .bn-cs-eyebrow {
+    animation: bnCsUp .42s .05s cubic-bezier(.16,1,.3,1) both;
+  }
+  .bn-cs-slide.active .bn-cs-title {
+    animation: bnCsUp .42s .12s cubic-bezier(.16,1,.3,1) both;
+  }
+  .bn-cs-slide.active .bn-cs-desc {
+    animation: bnCsUp .42s .19s cubic-bezier(.16,1,.3,1) both;
+  }
+  .bn-cs-slide.active .bn-cs-meta {
+    animation: bnCsUp .42s .25s cubic-bezier(.16,1,.3,1) both;
+  }
+  .bn-cs-slide.active .bn-cs-cta {
+    animation: bnCsUp .42s .31s cubic-bezier(.16,1,.3,1) both;
+  }
+  @keyframes bnCsUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .bn-cs-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--accent-dim, rgba(219,39,119,.1));
+    border: 1px solid rgba(219,39,119,.22);
+    border-radius: 50px;
+    padding: 4px 13px;
+    color: var(--accent, #db2777);
+    font-size: .71rem;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    width: fit-content;
+    margin-bottom: .7rem;
+  }
+  .bn-cs-title {
+    font-size: clamp(1.6rem, 3vw, 2.5rem);
+    font-weight: 800;
+    color: var(--text-1, #111827);
+    letter-spacing: -.024em;
+    line-height: 1.12;
+    margin: 0 0 .55rem;
+  }
+  .bn-cs-desc {
+    font-size: .9rem;
+    color: var(--text-3, #4b5563);
+    line-height: 1.65;
+    margin: 0 0 .9rem;
+    max-width: 360px;
+  }
+  .bn-cs-meta {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.1rem;
+  }
+  .bn-cs-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--surface, #fff);
+    border: 1px solid var(--border-strong, rgba(0,0,0,.12));
+    border-radius: 50px;
+    padding: 4px 13px;
+    font-size: .76rem;
+    font-weight: 600;
+    color: var(--text-2, #374151);
+    box-shadow: var(--shadow-sm);
+  }
+  .bn-cs-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent, #db2777);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 11px 22px;
+    font-size: .88rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    width: fit-content;
+    transition: background .15s, box-shadow .15s, transform .15s;
+    box-shadow: 0 4px 14px rgba(219,39,119,.28);
+  }
+  .bn-cs-cta:hover {
+    background: var(--accent-hover, #be185d);
+    box-shadow: 0 6px 20px rgba(219,39,119,.38);
+    transform: translateY(-2px);
+    color: #fff;
+    text-decoration: none;
+  }
+  .bn-cs-cta svg { transition: transform .2s; }
+  .bn-cs-cta:hover svg { transform: translateX(3px); }
+
+  /* ── Left image frame ── */
+  .bn-cs-img-frame {
+    position: absolute;
+    left: 3.5%;
+    top: 50%; transform: translateY(-50%);
+    width: 40%;
+    height: 78%;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg, 0 12px 40px rgba(0,0,0,.14));
+    border: 3px solid rgba(255,255,255,.9);
+    z-index: 3;
+    transition: transform .5s cubic-bezier(.16,1,.3,1);
+  }
+  .bn-cs-slide.active .bn-cs-img-frame {
+    animation: bnCsFrame .55s cubic-bezier(.16,1,.3,1) both;
+  }
+  @keyframes bnCsFrame {
+    from { opacity: 0; transform: translateY(calc(-50% + 16px)) scale(.97); }
+    to   { opacity: 1; transform: translateY(-50%) scale(1); }
+  }
+  .bn-cs-img-frame img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .6s ease;
+  }
+  .bn-cs-slide.active .bn-cs-img-frame img:hover { transform: scale(1.04); }
+  .bn-cs-img-placeholder {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 5rem;
+    background: var(--surface-3, #f0eef8);
+    color: var(--accent, #db2777);
+  }
+
+  /* ── Slide counter badge ── */
+  .bn-cs-counter {
+    position: absolute;
+    top: 18px; left: 18px;
+    background: var(--surface, #fff);
+    border: 1px solid var(--border-strong, rgba(0,0,0,.12));
+    border-radius: 50px;
+    padding: 4px 13px;
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--text-3, #4b5563);
+    z-index: 10;
+    box-shadow: var(--shadow-sm);
+    letter-spacing: .03em;
+  }
+  .bn-cs-counter strong { color: var(--accent, #db2777); }
+
+  /* ── Progress bar ── */
+  .bn-cs-progress {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: rgba(0,0,0,.06);
+    z-index: 10;
+  }
+  .bn-cs-progress-fill {
+    height: 100%;
+    background: var(--accent, #db2777);
+    width: 0%;
+    transition: width linear;
+  }
+
+  /* ── Thumbnail strip ── */
+  .bn-cs-thumbs {
+    position: absolute;
+    bottom: 16px; left: 50%; transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+  }
+  .bn-cs-thumb {
+    width: 52px; height: 38px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2.5px solid rgba(255,255,255,.7);
+    cursor: pointer;
+    transition: border-color .18s, transform .18s, box-shadow .18s;
+    box-shadow: var(--shadow-sm);
+    background: var(--surface-3, #f0eef8);
+    flex-shrink: 0;
+  }
+  .bn-cs-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .bn-cs-thumb-em {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+  }
+  .bn-cs-thumb.active {
+    border-color: var(--accent, #db2777);
+    transform: translateY(-3px) scale(1.07);
+    box-shadow: 0 4px 12px rgba(219,39,119,.3);
+  }
+  .bn-cs-thumb:hover:not(.active) { border-color: var(--accent, #db2777); transform: translateY(-2px); }
+
+  /* ── Nav arrows ── */
+  .bn-cs-arrow {
+    position: absolute;
+    top: 50%; transform: translateY(-50%);
+    width: 40px; height: 40px;
+    background: var(--surface, #fff);
+    border: 1px solid var(--border-strong, rgba(0,0,0,.12));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--text-2, #374151);
+    box-shadow: var(--shadow-md);
+    z-index: 10;
+    transition: background .14s, color .14s, transform .14s;
+  }
+  .bn-cs-arrow:hover {
+    background: var(--accent, #db2777);
+    color: #fff;
+    border-color: transparent;
+    transform: translateY(-50%) scale(1.08);
+  }
+  .bn-cs-prev { left: 14px; }
+  .bn-cs-next { right: 14px; }
+
+  @media (max-width: 768px) {
+    .bn-carousel-wrap { height: 480px; background: #fdf2f8; }
+    .bn-cs-img-frame {
+      left: 50%; top: 14px;
+      transform: translateX(-50%);
+      width: 82%;
+      height: 48%;
+    }
+    .bn-cs-slide.active .bn-cs-img-frame {
+      animation: bnCsFrameMob .55s cubic-bezier(.16,1,.3,1) both;
+    }
+    @keyframes bnCsFrameMob {
+      from { opacity: 0; transform: translateX(-50%) scale(.97); }
+      to   { opacity: 1; transform: translateX(-50%) scale(1); }
+    }
+    .bn-cs-card {
+      width: 100%;
+      top: auto; bottom: 0;
+      padding: 0 1.4rem 4.5rem;
+      justify-content: flex-end;
+    }
+    .bn-cs-title { font-size: 1.45rem; }
+    .bn-cs-desc { display: none; }
+  }
+  /* ── Assigned Beautician Banner ── */
+  .bn-assigned-worker-banner {
+    background: linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%);
+    border-bottom: 1.5px solid #fbcfe8;
+    padding: 1.15rem 1.5rem;
+    box-shadow: 0 4px 20px rgba(233, 30, 140, 0.05);
+  }
+  .bn-aw-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+  }
+  .bn-aw-left {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+  }
+  .bn-aw-avatar-wrap {
+    position: relative;
+    width: 62px;
+    height: 62px;
+    border-radius: 1rem;
+    overflow: hidden;
+    border: 2px solid #f472b6;
+    flex-shrink: 0;
+    box-shadow: 0 3px 12px rgba(233, 30, 140, 0.15);
+    background: #fdf2f8;
+  }
+  .bn-aw-avatar-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .bn-aw-check {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    background: #10b981;
+    color: #fff;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fff;
+  }
+  .bn-aw-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #fdf2f8;
+    color: #db2777;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 50px;
+    border: 1px solid #fbcfe8;
+    margin-bottom: 2px;
+  }
+  .bn-aw-name {
+    font-size: 1.12rem;
+    font-weight: 800;
+    color: #111827;
+    margin: 0 0 3px;
+    letter-spacing: -0.02em;
+  }
+  .bn-aw-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: #4b5563;
+    margin: 0;
+    flex-wrap: wrap;
+  }
+  .bn-aw-rating {
+    font-weight: 700;
+    color: #b45309;
+  }
+  .bn-aw-exp {
+    font-weight: 700;
+    color: #059669;
+    background: #ecfdf5;
+    padding: 1px 7px;
+    border-radius: 4px;
+    border: 1px solid #a7f3d0;
+  }
+  .bn-aw-dot { color: #d1d5db; }
+  .bn-aw-change-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #db2777;
+    background: #fff;
+    border: 1.5px solid #f472b6;
+    text-decoration: none;
+    transition: all 0.16s ease;
+    box-shadow: 0 2px 6px rgba(233, 30, 140, 0.08);
+  }
+  .bn-aw-change-btn:hover {
+    background: #db2777;
+    color: #fff;
+    border-color: #db2777;
+    text-decoration: none;
+  }
+</style>
+
+<div class="bn-cats-page">
+
+  <% if @selected_worker.present? %>
+    <!-- Dedicated Assigned Beautician Top Banner -->
+    <div class="bn-assigned-worker-banner">
+      <div class="bn-aw-inner">
+        <div class="bn-aw-left">
+          <div class="bn-aw-avatar-wrap">
+            <img src="<%= @selected_worker.display_avatar_url %>" alt="<%= @selected_worker.name %>" onerror="this.onerror=null;this.src='<%= ImageUrlResolver.fallback_for(:beautician) %>';">
+            <span class="bn-aw-check">✓</span>
+          </div>
+          <div class="bn-aw-info">
+            <span class="bn-aw-pill">Assigned Professional for Booking</span>
+            <h3 class="bn-aw-name">Booking exclusively with <%= @selected_worker.name %></h3>
+            <p class="bn-aw-meta">
+              <span class="bn-aw-rating">★ <%= @selected_worker.rating_display %> (<%= @selected_worker.reviews_count_display %>)</span>
+              <span class="bn-aw-dot">•</span>
+              <span class="bn-aw-exp"><%= @selected_worker.experience_display %></span>
+              <span class="bn-aw-dot">•</span>
+              <span><%= @selected_worker.serving_city %></span>
+              <span class="bn-aw-dot">•</span>
+              <span>Working Days: <%= @selected_worker.worker_profile&.available_days_short %></span>
+            </p>
+          </div>
+        </div>
+        <div class="bn-aw-right">
+          <a href="/beauticians" class="bn-aw-change-btn">
+            Change Beautician
+          </a>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Featured Carousel — Server-Side Rendered -->
+  <% if @featured_categories.present? %>
+    <div class="bn-carousel-wrap" id="bn-carousel-wrap">
+      <!-- Slides -->
+      <div id="bn-cs-slides">
+        <% @featured_categories.each_with_index do |cat, i| %>
+          <% em = category_emoji(cat.slug) %>
+          <div class="bn-cs-slide <%= 'active' if i == 0 %>" data-i="<%= i %>">
+            <div class="bn-cs-img-frame">
+              <% if cat.image_url.present? %>
+                <img src="<%= cat.image_url %>" alt="<%= cat.name %>" <%= 'loading="eager"' if i == 0 %> onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div class="bn-cs-img-placeholder" style="display:none"><%= em %></div>
+              <% else %>
+                <div class="bn-cs-img-placeholder"><%= em %></div>
+              <% end %>
+            </div>
+            <div class="bn-cs-card">
+              <span class="bn-cs-eyebrow">&#9733;&nbsp;Featured Category</span>
+              <h2 class="bn-cs-title"><%= cat.name %></h2>
+              <% if cat.description.present? %>
+                <p class="bn-cs-desc"><%= cat.description %></p>
+              <% end %>
+              <div class="bn-cs-meta">
+                <span class="bn-cs-pill">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>
+                  <%= cat.active_services_count %> Services
+                </span>
+              </div>
+              <a class="bn-cs-cta" href="/categories/<%= cat.slug %><%= "?worker_id=#{@selected_worker.id}" if @selected_worker %>">
+                Explore <%= cat.name %>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Slide counter -->
+      <div class="bn-cs-counter" id="bn-cs-counter">
+        <strong id="bn-cs-cur">1</strong> / <span id="bn-cs-tot"><%= @featured_categories.size %></span>
+      </div>
+
+      <!-- Arrows -->
+      <% if @featured_categories.size > 1 %>
+        <button class="bn-cs-arrow bn-cs-prev" id="bn-cs-prev" aria-label="Previous">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <button class="bn-cs-arrow bn-cs-next" id="bn-cs-next" aria-label="Next">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      <% end %>
+
+      <!-- Thumbnail strip -->
+      <div class="bn-cs-thumbs" id="bn-cs-thumbs">
+        <% @featured_categories.each_with_index do |cat, i| %>
+          <% em = category_emoji(cat.slug) %>
+          <div class="bn-cs-thumb <%= 'active' if i == 0 %>" data-i="<%= i %>" role="button" tabindex="0" aria-label="<%= cat.name %>">
+            <% if cat.image_url.present? %>
+              <img src="<%= cat.image_url %>" alt="<%= cat.name %>" loading="lazy" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex'">
+              <div class="bn-cs-thumb-em" style="display:none"><%= em %></div>
+            <% else %>
+              <div class="bn-cs-thumb-em"><%= em %></div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="bn-cs-progress"><div class="bn-cs-progress-fill" id="bn-cs-bar"></div></div>
+    </div>
+  <% end %>
+
+  <!-- Grid Section (Server-Side Rendered) -->
+  <div class="bn-cats-section">
+    <div class="bn-cats-section-header">
+      <h2>Browse by Category</h2>
+      <span class="bn-cat-count-badge" id="bn-cat-count"><%= @categories.size %> Categories</span>
+    </div>
+
+    <div class="bn-cats-grid" id="bn-cats-grid">
+      <% if @categories.empty? %>
+        <div class="bn-error-state">
+          <h3>No categories found</h3>
+          <p>Please check back later.</p>
+        </div>
+      <% else %>
+        <% @categories.each do |cat| %>
+          <% em = category_emoji(cat.slug) %>
+          <a class="bn-cat-card" href="/categories/<%= cat.slug %><%= "?worker_id=#{@selected_worker.id}" if @selected_worker %>">
+            <% if cat.featured? %>
+              <span class="bn-cat-featured-badge">&#9733; Featured</span>
+            <% end %>
+            <% if cat.image_url.present? %>
+              <img class="bn-cat-card-img" src="<%= cat.image_url %>" alt="<%= cat.name %>" loading="lazy" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex'">
+              <div class="bn-cat-card-img-placeholder" style="display:none"><%= em %></div>
+            <% else %>
+              <div class="bn-cat-card-img-placeholder"><%= em %></div>
+            <% end %>
+            <div class="bn-cat-card-body">
+              <div class="bn-cat-card-name"><%= cat.name %></div>
+              <% if cat.description.present? %>
+                <div class="bn-cat-card-desc"><%= cat.description %></div>
+              <% end %>
+              <div class="bn-cat-card-footer">
+                <span class="bn-cat-service-count"><%= cat.active_services_count %> Services</span>
+                <div class="bn-cat-arrow">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+              </div>
+            </div>
+          </a>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+</div><!-- /.bn-cats-page -->
+
+<script>
+// Pure UI Carousel logic (No API fetch calls)
+(function () {
+  'use strict';
+
+  var slidesEl = document.getElementById('bn-cs-slides');
+  var thumbsEl = document.getElementById('bn-cs-thumbs');
+  if (!slidesEl || !thumbsEl) return;
+
+  var prevBtn  = document.getElementById('bn-cs-prev');
+  var nextBtn  = document.getElementById('bn-cs-next');
+  var bar      = document.getElementById('bn-cs-bar');
+  var curEl    = document.getElementById('bn-cs-cur');
+  var wrap     = document.getElementById('bn-carousel-wrap');
+
+  var slides   = slidesEl.querySelectorAll('.bn-cs-slide');
+  var thumbs   = thumbsEl.querySelectorAll('.bn-cs-thumb');
+  var total    = slides.length;
+  if (total <= 1) return;
+
+  var current  = 0;
+  var timer    = null;
+  var barTimer = null;
+  var INTERVAL = 4800;
+
+  function activateSlide(n) {
+    slides.forEach(function(s) { s.classList.remove('active'); });
+    thumbs.forEach(function(t) { t.classList.remove('active'); });
+    if (slides[n]) slides[n].classList.add('active');
+    if (thumbs[n]) thumbs[n].classList.add('active');
+    if (curEl) curEl.textContent = n + 1;
+  }
+
+  function startBar() {
+    if (!bar) return;
+    clearTimeout(barTimer);
+    bar.style.transition = 'none';
+    bar.style.width = '0%';
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        bar.style.transition = 'width ' + INTERVAL + 'ms linear';
+        bar.style.width = '100%';
+      });
+    });
+  }
+
+  function goTo(n) {
+    current = (n + total) % total;
+    activateSlide(current);
+    startBar();
+  }
+
+  function startTimer() {
+    clearInterval(timer);
+    timer = setInterval(function() { goTo(current + 1); }, INTERVAL);
+    startBar();
+  }
+
+  if (prevBtn) prevBtn.addEventListener('click', function() { goTo(current - 1); startTimer(); });
+  if (nextBtn) nextBtn.addEventListener('click', function() { goTo(current + 1); startTimer(); });
+
+  thumbsEl.addEventListener('click', function(e) {
+    var t = e.target.closest('.bn-cs-thumb');
+    if (t && t.dataset.i !== undefined) { goTo(parseInt(t.dataset.i, 10)); startTimer(); }
+  });
+
+  thumbsEl.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      var t = e.target.closest('.bn-cs-thumb');
+      if (t && t.dataset.i !== undefined) { goTo(parseInt(t.dataset.i, 10)); startTimer(); }
+    }
+  });
+
+  if (wrap) {
+    wrap.addEventListener('mouseenter', function() {
+      clearInterval(timer);
+      if (bar) bar.style.transition = 'none';
+    });
+    wrap.addEventListener('mouseleave', startTimer);
+  }
+
+  startTimer();
+})();
+
+<% if @selected_worker.present? %>
+  try {
+    localStorage.setItem('selected_worker_id', '<%= @selected_worker.id %>');
+    localStorage.setItem('selected_worker_name', '<%= j(@selected_worker.name) %>');
+    localStorage.setItem('selected_worker_city', '<%= j(@selected_worker.serving_city) %>');
+  } catch(e) {}
+<% end %>
+</script>

@@ -1,0 +1,217 @@
+<% content_for :page_title, "Customers" %>
+
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">Directory</div>
+      <h2 class="page-title fs-1 fw-bold">Customers</h2>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <%= link_to admin_customers_path(request.query_parameters.merge(format: :csv)), class: "btn btn-outline-secondary", data: { turbo: false } do %>
+        <i class="ti ti-download me-1 fs-3"></i> Export CSV
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- KPI Summary Cards -->
+<div class="row row-cards mb-4">
+  <div class="col-sm-6 col-lg-3">
+    <div class="card card-sm shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-md rounded-3 bg-azure-lt text-azure me-3">
+            <i class="ti ti-users fs-1"></i>
+          </span>
+          <div>
+            <div class="text-secondary small fw-medium">Total Customers</div>
+            <div class="fs-2 fw-bold"><%= @total_customers %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-lg-3">
+    <div class="card card-sm shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-md rounded-3 bg-green-lt text-green me-3">
+            <i class="ti ti-user-check fs-1"></i>
+          </span>
+          <div>
+            <div class="text-secondary small fw-medium">Active Accounts</div>
+            <div class="fs-2 fw-bold text-success"><%= @active_customers %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-lg-3">
+    <div class="card card-sm shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-md rounded-3 bg-orange-lt text-orange me-3">
+            <i class="ti ti-user-x fs-1"></i>
+          </span>
+          <div>
+            <div class="text-secondary small fw-medium">Inactive / Suspended</div>
+            <div class="fs-2 fw-bold text-warning"><%= @inactive_customers %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-lg-3">
+    <div class="card card-sm shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-md rounded-3 bg-purple-lt text-purple me-3">
+            <i class="ti ti-user-plus fs-1"></i>
+          </span>
+          <div>
+            <div class="text-secondary small fw-medium">New This Month</div>
+            <div class="fs-2 fw-bold text-purple"><%= @new_this_month %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Customer Table Card -->
+<div class="card shadow-sm">
+  <div class="card-header border-bottom py-3">
+    <%= form_with url: admin_customers_path, method: :get, data: { controller: "search", turbo_frame: "customers_list", turbo_action: "advance" }, class: "w-100" do %>
+      <div class="row g-2 align-items-center">
+        <div class="col-md-5">
+          <div class="input-icon">
+            <span class="input-icon-addon">
+              <i class="ti ti-search text-secondary fs-3"></i>
+            </span>
+            <input class="form-control"
+                   type="text"
+                   name="q"
+                   value="<%= params[:q] %>"
+                   placeholder="Search by name, email, or phone..."
+                   data-action="input->search#debounce"
+                   autocomplete="off">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" name="status" data-action="change->search#submit">
+            <option value="">All Statuses</option>
+            <option value="active" <%= "selected" if params[:status] == "active" %>>Active</option>
+            <option value="inactive" <%= "selected" if params[:status] == "inactive" %>>Inactive</option>
+          </select>
+        </div>
+        <div class="col-auto ms-auto text-secondary small">
+          Showing <span class="fw-bold text-reset"><%= @customers.length %></span> customers
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <%= turbo_frame_tag "customers_list" do %>
+    <div class="table-responsive">
+      <table class="table table-vcenter card-table table-hover table-striped-columns">
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Contact</th>
+            <th>City</th>
+            <th>Total Bookings</th>
+            <th>Registered</th>
+            <th>Status</th>
+            <th class="text-end pe-3">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if @customers.any? %>
+            <% @customers.each do |c| %>
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <%= user_avatar_tag(c, size: :sm, class_name: "me-2") %>
+                    <div>
+                      <div class="fw-semibold text-reset"><%= c[:name] %></div>
+                      <div class="text-secondary small"><%= c[:email] %></div>
+                    </div>
+                  </div>
+                </td>
+                <td class="text-secondary small">
+                  <i class="ti ti-phone me-1"></i><%= c[:phone] %>
+                </td>
+                <td class="text-secondary"><%= c[:city] %></td>
+                <td>
+                  <span class="badge bg-secondary-lt fw-bold"><%= c[:bookings] %> bookings</span>
+                </td>
+                <td class="text-secondary small"><%= c[:joined] %></td>
+                <td><%= active_status_badge(c[:status]) %></td>
+                <td class="text-end pe-3">
+                  <div class="btn-list justify-content-end align-items-center flex-nowrap">
+                    <%= link_to admin_customer_path(c[:id]), data: { turbo_frame: "_top" }, class: "btn btn-icon btn-ghost-secondary btn-sm", title: "View Profile" do %>
+                      <i class="ti ti-eye fs-3"></i>
+                    <% end %>
+
+                    <!-- Protected Actions Dropdown (Prevents accidental clicks) -->
+                    <div class="dropdown d-inline-block">
+                      <button type="button" class="btn btn-icon btn-ghost-secondary btn-sm" data-bs-toggle="dropdown" aria-expanded="false" title="More Options">
+                        <i class="ti ti-dots-vertical fs-3"></i>
+                      </button>
+                      <div class="dropdown-menu dropdown-menu-end shadow-sm border py-1" style="min-width: 195px;">
+                        <div class="dropdown-header text-uppercase small fw-bold px-3 py-1 text-secondary" style="font-size: 0.68rem; letter-spacing: 0.05em;">
+                          Customer Actions
+                        </div>
+                        <%= link_to admin_customer_path(c[:id]), data: { turbo_frame: "_top" }, class: "dropdown-item py-2" do %>
+                          <i class="ti ti-user me-2 fs-3 text-secondary"></i> View Profile
+                        <% end %>
+                        <div class="dropdown-divider my-1"></div>
+                        <%= button_to toggle_status_admin_customer_path(c[:id]), method: :patch,
+                              form: { data: { turbo_frame: "_top" }, class: "m-0 w-100" },
+                              data: {
+                                turbo_confirm: "Are you sure you want to #{c[:status] == 'active' ? 'deactivate' : 'activate'} customer account for '#{c[:name]}'? #{c[:status] == 'active' ? 'Deactivated customers cannot log in or make appointments.' : 'Customer will regain full access to make bookings.'}",
+                                confirm_title: (c[:status] == 'active' ? "Deactivate Account" : "Activate Account"),
+                                confirm_btn: (c[:status] == 'active' ? "Deactivate Account" : "Activate Account"),
+                                confirm_theme: (c[:status] == 'active' ? "warning" : "success"),
+                                confirm_icon: (c[:status] == 'active' ? "ti-user-off" : "ti-user-check")
+                              },
+                              class: "dropdown-item py-2 text-#{c[:status] == 'active' ? 'warning' : 'success'}" do %>
+                          <i class="ti ti-<%= c[:status] == 'active' ? 'user-off' : 'user-check' %> me-2 fs-3"></i>
+                          <%= c[:status] == 'active' ? 'Deactivate Account' : 'Activate Account' %>
+                        <% end %>
+                        <div class="dropdown-divider my-1"></div>
+                        <%= button_to admin_customer_path(c[:id]), method: :delete,
+                              form: { data: { turbo_frame: "_top" }, class: "m-0 w-100" },
+                              data: {
+                                turbo_confirm: "Are you sure you want to permanently delete customer '#{c[:name]}'? This action is permanent and cannot be undone.",
+                                confirm_title: "Permanently Delete Customer",
+                                confirm_btn: "Delete Customer",
+                                confirm_theme: "danger",
+                                confirm_icon: "ti-trash"
+                              },
+                              class: "dropdown-item py-2 text-danger" do %>
+                          <i class="ti ti-trash me-2 fs-3"></i> Delete Customer
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          <% else %>
+            <tr>
+              <td colspan="7" class="text-center py-5 text-secondary">
+                <i class="ti ti-search-off fs-1 d-block mb-2 text-muted"></i>
+                No customers found matching your criteria.
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    <%= render_pagination %>
+  <% end %>
+</div>

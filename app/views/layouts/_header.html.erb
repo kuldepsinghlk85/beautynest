@@ -1,0 +1,137 @@
+<header class="navbar navbar-expand-md d-none d-lg-flex d-print-none sticky-top border-bottom">
+  <div class="container-xl">
+    <div class="navbar-nav flex-row align-items-center me-auto">
+      <div class="nav-item">
+        <h2 class="page-title fs-2 mb-0 fw-bold">
+          <%= content_for?(:page_title) ? yield(:page_title) : controller.controller_name.humanize.titleize %>
+        </h2>
+      </div>
+    </div>
+
+    <div class="navbar-nav flex-row order-md-last align-items-center gap-2">
+      <!-- Search input -->
+      <div class="d-none d-md-flex me-2">
+        <div class="input-icon">
+          <span class="input-icon-addon">
+            <i class="ti ti-search fs-3 text-secondary"></i>
+          </span>
+          <input type="text" class="form-control form-control-rounded form-control-sm"
+                 placeholder="Search bookings, customers, workers..." aria-label="Search"
+                 style="min-width: 260px; border-radius: 50px !important;">
+        </div>
+      </div>
+
+      <!-- Live status pill -->
+      <div class="d-none d-xl-flex align-items-center gap-2 me-1"
+           style="background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.20); border-radius: 50px; padding: 4px 12px;">
+        <span class="green-blink-dot"></span>
+        <span style="font-size: 0.75rem; font-weight: 600; color: #16a34a; letter-spacing: -0.01em;"><%= t("admin.system_live") %></span>
+      </div>
+
+      <!-- Language Switcher (EN / HI) -->
+      <div class="d-flex align-items-center me-1">
+        <div class="btn-group btn-group-sm rounded-pill p-1" style="background: rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.12); font-size: 0.76rem;">
+          <%= link_to switch_locale_path(locale: "en"),
+                      class: "btn btn-sm rounded-pill px-2 py-0 border-0 #{'bg-white text-dark shadow-sm fw-bold' if english?} #{'text-secondary' unless english?}",
+                      title: "Switch Admin & Platform to English" do %>
+            EN
+          <% end %>
+          <%= link_to switch_locale_path(locale: "hi"),
+                      class: "btn btn-sm rounded-pill px-2 py-0 border-0 #{'bg-white text-dark shadow-sm fw-bold' if hindi?} #{'text-secondary' unless hindi?}",
+                      title: "एडमिन और प्लेटफॉर्म को हिन्दी में बदलें" do %>
+            हिन्दी
+          <% end %>
+        </div>
+      </div>
+
+      <!-- View Website (Storefront) Link -->
+      <div class="d-flex align-items-center me-1">
+        <%= link_to root_path, target: "_blank", rel: "noopener",
+                    class: "btn btn-outline-pink btn-sm rounded-pill d-flex align-items-center gap-2 px-3 py-1",
+                    title: "Open Live Customer Website in a new tab",
+                    style: "font-weight: 600; font-size: 0.82rem; text-decoration: none; border: 1.5px solid rgba(219,39,119,0.35); color: #db2777; background: rgba(219,39,119,0.05); transition: all 0.16s ease;" do %>
+          <i class="ti ti-world fs-2"></i>
+          <span class="d-none d-sm-inline"><%= t("admin.view_website") %></span>
+          <i class="ti ti-external-link fs-4 opacity-75"></i>
+        <% end %>
+      </div>
+
+      <!-- Theme Switcher -->
+      <div class="d-flex">
+        <button type="button" class="btn btn-icon btn-ghost-secondary rounded-circle" id="theme-toggle-btn" title="Toggle theme" data-action="click->theme#toggle">
+          <i class="ti ti-sun fs-2 icon-sun"></i>
+          <i class="ti ti-moon fs-2 icon-moon" style="display:none;"></i>
+        </button>
+      </div>
+
+      <!-- Notification Bell -->
+      <div class="nav-item dropdown d-flex align-items-center"
+           data-controller="notification-bell"
+           data-notification-bell-url-value="<%= unread_count_admin_notifications_path %>"
+           data-notification-bell-interval-value="30">
+        <a href="<%= admin_notifications_path %>" class="btn btn-icon btn-ghost-secondary rounded-circle position-relative" title="Notifications" id="notification-bell-link" style="width: 38px; height: 38px;">
+          <i class="ti ti-bell fs-2"></i>
+          <% notif_count = header_notification_count %>
+          <% if notif_count > 0 %>
+            <span class="badge bg-danger rounded-circle position-absolute" id="notification-badge"
+                  style="top: 3px; right: 3px; min-width: 17px; height: 17px; font-size: 10px; line-height: 1; padding: 0 3px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; border: 2px solid var(--surface, #1e293b); box-shadow: 0 1px 3px rgba(0,0,0,0.3); z-index: 10; pointer-events: none;">
+              <%= notif_count > 99 ? "99+" : notif_count %>
+            </span>
+          <% else %>
+            <span class="badge bg-danger rounded-circle position-absolute d-none" id="notification-badge"
+                  style="top: 3px; right: 3px; min-width: 17px; height: 17px; font-size: 10px; line-height: 1; padding: 0 3px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; border: 2px solid var(--surface, #1e293b); box-shadow: 0 1px 3px rgba(0,0,0,0.3); z-index: 10; pointer-events: none;">
+            </span>
+          <% end %>
+        </a>
+      </div>
+
+
+      <!-- User Profile Dropdown -->
+      <div class="nav-item dropdown ms-2">
+        <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Open user menu">
+          <% header_user = current_user || current_admin %>
+          <span class="avatar avatar-sm rounded-circle fw-bold text-white"
+                style="background: linear-gradient(135deg, #db2777, #be185d);">
+            <%= header_user&.name&.first&.upcase || (header_user&.worker? ? "W" : "A") %>
+          </span>
+          <div class="d-none d-xl-block ps-2">
+            <div class="fw-semibold"><%= header_user&.name || (header_user&.worker? ? "Worker User" : "#{site_name} Admin") %></div>
+            <div class="mt-1 small text-secondary"><%= header_user&.worker? ? "Worker / Beautician" : (header_user&.role&.titleize || "Admin") %></div>
+          </div>
+          <i class="ti ti-chevron-down ms-1 text-secondary fs-4"></i>
+        </a>
+        <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow shadow-sm">
+          <div class="dropdown-header">
+            <div class="fw-bold"><%= header_user&.name || (header_user&.worker? ? "Worker User" : "#{site_name} Admin") %></div>
+            <div class="small text-secondary"><%= header_user&.email || "admin@#{site_name.parameterize}.test" %></div>
+          </div>
+          <div class="dropdown-divider"></div>
+          <% if !header_user&.worker? %>
+            <%= link_to admin_settings_path, class: "dropdown-item" do %>
+              <i class="ti ti-settings me-2 fs-3 text-secondary"></i>
+              Platform Settings
+            <% end %>
+          <% else %>
+            <%= link_to admin_worker_path(header_user.id), class: "dropdown-item" do %>
+              <i class="ti ti-user me-2 fs-3 text-secondary"></i>
+              My Profile
+            <% end %>
+          <% end %>
+          <%= link_to admin_dashboard_path, class: "dropdown-item" do %>
+            <i class="ti ti-layout-dashboard me-2 fs-3 text-secondary"></i>
+            <%= header_user&.worker? ? "Dashboard" : "Admin Dashboard" %>
+          <% end %>
+          <%= link_to root_path, target: "_blank", rel: "noopener", class: "dropdown-item" do %>
+            <i class="ti ti-world me-2 fs-3 text-secondary"></i>
+            View Customer Website
+          <% end %>
+          <div class="dropdown-divider"></div>
+          <%= link_to logout_path, class: "dropdown-item text-danger", data: { turbo: false } do %>
+            <i class="ti ti-logout me-2 fs-3"></i>
+            Sign Out
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>

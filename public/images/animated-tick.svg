@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="tickGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <filter id="tickGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#10b981" flood-opacity="0.35" />
+    </filter>
+  </defs>
+  <style>
+    .tick-circle {
+      stroke-dasharray: 314;
+      stroke-dashoffset: 314;
+      stroke-width: 6;
+      stroke-miterlimit: 10;
+      stroke: url(#tickGrad);
+      fill: #ecfdf5;
+      animation: drawCircle 0.7s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+    }
+    .tick-check {
+      transform-origin: 50% 50%;
+      stroke-dasharray: 80;
+      stroke-dashoffset: 80;
+      stroke-width: 7;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke: #059669;
+      animation: drawCheck 0.5s cubic-bezier(0.65, 0, 0.45, 1) 0.5s forwards;
+    }
+    .tick-sparkle {
+      animation: pulseSparkle 1.8s ease-in-out infinite alternate;
+    }
+    @keyframes drawCircle {
+      100% { stroke-dashoffset: 0; }
+    }
+    @keyframes drawCheck {
+      100% { stroke-dashoffset: 0; }
+    }
+    @keyframes pulseSparkle {
+      0% { opacity: 0.3; transform: scale(0.9); }
+      100% { opacity: 1; transform: scale(1.1); }
+    }
+  </style>
+  <g filter="url(#tickGlow)">
+    <circle class="tick-circle" cx="60" cy="60" r="50" />
+    <path class="tick-check" fill="none" d="M36 62 l16 16 l32 -34" />
+  </g>
+</svg>

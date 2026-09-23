@@ -1,0 +1,136 @@
+<% content_for :page_title, @city.name %>
+
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">Operations › Cities</div>
+      <h2 class="page-title fs-1 fw-bold"><%= @city.name %></h2>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <div class="btn-list">
+        <%= link_to admin_cities_path, class: "btn btn-outline-secondary" do %>
+          <i class="ti ti-arrow-left me-1 fs-3"></i> Back
+        <% end %>
+        <% if policy(@city).update? %>
+          <%= link_to edit_admin_city_path(@city), class: "btn btn-outline-primary" do %>
+            <i class="ti ti-pencil me-1 fs-3"></i> Edit City
+          <% end %>
+        <% end %>
+        <%= link_to new_admin_service_city_price_path(city_id: @city.id), class: "btn btn-primary" do %>
+          <i class="ti ti-plus me-1 fs-3"></i> Add Price Override
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- City Details -->
+  <div class="col-lg-4">
+    <div class="card shadow-sm mb-4">
+      <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+        <h3 class="card-title fw-bold mb-0">City Details</h3>
+        <%= active_status_badge(@city.status) %>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          <div class="text-secondary small fw-medium">State / Region</div>
+          <div class="fw-semibold mt-1"><%= @city.state.presence || "—" %></div>
+        </div>
+        <div class="mb-3">
+          <div class="text-secondary small fw-medium">Slug</div>
+          <div class="font-monospace fw-semibold mt-1"><%= @city.slug %></div>
+        </div>
+        <div class="mb-3">
+          <div class="text-secondary small fw-medium">Active Price Overrides</div>
+          <div class="fw-bold fs-2 text-primary mt-1"><%= @service_city_prices.size %></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Price Overrides for Services -->
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+        <div>
+          <h3 class="card-title fw-bold mb-0">City Price Overrides</h3>
+          <div class="text-secondary small">Custom base & discount prices applied in <%= @city.name %></div>
+        </div>
+        <%= link_to new_admin_service_city_price_path(city_id: @city.id), class: "btn btn-sm btn-primary" do %>
+          <i class="ti ti-plus me-1"></i> Add Override
+        <% end %>
+      </div>
+
+      <% if @service_city_prices.empty? %>
+        <div class="card-body text-center py-5">
+          <div class="avatar avatar-lg rounded-circle bg-light-subtle text-secondary mx-auto mb-3">
+            <i class="ti ti-currency-rupee fs-2"></i>
+          </div>
+          <h4 class="fw-bold mb-1">No custom prices configured</h4>
+          <p class="text-secondary small mb-3">All services in <%= @city.name %> currently use their global default prices.</p>
+          <%= link_to new_admin_service_city_price_path(city_id: @city.id), class: "btn btn-sm btn-primary" do %>
+            <i class="ti ti-plus me-1"></i> Set Custom Price
+          <% end %>
+        </div>
+      <% else %>
+        <div class="table-responsive">
+          <table class="table table-vcenter card-table table-hover">
+            <thead>
+              <tr>
+                <th>Service</th>
+                <th>Global Default</th>
+                <th><%= @city.name %> Base Price</th>
+                <th><%= @city.name %> Discount Price</th>
+                <th>Status</th>
+                <th class="w-1 text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @service_city_prices.each do |scp| %>
+                <tr>
+                  <td>
+                    <div class="fw-semibold">
+                      <%= link_to scp.service.name, admin_service_path(scp.service), class: "text-reset" %>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="text-secondary"><%= scp.service.display_price %></span>
+                  </td>
+                  <td>
+                    <span class="fw-bold text-primary"><%= scp.display_base_price %></span>
+                  </td>
+                  <td>
+                    <% if scp.discount_price.present? %>
+                      <span class="fw-bold text-success"><%= scp.display_price %></span>
+                    <% else %>
+                      <span class="text-secondary">—</span>
+                    <% end %>
+                  </td>
+                  <td><%= active_status_badge(scp.status) %></td>
+                  <td class="text-end">
+                    <div class="btn-list flex-nowrap justify-content-end">
+                      <% if policy(scp).update? %>
+                        <%= link_to edit_admin_service_city_price_path(scp), class: "btn btn-sm btn-icon btn-ghost-primary", title: "Edit" do %>
+                          <i class="ti ti-pencil fs-3"></i>
+                        <% end %>
+                      <% end %>
+                      <% if policy(scp).destroy? %>
+                        <%= button_to admin_service_city_price_path(scp), method: :delete,
+                              class: "btn btn-sm btn-icon btn-ghost-danger",
+                              title: "Delete",
+                              data: { turbo_confirm: "Reset this service to default price for #{@city.name}?" } do %>
+                          <i class="ti ti-trash fs-3"></i>
+                        <% end %>
+                      <% end %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

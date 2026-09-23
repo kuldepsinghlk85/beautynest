@@ -1,0 +1,176 @@
+<% content_for :page_title, "Worker Invitations" %>
+
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">
+        <%= link_to "Workers", admin_workers_path, class: "text-decoration-none text-secondary" %> / Onboarding
+      </div>
+      <h2 class="page-title fs-1 fw-bold">Worker Invitations</h2>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <div class="btn-list">
+        <%= link_to admin_workers_path, class: "btn btn-outline-secondary" do %>
+          <i class="ti ti-arrow-left me-1 fs-3"></i> Back to Workers
+        <% end %>
+        <%= link_to new_admin_worker_invitation_path, class: "btn btn-primary" do %>
+          <i class="ti ti-mail-plus me-1 fs-3"></i> Invite Worker
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-header border-bottom py-3">
+    <%= form_with url: admin_worker_invitations_path, method: :get, class: "w-100" do %>
+      <div class="row g-2 align-items-center">
+        <div class="col-md-4">
+          <div class="input-icon">
+            <span class="input-icon-addon">
+              <i class="ti ti-search text-secondary fs-3"></i>
+            </span>
+            <input class="form-control" type="text" name="q" value="<%= params[:q] %>"
+                   placeholder="Search email, name, phone..." autocomplete="off">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" name="status" onchange="this.form.requestSubmit()">
+            <option value="">All Statuses</option>
+            <option value="pending"  <%= "selected" if params[:status] == "pending" %>>Pending</option>
+            <option value="accepted" <%= "selected" if params[:status] == "accepted" %>>Accepted</option>
+            <option value="expired"  <%= "selected" if params[:status] == "expired" %>>Expired</option>
+            <option value="revoked"  <%= "selected" if params[:status] == "revoked" %>>Revoked</option>
+          </select>
+        </div>
+        <div class="col-auto">
+          <button type="submit" class="btn btn-outline-primary">
+            <i class="ti ti-filter me-1 fs-3"></i> Filter
+          </button>
+          <% if params[:q].present? || params[:status].present? %>
+            <%= link_to "Clear", admin_worker_invitations_path, class: "btn btn-ghost-secondary ms-1" %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-vcenter card-table table-hover">
+      <thead>
+        <tr>
+          <th>Invited Worker</th>
+          <th>Primary Skill</th>
+          <th>Invited By</th>
+          <th>Sent Date</th>
+          <th>Expires</th>
+          <th>Status</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if @invitations.empty? %>
+          <tr>
+            <td colspan="7" class="text-center py-5 text-secondary">
+              <i class="ti ti-mail-off fs-1 d-block mb-2 opacity-50"></i>
+              No worker invitations found. Click <strong>"Invite Worker"</strong> above to send an invitation.
+            </td>
+          </tr>
+        <% else %>
+          <% @invitations.each do |invite| %>
+            <tr>
+              <td>
+                <div class="d-flex align-items-center">
+                  <span class="avatar avatar-sm rounded-circle me-2 bg-primary-lt fw-bold">
+                    <%= (invite.name.presence || invite.email)[0].upcase %>
+                  </span>
+                  <div>
+                    <div class="font-weight-medium text-heading">
+                      <%= invite.name.presence || "—" %>
+                    </div>
+                    <div class="text-secondary fs-5">
+                      <%= invite.email %>
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="badge bg-purple-lt"><%= invite.speciality.presence || "Beauty Professional" %></span>
+              </td>
+              <td>
+                <span class="text-secondary fs-5">
+                  <%= invite.invited_by&.name || "Admin" %>
+                </span>
+              </td>
+              <td>
+                <span class="text-secondary fs-5">
+                  <%= invite.created_at.strftime("%b %d, %Y") %>
+                </span>
+              </td>
+              <td>
+                <% if invite.accepted? %>
+                  <span class="text-success fs-5">
+                    Accepted on <%= invite.accepted_at&.strftime("%b %d, %Y") %>
+                  </span>
+                <% elsif invite.expired? %>
+                  <span class="text-danger fs-5">
+                    Expired <%= time_ago_in_words(invite.expires_at) %> ago
+                  </span>
+                <% else %>
+                  <span class="text-secondary fs-5">
+                    in <%= distance_of_time_in_words(Time.current, invite.expires_at) %>
+                  </span>
+                <% end %>
+              </td>
+              <td>
+                <span class="badge <%= invite.status_badge_class %>">
+                  <%= invite.display_status %>
+                </span>
+              </td>
+              <td class="text-end">
+                <div class="btn-list justify-content-end">
+                  <% if invite.pending? %>
+                    <button type="button" class="btn btn-icon btn-sm btn-ghost-secondary" title="Copy Invite Link"
+                            onclick="navigator.clipboard.writeText('<%= worker_invitation_accept_url(token: invite.token) %>'); alert('Invite link copied to clipboard!\n\n<%= worker_invitation_accept_url(token: invite.token) %>');">
+                      <i class="ti ti-copy fs-3"></i>
+                    </button>
+
+                    <%= button_to resend_admin_worker_invitation_path(invite),
+                                  method: :post,
+                                  class: "btn btn-icon btn-sm btn-ghost-primary",
+                                  title: "Resend Invitation Email",
+                                  data: { turbo_confirm: "Resend invitation to #{invite.email}?" } do %>
+                      <i class="ti ti-send fs-3"></i>
+                    <% end %>
+
+                    <%= button_to revoke_admin_worker_invitation_path(invite),
+                                  method: :patch,
+                                  class: "btn btn-icon btn-sm btn-ghost-danger",
+                                  title: "Revoke Invitation",
+                                  data: { turbo_confirm: "Are you sure you want to revoke the invitation for #{invite.email}?" } do %>
+                      <i class="ti ti-x fs-3"></i>
+                    <% end %>
+                  <% elsif invite.expired? %>
+                    <%= button_to resend_admin_worker_invitation_path(invite),
+                                  method: :post,
+                                  class: "btn btn-sm btn-outline-primary",
+                                  title: "Renew and Resend",
+                                  data: { turbo_confirm: "Renew and resend invitation to #{invite.email}?" } do %>
+                      <i class="ti ti-refresh me-1 fs-4"></i> Renew & Resend
+                    <% end %>
+                  <% end %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <% if @invitations.respond_to?(:total_pages) && @invitations.total_pages > 1 %>
+    <div class="card-footer d-flex align-items-center border-top py-3">
+      <%= paginate @invitations %>
+    </div>
+  <% end %>
+</div>

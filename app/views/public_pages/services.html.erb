@@ -1,0 +1,1758 @@
+<% content_for :page_title, "Services — Professional Beauty & Wellness at Home" %>
+
+<%= render "shared/public_nav", active: "services" %>
+
+<script>
+  // Customer JWT token if logged in through Rails session
+  window.__CUSTOMER_TOKEN__ = "<%= @customer_token.presence || '' %>";
+  if (window.__CUSTOMER_TOKEN__) {
+    try { localStorage.setItem('customerToken', window.__CUSTOMER_TOKEN__); } catch(e) {}
+  }
+
+  // Preloaded active category from URL if routed via /services/:category_id
+  window.__INITIAL_CATEGORY_ID__ = "<%= @selected_category&.id || (@selected_category ? @selected_category.slug : (params[:category_id].presence || params[:category].presence || '')) %>";
+  window.__INITIAL_CATEGORY_SLUG__ = "<%= @selected_category&.slug || '' %>";
+  window.__INITIAL_CATEGORY_NAME__ = "<%= @selected_category&.name || '' %>";
+</script>
+
+<style>
+  /* ====================================================
+     BeautyNest Services & Dynamic API Explorer Styles
+     ==================================================== */
+  :root {
+    --bn-pink: #db2777;
+    --bn-pink-dark: #be185d;
+    --bn-pink-light: #fdf2f8;
+    --bn-pink-border: rgba(219, 39, 119, 0.2);
+    --bn-card-border: rgba(0, 0, 0, 0.08);
+  }
+
+  .bc-catalog-wrapper {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  /* ── Live Customer API Console Bar (Visible & Clear) ── */
+  .bc-api-bar-wrap {
+    margin: 1.5rem 0 2rem;
+    position: relative;
+    z-index: 100;
+  }
+
+  .bc-api-bar {
+    background: #0f172a;
+    color: #f8fafc;
+    border-radius: 16px;
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", monospace;
+  }
+
+  .bc-api-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 0.84rem;
+  }
+
+  .bc-api-pulse-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+    animation: bcApiPulse 1.8s infinite;
+  }
+
+  @keyframes bcApiPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.9); }
+  }
+
+  .bc-api-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #94a3b8;
+    text-transform: uppercase;
+  }
+
+  .bc-api-badge-method {
+    background: #0284c7;
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.04em;
+  }
+
+  .bc-api-badge-method.post {
+    background: #10b981;
+  }
+
+  .bc-api-endpoint {
+    background: rgba(255, 255, 255, 0.1);
+    color: #38bdf8;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.84rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    word-break: break-all;
+  }
+
+  .bc-api-bar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .bc-api-status-badge {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+    font-size: 0.76rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 50px;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+
+  .bc-api-meta {
+    font-size: 0.78rem;
+    color: #94a3b8;
+  }
+
+  .bc-api-inspect-btn {
+    background: rgba(255, 255, 255, 0.15);
+    color: #f1f5f9;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.15s ease;
+  }
+
+  .bc-api-inspect-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+  }
+
+  .bc-api-drawer {
+    margin-top: 8px;
+    background: #090d16;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 1rem 1.25rem;
+    animation: bcModalIn 0.18s ease;
+  }
+
+  .bc-api-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.8rem;
+    color: #94a3b8;
+  }
+
+  .bc-api-drawer-close {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 1.1rem;
+  }
+
+  .bc-api-drawer-close:hover {
+    color: #ffffff;
+  }
+
+  .bc-api-json {
+    max-height: 240px;
+    overflow-y: auto;
+    font-size: 0.78rem;
+    color: #e2e8f0;
+    background: #020617;
+    padding: 10px;
+    border-radius: 8px;
+    margin: 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* ── Screen 1: Categories View ── */
+  .bc-category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 18px;
+    margin-top: 1.5rem;
+  }
+
+  .bc-cat-card {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #ffffff;
+    border: 1.5px solid var(--bn-card-border);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+    cursor: pointer;
+    transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    height: 200px;
+    text-align: left;
+    user-select: none;
+  }
+
+  .bc-cat-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--bn-pink);
+    box-shadow: 0 16px 36px rgba(219, 39, 119, 0.16);
+  }
+
+  .bc-cat-card-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .bc-cat-card:hover .bc-cat-card-img {
+    transform: scale(1.08);
+  }
+
+  .bc-cat-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(15, 10, 30, 0.1) 0%, rgba(15, 10, 30, 0.88) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.25rem;
+    color: #ffffff;
+    z-index: 2;
+  }
+
+  .bc-cat-card-badge {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    z-index: 3;
+  }
+
+  .bc-cat-card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: #ffffff;
+    margin-bottom: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .bc-cat-card-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 4px;
+    line-height: 1.25;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  }
+
+  .bc-cat-card-desc {
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0 0 8px;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .bc-cat-card-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #f472b6;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── Screen 2: Category Drilldown View (Subcategories Tabs + Services) ── */
+  .bc-drilldown-header {
+    margin-bottom: 2rem;
+  }
+
+  .bc-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 20px;
+    border-radius: 50px;
+    background: #ffffff;
+    color: #374151;
+    font-size: 0.88rem;
+    font-weight: 700;
+    border: 1.5px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    cursor: pointer;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    margin-bottom: 1.5rem;
+  }
+
+  .bc-back-btn:hover {
+    border-color: var(--bn-pink);
+    color: var(--bn-pink);
+    transform: translateX(-3px);
+  }
+
+  /* Category Hero Banner in Drilldown */
+  .bc-category-hero-card {
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
+    height: 180px;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  }
+
+  .bc-cat-hero-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .bc-cat-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(15, 10, 30, 0.92) 0%, rgba(15, 10, 30, 0.6) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2rem 2.5rem;
+    color: #ffffff;
+  }
+
+  .bc-cat-hero-info h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 6px;
+    letter-spacing: -0.02em;
+  }
+
+  .bc-cat-hero-info p {
+    font-size: 0.92rem;
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0;
+    max-width: 540px;
+    line-height: 1.5;
+  }
+
+  /* ── Subcategories in TAB Form (Requested by User) ── */
+  .bc-subcat-tabs-container {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 8px 12px;
+    border: 1px solid var(--bn-card-border);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .bc-subcat-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    border-radius: 14px;
+    border: 1.5px solid transparent;
+    background: transparent;
+    color: #475569;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .bc-subcat-tab:hover {
+    color: var(--bn-pink);
+    background: var(--bn-pink-light);
+  }
+
+  .bc-subcat-tab.active {
+    background: linear-gradient(135deg, var(--bn-pink), var(--bn-pink-dark));
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 4px 14px rgba(219, 39, 119, 0.28);
+  }
+
+  .bc-subcat-tab-count {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    background: rgba(0, 0, 0, 0.06);
+    color: inherit;
+  }
+
+  .bc-subcat-tab.active .bc-subcat-tab-count {
+    background: rgba(255, 255, 255, 0.28);
+    color: #ffffff;
+  }
+
+  /* ── Filter & Search Toolbar in Drilldown ── */
+  .bc-drilldown-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
+  }
+
+  .bc-drilldown-search-box {
+    position: relative;
+    flex: 1 1 280px;
+    max-width: 420px;
+  }
+
+  .bc-drilldown-search-box input {
+    width: 100%;
+    padding: 11px 16px 11px 40px;
+    border-radius: 50px;
+    border: 1.5px solid rgba(0, 0, 0, 0.1);
+    font-size: 0.88rem;
+    background: #ffffff;
+    outline: none;
+    transition: all 0.2s ease;
+  }
+
+  .bc-drilldown-search-box input:focus {
+    border-color: var(--bn-pink);
+    box-shadow: 0 0 0 3px rgba(219, 39, 119, 0.15);
+  }
+
+  .bc-drilldown-search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 1.1rem;
+  }
+
+  .bc-drilldown-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  /* ── Services in Card Format ── */
+  .bc-services-full {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .bc-svc-card {
+    position: relative;
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid var(--bn-card-border);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease;
+  }
+
+  .bc-svc-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 36px rgba(219, 39, 119, 0.12);
+  }
+
+  .bc-svc-img-wrap {
+    position: relative;
+    width: 100%;
+    height: 195px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #fdf2f8, #fce7f3);
+  }
+
+  .bc-svc-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+
+  .bc-svc-card:hover .bc-svc-img {
+    transform: scale(1.06);
+  }
+
+  .bc-svc-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(219, 39, 119, 0.92);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #ffffff;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    padding: 4px 10px;
+    border-radius: 50px;
+    z-index: 2;
+  }
+
+  .bc-svc-body {
+    padding: 1.25rem 1.4rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .bc-svc-cat-tag {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--bn-pink);
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .bc-svc-body h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 6px;
+    line-height: 1.35;
+  }
+
+  .bc-svc-desc {
+    font-size: 0.83rem;
+    color: #64748b;
+    line-height: 1.55;
+    margin: 0 0 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+  }
+
+  .bc-svc-meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-top: 1px dashed rgba(0, 0, 0, 0.08);
+    margin-bottom: 12px;
+    font-size: 0.8rem;
+    color: #64748b;
+  }
+
+  .bc-svc-duration {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 500;
+  }
+
+  .bc-svc-rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #b45309;
+    font-weight: 700;
+  }
+
+  .bc-svc-price-action {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: auto;
+  }
+
+  .bc-svc-price-wrap {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .bc-svc-orig-price {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    text-decoration: line-through;
+  }
+
+  .bc-svc-final-price {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--bn-pink);
+    line-height: 1;
+  }
+
+  .bc-svc-btns-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .bc-svc-info-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(0, 0, 0, 0.1);
+    background: #ffffff;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.16s ease;
+    font-size: 1.1rem;
+  }
+
+  .bc-svc-info-btn:hover {
+    border-color: var(--bn-pink);
+    color: var(--bn-pink);
+    background: var(--bn-pink-light);
+  }
+
+  .bc-svc-book-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border-radius: 50px;
+    background: linear-gradient(135deg, var(--bn-pink), var(--bn-pink-dark));
+    color: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(219, 39, 119, 0.25);
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .bc-svc-book-btn:hover {
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(219, 39, 119, 0.4);
+  }
+
+  /* Skeleton Loading State */
+  .bc-svc-skeleton {
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid var(--bn-card-border);
+    height: 380px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: bcPulse 1.2s infinite ease-in-out;
+  }
+
+  @keyframes bcPulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 0.95; }
+  }
+
+  .bc-skel-img {
+    height: 195px;
+    background: #f1f5f9;
+  }
+
+  .bc-skel-body {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .bc-skel-line {
+    height: 12px;
+    border-radius: 6px;
+    background: #e2e8f0;
+  }
+
+  /* Quick View Modal */
+  .bc-modal-backdrop {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(15, 10, 30, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 99999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+  }
+
+  .bc-modal-backdrop.open {
+    display: flex;
+  }
+
+  .bc-modal-card {
+    background: #ffffff;
+    border-radius: 24px;
+    max-width: 640px;
+    width: 100%;
+    max-height: 88vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    animation: bcModalIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes bcModalIn {
+    from { opacity: 0; transform: scale(0.96) translateY(12px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .bc-modal-header {
+    position: relative;
+    height: 220px;
+    background: linear-gradient(135deg, #fdf2f8, #fce7f3);
+    overflow: hidden;
+  }
+
+  .bc-modal-header img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .bc-modal-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    color: #ffffff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: background 0.15s ease;
+    z-index: 10;
+  }
+
+  .bc-modal-close:hover {
+    background: rgba(0, 0, 0, 0.8);
+  }
+
+  .bc-modal-body {
+    padding: 1.75rem;
+  }
+
+  .bc-modal-badge {
+    display: inline-block;
+    background: #fdf2f8;
+    color: var(--bn-pink);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 4px 12px;
+    border-radius: 50px;
+    margin-bottom: 8px;
+  }
+
+  .bc-modal-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #111827;
+    margin: 0 0 8px;
+  }
+
+  .bc-modal-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: #64748b;
+    font-size: 0.85rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    flex-wrap: wrap;
+  }
+
+  .bc-modal-section-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 1.25rem 0 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .bc-modal-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .bc-modal-list li {
+    font-size: 0.85rem;
+    color: #4b5563;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.5;
+  }
+
+  .bc-modal-list li i {
+    color: #15803d;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .bc-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.75rem;
+    background: #fafafa;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom-left-radius: 24px;
+    border-bottom-right-radius: 24px;
+  }
+
+  /* Floating Toast */
+  .bc-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #111827;
+    color: #ffffff;
+    padding: 12px 22px;
+    border-radius: 50px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    z-index: 999999;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .bc-toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .bc-toast i {
+    color: #22c55e;
+    font-size: 1.2rem;
+  }
+</style>
+
+<!-- Hero Slider (Services Header) -->
+<section class="bc-slider-hero" id="bc-services-slider">
+  <div class="bc-slider-track" id="bc-slider-track">
+    <% [
+      { img: "/slider/slide1.png", badge: "BESTSELLER",           title: "Glow Like Never Before",      sub: "Doorstep Facial, Cleanup & Korean Glass Skin Rituals",    cta: "Explore Facials" },
+      { img: "/slider/slide2.png", badge: "TRENDING",             title: "Silky Hair Spa & Styling",    sub: "Keratin, Hair Spa, Precision Cuts & Blowdry at Home",      cta: "Explore Hair Care" },
+      { img: "/slider/slide3.png", badge: "SPECIAL OCCASIONS ✨", title: "Bridal & Party Glamour",      sub: "Sterile single-use kits, premium cosmetics & salon touch", cta: "View Glam Packages" },
+      { img: "/slider/slide4.png", badge: "100% RELAXING",        title: "Aroma Spa & Full Body Care",  sub: "Full body Swedish massage, de-stress therapies & nail art", cta: "Explore Spa Rituals" },
+    ].each_with_index do |s, i| %>
+      <div class="bc-slide <%= i == 0 ? 'bc-slide-active' : '' %>">
+        <img src="<%= s[:img] %>" alt="<%= s[:title] %>" class="bc-slide-img">
+        <div class="bc-slide-overlay">
+          <span class="bc-slide-badge"><%= s[:badge] %></span>
+          <h2><%= s[:title] %></h2>
+          <p><%= s[:sub] %></p>
+          <a href="#services-explorer" class="bc-slide-cta">
+            <%= s[:cta] %> <i class="ti ti-arrow-down"></i>
+          </a>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <button class="bc-slide-ctrl bc-slide-prev" id="bc-slide-prev" aria-label="Previous">
+    <i class="ti ti-chevron-left"></i>
+  </button>
+  <button class="bc-slide-ctrl bc-slide-next" id="bc-slide-next" aria-label="Next">
+    <i class="ti ti-chevron-right"></i>
+  </button>
+
+  <div class="bc-slide-dots" id="bc-slide-dots">
+    <button class="bc-dot bc-dot-active" data-idx="0"></button>
+    <button class="bc-dot" data-idx="1"></button>
+    <button class="bc-dot" data-idx="2"></button>
+    <button class="bc-dot" data-idx="3"></button>
+  </div>
+
+  <div class="bc-slider-label">
+    <span class="bc-page-pretitle" style="backdrop-filter:blur(8px); background:rgba(255,255,255,.18); border-color:rgba(255,255,255,.4); color:#fff;">
+      <i class="ti ti-sparkles"></i> CERTIFIED DOORSTEP SALON SERVICES
+    </span>
+  </div>
+</section>
+
+<!-- ====================================================
+     Catalog Explorer Root
+     ==================================================== -->
+<section class="bc-section" id="services-explorer" style="padding-top: 1.5rem;">
+  <div class="bc-catalog-wrapper">
+
+    <!-- ── Live Customer API Console Bar (Requested: shows endpoints clearly) ── -->
+    <div class="bc-api-bar-wrap">
+      <div class="bc-api-bar">
+        <div class="bc-api-bar-left">
+          <span class="bc-api-pulse-dot"></span>
+          <span class="bc-api-label">CUSTOMER API</span>
+          <span class="bc-api-badge-method" id="api-disp-method">GET</span>
+          <code class="bc-api-endpoint" id="api-disp-endpoint">/api/v1/categories</code>
+        </div>
+        <div class="bc-api-bar-right">
+          <span class="bc-api-status-badge" id="api-disp-status">200 OK</span>
+          <span class="bc-api-meta" id="api-disp-meta"><%= (@categories || []).size %> categories</span>
+          <button type="button" class="bc-api-inspect-btn" onclick="toggleApiInspector()">
+            <i class="ti ti-code"></i> Inspect JSON
+          </button>
+        </div>
+      </div>
+      <div class="bc-api-drawer" id="api-inspect-drawer" style="display: none;">
+        <div class="bc-api-drawer-header">
+          <span id="api-drawer-url">http://localhost:3009/api/v1/categories</span>
+          <button type="button" class="bc-api-drawer-close" onclick="toggleApiInspector()"><i class="ti ti-x"></i></button>
+        </div>
+        <pre class="bc-api-json" id="api-drawer-json">{ "status": "success", "message": "Trigger any category or subcategory to view live JSON response here." }</pre>
+      </div>
+    </div>
+
+    <!-- ====================================================
+         SCREEN 1: All Categories View (Card Format)
+         ==================================================== -->
+    <div id="screen-categories-view">
+      <div class="bc-section-header" style="margin-bottom: 2rem;">
+        <span class="pretitle">SERVICE CATEGORIES</span>
+        <h2>Select a Category</h2>
+        <p>Choose from our specialized beauty &amp; grooming departments to view treatments and doorstep services.</p>
+      </div>
+
+      <!-- Categories Grid in Card Format -->
+      <div class="bc-category-grid" id="bc-category-cards-container">
+        <% (@categories || []).each do |cat| %>
+          <% 
+            cat_services_count = cat.service_count
+            icon_name = case cat.name.to_s.downcase
+              when /women/ then "ti-sparkles"
+              when /men/   then "ti-cut"
+              when /spa|wellness|massage/ then "ti-leaf"
+              when /clean/ then "ti-wash"
+              when /facial/ then "ti-mood-smile"
+              when /hair/ then "ti-scissors"
+              when /waxing/ then "ti-flame"
+              when /manicure|pedicure|nail/ then "ti-hand-stop"
+              else "ti-category"
+            end
+          %>
+          <div class="bc-cat-card" 
+               data-category-id="<%= cat.id %>" 
+               data-category-slug="<%= cat.slug %>"
+               data-category-name="<%= cat.name %>"
+               data-category-desc="<%= cat.description %>"
+               data-category-img="<%= cat.image_url %>"
+               onclick="openCategoryDrilldown('<%= cat.id %>', '<%= cat.slug %>', '<%= j cat.name %>')">
+            <img src="<%= cat.image_url %>" alt="<%= cat.name %>" class="bc-cat-card-img" loading="lazy">
+            <span class="bc-cat-card-badge"><%= cat_services_count %> Services</span>
+            <div class="bc-cat-card-overlay">
+              <div class="bc-cat-card-icon">
+                <i class="ti <%= icon_name %>"></i>
+              </div>
+              <h3 class="bc-cat-card-title"><%= cat.name %></h3>
+              <p class="bc-cat-card-desc"><%= cat.description.presence || "Explore professional salon rituals" %></p>
+              <span class="bc-cat-card-action">
+                View Subcategories <i class="ti ti-arrow-right"></i>
+              </span>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- ====================================================
+         SCREEN 2: Category Drilldown View (Subcategories Tabs + Services)
+         ==================================================== -->
+    <div id="screen-category-drilldown" style="display: none;">
+      
+      <!-- Back button & Breadcrumbs -->
+      <div class="bc-drilldown-header">
+        <button type="button" class="bc-back-btn" onclick="backToCategoriesList()">
+          <i class="ti ti-arrow-left"></i> All Categories
+        </button>
+
+        <!-- Category Banner in Drilldown -->
+        <div class="bc-category-hero-card">
+          <img id="drilldown-cat-bg" src="" alt="Category preview" class="bc-cat-hero-bg">
+          <div class="bc-cat-hero-overlay">
+            <div class="bc-cat-hero-info">
+              <span class="bc-page-pretitle" style="background:rgba(219,39,119,0.25); color:#f472b6; border-color:rgba(219,39,119,0.4); margin-bottom: 8px;">
+                <i class="ti ti-sparkles"></i> CATEGORY EXPLORER
+              </span>
+              <h2 id="drilldown-cat-title">Category Name</h2>
+              <p id="drilldown-cat-desc">Explore professional treatments in this category</p>
+            </div>
+            <div class="d-none d-md-block text-end">
+              <span class="bc-results-badge" style="background:#ffffff; color:#0f172a; padding:8px 18px; border-radius:50px; font-size:0.85rem;" id="drilldown-cat-count-badge">
+                0 Services
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Subcategories in TAB Form (Requested: in tab form) ── -->
+      <div class="mb-2 d-flex align-items-center justify-content-between">
+        <span style="font-size: 0.85rem; font-weight: 700; color: #1e293b; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px;">
+          <i class="ti ti-folders text-pink"></i> Subcategories
+        </span>
+        <span style="font-size: 0.8rem; color: #64748b;">Click a tab to view services</span>
+      </div>
+
+      <div class="bc-subcat-tabs-container" id="bc-subcat-tabs-container">
+        <!-- Subcategory tabs will be loaded dynamically via API -->
+      </div>
+
+      <!-- ── Filter & Search Toolbar in Drilldown ── -->
+      <div class="bc-drilldown-toolbar">
+        <div class="bc-drilldown-search-box">
+          <i class="ti ti-search bc-drilldown-search-icon"></i>
+          <input type="text" id="bc-drilldown-search" placeholder="Search treatments in this category..." autocomplete="off">
+        </div>
+
+        <div class="bc-drilldown-actions">
+          <!-- City Selector -->
+          <select class="bc-filter-select" id="bc-city-select" onchange="handleCityChange(this.value)">
+            <option value="all">📍 All Cities</option>
+            <% (@cities || []).each do |city| %>
+              <option value="<%= city.slug.presence || city.id %>"><%= city.name %></option>
+            <% end %>
+          </select>
+
+          <!-- Sort Selector -->
+          <select class="bc-filter-select" id="bc-sort-select" onchange="handleSortChange(this.value)">
+            <option value="featured">✨ Featured</option>
+            <option value="price_asc">Price: Low to High</option>
+            <option value="price_desc">Price: High to Low</option>
+            <option value="duration_asc">Duration: Shortest</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Results Count Bar -->
+      <div class="bc-active-filter-bar">
+        <div>
+          Showing <span class="bc-results-badge" id="visible-count">0</span> services
+        </div>
+        <div id="active-tab-filter-label" style="font-size: 0.84rem; color: #db2777; font-weight: 700;"></div>
+      </div>
+
+      <!-- ── Services in Card Format ── -->
+      <div class="bc-services-full" id="bc-services-grid">
+        <!-- Loaded dynamically from Customer API -->
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- ====================================================
+     Quick View Modal (Triggered by /api/v1/services/:id)
+     ==================================================== -->
+<div class="bc-modal-backdrop" id="bc-svc-modal" onclick="closeModalOnBackdrop(event)">
+  <div class="bc-modal-card" id="bc-modal-card">
+    <div class="bc-modal-header">
+      <button type="button" class="bc-modal-close" onclick="closeServiceModal()" aria-label="Close">
+        <i class="ti ti-x"></i>
+      </button>
+      <img id="modal-img" src="" alt="Service preview">
+    </div>
+
+    <div class="bc-modal-body">
+      <span class="bc-modal-badge" id="modal-cat"></span>
+      <h2 class="bc-modal-title" id="modal-title"></h2>
+
+      <div class="bc-modal-meta">
+        <span><i class="ti ti-clock me-1 text-pink"></i> <strong id="modal-duration"></strong></span>
+        <span><i class="ti ti-shield-check me-1 text-green"></i> 100% Sanitized Kit</span>
+        <span><i class="ti ti-star-filled me-1 text-amber"></i> 4.9 Rated</span>
+      </div>
+
+      <div class="bc-modal-section-title">
+        <i class="ti ti-align-left text-pink"></i> About this Treatment
+      </div>
+      <p id="modal-about" style="font-size:0.88rem; color:#4b5563; line-height:1.65; margin:0 0 1rem;"></p>
+
+      <div class="bc-modal-section-title">
+        <i class="ti ti-check text-green"></i> Key Benefits
+      </div>
+      <ul class="bc-modal-list" id="modal-benefits"></ul>
+
+      <div class="bc-modal-section-title">
+        <i class="ti ti-list-numbers text-indigo"></i> How It Works
+      </div>
+      <ul class="bc-modal-list" id="modal-process"></ul>
+    </div>
+
+    <div class="bc-modal-footer">
+      <div>
+        <div id="modal-base-price" style="font-size:0.8rem; color:#9ca3af; text-decoration:line-through;"></div>
+        <div id="modal-price" style="font-size:1.4rem; font-weight:800; color:#db2777;"></div>
+      </div>
+      <button type="button" id="modal-book-btn" class="bc-btn-pink bc-btn-lg">
+        <i class="ti ti-calendar-plus"></i> Book Now
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Floating Toast Notification -->
+<div class="bc-toast" id="bc-toast">
+  <i class="ti ti-circle-check"></i>
+  <span id="bc-toast-msg">Item added to cart!</span>
+</div>
+
+<!-- CTA Banner -->
+<div style="max-width:1200px; margin: 3rem auto 4rem; padding: 0 2rem;">
+  <div class="bc-cta-section">
+    <h2>Not Sure Which Treatment to Pick?</h2>
+    <p>Chat with our beauty concierge — we'll guide you to the perfect facial, massage, or salon ritual.</p>
+    <div style="display:flex;justify-content:center;gap:14px;flex-wrap:wrap;position:relative;z-index:1;">
+      <a href="https://wa.me/919876543210" target="_blank" rel="noreferrer" class="bc-btn-white">
+        <i class="ti ti-brand-whatsapp"></i> Chat on WhatsApp
+      </a>
+      <a href="/contact" style="background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.35);padding:13px 28px;border-radius:50px;font-weight:600;font-size:1rem;text-decoration:none;display:inline-flex;align-items:center;gap:8px;">
+        <i class="ti ti-mail"></i> Send Inquiry
+      </a>
+    </div>
+  </div>
+</div>
+
+<%= render "shared/public_footer" %>
+
+<!-- ====================================================
+     Dynamic Customer API & Screen Controller
+     ==================================================== -->
+<script>
+  // State
+  let currentCategoryId      = null;
+  let currentCategorySlug    = null;
+  let currentCategoryName    = null;
+  let currentSubcategoryId   = 'all';
+  let currentSubcategoryName = 'All Services';
+  let currentCityId          = 'all';
+  let currentSort            = 'featured';
+  let searchQuery            = '';
+  let searchDebounceTimer    = null;
+  let lastApiPayload         = null;
+
+  // ── Hero Slider ──
+  (function() {
+    let current = 0;
+    const slides = document.querySelectorAll('.bc-slide');
+    const dots   = document.querySelectorAll('.bc-dot');
+    const total  = slides.length;
+
+    function goTo(idx) {
+      if (!slides.length) return;
+      slides[current].classList.remove('bc-slide-active');
+      dots[current].classList.remove('bc-dot-active');
+      current = (idx + total) % total;
+      slides[current].classList.add('bc-slide-active');
+      dots[current].classList.add('bc-dot-active');
+    }
+
+    const prevBtn = document.getElementById('bc-slide-prev');
+    const nextBtn = document.getElementById('bc-slide-next');
+    if (prevBtn) prevBtn.addEventListener('click', () => goTo(current - 1));
+    if (nextBtn) nextBtn.addEventListener('click', () => goTo(current + 1));
+    dots.forEach(d => d.addEventListener('click', () => goTo(+d.dataset.idx)));
+
+    const slider = document.getElementById('bc-services-slider');
+    let timer = setInterval(() => goTo(current + 1), 4500);
+    if (slider) {
+      slider.addEventListener('mouseenter', () => clearInterval(timer));
+      slider.addEventListener('mouseleave', () => { timer = setInterval(() => goTo(current + 1), 4500); });
+    }
+  })();
+
+  // ── Toast Messenger ──
+  function showToast(message, isSuccess = true) {
+    const toast = document.getElementById('bc-toast');
+    const msgEl = document.getElementById('bc-toast-msg');
+    if (!toast || !msgEl) return;
+    msgEl.textContent = message;
+    const icon = toast.querySelector('i');
+    if (icon) {
+      icon.className = isSuccess ? 'ti ti-circle-check' : 'ti ti-alert-circle';
+      icon.style.color = isSuccess ? '#22c55e' : '#f43f5e';
+    }
+    toast.classList.add('show');
+    setTimeout(() => { toast.classList.remove('show'); }, 3500);
+  }
+
+  // ── Live API Console Display Updater ──
+  function updateApiDisplay(method, endpoint, status, meta, data) {
+    const methodEl   = document.getElementById('api-disp-method');
+    const endpointEl = document.getElementById('api-disp-endpoint');
+    const statusEl   = document.getElementById('api-disp-status');
+    const metaEl     = document.getElementById('api-disp-meta');
+    const drawerUrl  = document.getElementById('api-drawer-url');
+    const drawerJson = document.getElementById('api-drawer-json');
+
+    if (methodEl) {
+      methodEl.textContent = method;
+      methodEl.className = 'bc-api-badge-method' + (method === 'POST' ? ' post' : '');
+    }
+    if (endpointEl) endpointEl.textContent = endpoint;
+    if (statusEl)   statusEl.textContent   = status;
+    if (metaEl)     metaEl.textContent     = meta;
+    if (drawerUrl)  drawerUrl.textContent  = window.location.origin + endpoint;
+    if (drawerJson) {
+      lastApiPayload = data;
+      try {
+        drawerJson.textContent = JSON.stringify(data, null, 2);
+      } catch(e) {
+        drawerJson.textContent = String(data);
+      }
+    }
+  }
+
+  window.toggleApiInspector = function() {
+    const drawer = document.getElementById('api-inspect-drawer');
+    if (!drawer) return;
+    drawer.style.display = (drawer.style.display === 'none' || !drawer.style.display) ? 'block' : 'none';
+  };
+
+  // ── 1. Navigate from Categories Screen -> Category Drilldown Screen ──
+  window.openCategoryDrilldown = async function(catId, catSlug, catName) {
+    currentCategoryId   = catId;
+    currentCategorySlug = catSlug || catId;
+    currentCategoryName = catName;
+    currentSubcategoryId = 'all';
+    currentSubcategoryName = 'All Services';
+    searchQuery = '';
+
+    const searchInput = document.getElementById('bc-drilldown-search');
+    if (searchInput) searchInput.value = '';
+
+    // Switch visible screens
+    document.getElementById('screen-categories-view').style.display = 'none';
+    const drilldownScreen = document.getElementById('screen-category-drilldown');
+    drilldownScreen.style.display = 'block';
+
+    // Update Hero Banner in Drilldown
+    const cardEl = document.querySelector(`.bc-cat-card[data-category-id="${catId}"]`);
+    const bgImg = cardEl ? cardEl.dataset.categoryImg : '';
+    const desc  = cardEl ? cardEl.dataset.categoryDesc : '';
+
+    const heroBgEl    = document.getElementById('drilldown-cat-bg');
+    const heroTitleEl = document.getElementById('drilldown-cat-title');
+    const heroDescEl  = document.getElementById('drilldown-cat-desc');
+
+    if (heroBgEl && bgImg) heroBgEl.src = bgImg;
+    if (heroTitleEl) heroTitleEl.textContent = catName;
+    if (heroDescEl)  heroDescEl.textContent  = desc || `Explore curated salon and wellness services in ${catName}.`;
+
+    // Push URL state
+    try {
+      history.pushState({ categoryId: catId, categorySlug: currentCategorySlug }, '', '/services/' + currentCategorySlug);
+    } catch(e) {}
+
+    // Scroll to drilldown section smoothly
+    drilldownScreen.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Trigger APIs
+    await fetchSubcategories(catId);
+    await fetchServices();
+  };
+
+  // ── 2. Back to All Categories ──
+  window.backToCategoriesList = function() {
+    currentCategoryId   = null;
+    currentCategorySlug = null;
+    currentSubcategoryId = 'all';
+    searchQuery = '';
+
+    document.getElementById('screen-category-drilldown').style.display = 'none';
+    const catScreen = document.getElementById('screen-categories-view');
+    catScreen.style.display = 'block';
+
+    try {
+      history.pushState(null, '', '/services');
+    } catch(e) {}
+
+    catScreen.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Update API display to reflect categories endpoint
+    updateApiDisplay('GET', '/api/v1/categories', '200 OK', 'Categories View', { status: 'success', active_screen: 'categories' });
+  };
+
+  // ── 3. Subcategory Tab Click ──
+  window.selectSubcategoryTab = async function(subId, subName) {
+    currentSubcategoryId = subId;
+    currentSubcategoryName = subName || 'All Services';
+    searchQuery = '';
+
+    const searchInput = document.getElementById('bc-drilldown-search');
+    if (searchInput) searchInput.value = '';
+
+    // Update tab active classes
+    document.querySelectorAll('.bc-subcat-tab').forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.subcategoryId === subId);
+    });
+
+    const activeLabel = document.getElementById('active-tab-filter-label');
+    if (activeLabel) {
+      activeLabel.textContent = currentCategoryName + ' • ' + currentSubcategoryName;
+    }
+
+    await fetchServices();
+  };
+
+  // ── 4. City & Sort Handlers ──
+  window.handleCityChange = async function(cityVal) {
+    currentCityId = cityVal;
+    await fetchServices();
+  };
+
+  window.handleSortChange = async function(sortVal) {
+    currentSort = sortVal;
+    await fetchServices();
+  };
+
+  // ── 5. In-Category Search Handler ──
+  const drilldownSearchInput = document.getElementById('bc-drilldown-search');
+  if (drilldownSearchInput) {
+    drilldownSearchInput.addEventListener('input', function(e) {
+      searchQuery = e.target.value.trim();
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(async () => {
+        await fetchServices();
+      }, 300);
+    });
+  }
+
+  // ── API: Fetch Subcategories (Loads into Tab Form) ──
+  async function fetchSubcategories(categoryId) {
+    const tabsContainer = document.getElementById('bc-subcat-tabs-container');
+    if (!tabsContainer) return;
+
+    let endpoint = `/api/v1/subcategories?category_id=${categoryId}`;
+    if (currentCityId !== 'all') endpoint += `&city_id=${currentCityId}`;
+
+    // Show loading skeleton tabs
+    tabsContainer.innerHTML = `
+      <div class="bc-subcat-tab active">
+        <i class="ti ti-loader animate-spin"></i> Loading subcategories...
+      </div>
+    `;
+
+    try {
+      const res = await fetch(endpoint, { headers: { 'Accept': 'application/json' } });
+      const json = await res.json();
+      const subcategories = json.data || [];
+
+      let totalServices = 0;
+      subcategories.forEach(s => { totalServices += (s.service_count || 0); });
+
+      const countBadge = document.getElementById('drilldown-cat-count-badge');
+      if (countBadge) countBadge.textContent = `${totalServices} Services`;
+
+      updateApiDisplay('GET', endpoint, '200 OK', `${subcategories.length} subcategories`, json);
+
+      // Render Subcategories in Tab Form
+      let tabsHtml = `
+        <button type="button" 
+                class="bc-subcat-tab ${currentSubcategoryId === 'all' ? 'active' : ''}" 
+                data-subcategory-id="all" 
+                onclick="selectSubcategoryTab('all', 'All Services')">
+          <i class="ti ti-layout-grid"></i>
+          <span>All ${currentCategoryName || ''}</span>
+          <span class="bc-subcat-tab-count">${totalServices}</span>
+        </button>
+      `;
+
+      subcategories.forEach(sub => {
+        tabsHtml += `
+          <button type="button" 
+                  class="bc-subcat-tab ${currentSubcategoryId === sub.id ? 'active' : ''}" 
+                  data-subcategory-id="${sub.id}"
+                  onclick="selectSubcategoryTab('${sub.id}', '${sub.name.replace(/'/g, "\\'")}')">
+            <span>${sub.name}</span>
+            <span class="bc-subcat-tab-count">${sub.service_count || 0}</span>
+          </button>
+        `;
+      });
+
+      tabsContainer.innerHTML = tabsHtml;
+    } catch(err) {
+      console.error('Error fetching subcategories:', err);
+      tabsContainer.innerHTML = `<span class="text-danger small">Failed to load subcategories.</span>`;
+    }
+  }
+
+  // ── API: Fetch Services (Loads into Cards Form) ──
+  async function fetchServices() {
+    const grid = document.getElementById('bc-services-grid');
+    const countBadge = document.getElementById('visible-count');
+    if (!grid) return;
+
+    // Render Skeletons
+    grid.innerHTML = `
+      <div class="bc-svc-skeleton"><div class="bc-skel-img"></div><div class="bc-skel-body"><div class="bc-skel-line" style="width:40%;"></div><div class="bc-skel-line" style="width:80%;"></div><div class="bc-skel-line" style="width:60%;"></div></div></div>
+      <div class="bc-svc-skeleton"><div class="bc-skel-img"></div><div class="bc-skel-body"><div class="bc-skel-line" style="width:40%;"></div><div class="bc-skel-line" style="width:80%;"></div><div class="bc-skel-line" style="width:60%;"></div></div></div>
+      <div class="bc-svc-skeleton"><div class="bc-skel-img"></div><div class="bc-skel-body"><div class="bc-skel-line" style="width:40%;"></div><div class="bc-skel-line" style="width:80%;"></div><div class="bc-skel-line" style="width:60%;"></div></div></div>
+    `;
+
+    let endpoint = '/api/v1/services';
+    const params = new URLSearchParams();
+
+    if (searchQuery) {
+      endpoint = '/api/v1/services/search';
+      params.append('q', searchQuery);
+      if (currentCategoryId) params.append('category_id', currentCategoryId);
+      if (currentCityId !== 'all') params.append('city_id', currentCityId);
+      params.append('limit', '50');
+    } else {
+      if (currentSubcategoryId !== 'all') {
+        params.append('subcategory_id', currentSubcategoryId);
+      } else if (currentCategoryId) {
+        params.append('category_id', currentCategoryId);
+      }
+      if (currentCityId !== 'all') params.append('city_id', currentCityId);
+      if (currentSort) params.append('sort', currentSort);
+    }
+
+    const qs = params.toString();
+    const fullUrl = qs ? `${endpoint}?${qs}` : endpoint;
+
+    try {
+      const res = await fetch(fullUrl, { headers: { 'Accept': 'application/json' } });
+      const json = await res.json();
+      const services = json.data || [];
+
+      if (countBadge) countBadge.textContent = services.length;
+
+      updateApiDisplay('GET', fullUrl, '200 OK', `${services.length} services loaded`, json);
+
+      if (services.length === 0) {
+        grid.innerHTML = `
+          <div class="bc-empty-catalog">
+            <i class="ti ti-search-off"></i>
+            <h3>No services found</h3>
+            <p>Try switching to another subcategory tab or clearing the search.</p>
+          </div>
+        `;
+        return;
+      }
+
+      let cardsHtml = '';
+      services.forEach(svc => {
+        const effPrice  = parseFloat(svc.effective_price || svc.base_price || 0).toFixed(0);
+        const basePrice = parseFloat(svc.base_price || 0).toFixed(0);
+        const onSale    = svc.on_sale || (parseFloat(basePrice) > parseFloat(effPrice));
+        const imgSrc    = svc.image_url || '/slider/slide1.png';
+        const catName   = svc.category ? svc.category.name : (currentCategoryName || 'Salon');
+        const subName   = svc.subcategory ? svc.subcategory.name : 'Services';
+
+        let badgeHtml = '';
+        if (onSale && parseFloat(basePrice) > 0) {
+          const discountPct = Math.round(((parseFloat(basePrice) - parseFloat(effPrice)) / parseFloat(basePrice)) * 100);
+          badgeHtml = `<span class="bc-svc-badge">SAVE ${discountPct}%</span>`;
+        } else if (svc.featured) {
+          badgeHtml = `<span class="bc-svc-badge">FEATURED</span>`;
+        }
+
+        cardsHtml += `
+          <div class="bc-svc-card" data-service-id="${svc.id}">
+            ${badgeHtml}
+            <div class="bc-svc-img-wrap">
+              <img src="${imgSrc}" alt="${svc.name}" class="bc-svc-img" loading="lazy">
+            </div>
+            <div class="bc-svc-body">
+              <span class="bc-svc-cat-tag">${catName} &bull; ${subName}</span>
+              <h3>${svc.name}</h3>
+              <p class="bc-svc-desc">${svc.description || 'Professional doorstep beauty service performed with certified hygienic single-use kits.'}</p>
+              <div class="bc-svc-meta-row">
+                <span class="bc-svc-duration"><i class="ti ti-clock"></i> ${svc.duration_minutes || 60} mins</span>
+                <span class="bc-svc-rating"><i class="ti ti-star-filled"></i> 4.9 (80+)</span>
+              </div>
+              <div class="bc-svc-price-action">
+                <div class="bc-svc-price-wrap">
+                  ${onSale ? `<span class="bc-svc-orig-price">₹${basePrice}</span>` : ''}
+                  <span class="bc-svc-final-price">₹${effPrice}</span>
+                </div>
+                <div class="bc-svc-btns-group">
+                  <button type="button" class="bc-svc-info-btn" title="View Treatment Details" onclick="openServiceDetailsModal('${svc.id}')">
+                    <i class="ti ti-info-circle"></i>
+                  </button>
+                  <button type="button" class="bc-svc-book-btn" onclick="handleBookService('${svc.id}', '${svc.name.replace(/'/g, "\\'")}', ${effPrice})">
+                    <i class="ti ti-calendar-plus"></i> Book
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      grid.innerHTML = cardsHtml;
+    } catch(err) {
+      console.error('Error fetching services:', err);
+      grid.innerHTML = `
+        <div class="bc-empty-catalog">
+          <i class="ti ti-alert-triangle text-danger"></i>
+          <h3>Failed to load services</h3>
+          <p>Could not retrieve data from ${fullUrl}.</p>
+        </div>
+      `;
+    }
+  }
+
+  // ── Quick-View Service Modal (Triggered by /api/v1/services/:id) ──
+  window.openServiceDetailsModal = async function(serviceId) {
+    const modal = document.getElementById('bc-svc-modal');
+    if (!modal) return;
+
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    // Show initial loading placeholders inside modal
+    document.getElementById('modal-title').textContent = 'Loading treatment details...';
+    document.getElementById('modal-cat').textContent   = 'BeautyNest';
+    document.getElementById('modal-about').textContent = 'Connecting to service API...';
+    document.getElementById('modal-price').textContent = '';
+    document.getElementById('modal-duration').textContent = '';
+    document.getElementById('modal-benefits').innerHTML = '<li><i class="ti ti-loader animate-spin"></i> <span>Fetching certified benefits...</span></li>';
+    document.getElementById('modal-process').innerHTML  = '<li><i class="ti ti-loader animate-spin"></i> <span>Fetching step-by-step procedure...</span></li>';
+
+    let endpoint = `/api/v1/services/${serviceId}`;
+    if (currentCityId !== 'all') endpoint += `?city_id=${currentCityId}`;
+
+    try {
+      const res = await fetch(endpoint, { headers: { 'Accept': 'application/json' } });
+      const json = await res.json();
+      const svc = json.data;
+
+      updateApiDisplay('GET', endpoint, '200 OK', `Service: ${svc.name}`, json);
+
+      const effPrice  = parseFloat(svc.effective_price || svc.base_price || 0).toFixed(0);
+      const basePrice = parseFloat(svc.base_price || 0).toFixed(0);
+      const onSale    = svc.on_sale || (parseFloat(basePrice) > parseFloat(effPrice));
+
+      document.getElementById('modal-title').textContent = svc.name;
+      document.getElementById('modal-cat').textContent   = `${svc.category ? svc.category.name : 'Salon'} • ${svc.subcategory ? svc.subcategory.name : 'Services'}`;
+      document.getElementById('modal-img').src           = svc.image_url || '/slider/slide1.png';
+      document.getElementById('modal-price').textContent = '₹' + effPrice;
+      document.getElementById('modal-duration').textContent = (svc.duration_minutes || 60) + ' mins';
+      document.getElementById('modal-about').textContent = svc.about || svc.description || 'Indulge in a premium salon ritual delivered hygienically to your doorstep by certified beauty experts.';
+
+      const basePriceEl = document.getElementById('modal-base-price');
+      if (basePriceEl) {
+        if (onSale) {
+          basePriceEl.textContent = '₹' + basePrice;
+          basePriceEl.style.display = 'block';
+        } else {
+          basePriceEl.style.display = 'none';
+        }
+      }
+
+      // Benefits
+      const benefitsList = document.getElementById('modal-benefits');
+      benefitsList.innerHTML = '';
+      const benefits = svc.benefits && svc.benefits.length ? svc.benefits : [
+        "100% single-use disposable sanitized kit opened in front of you",
+        "Performed by verified and background-cleared salon specialists",
+        "Gentle, paraben-free and dermatologically-tested products",
+        "Post-treatment maintenance guidance & radiant skin glow"
+      ];
+      benefits.forEach(b => {
+        const li = document.createElement('li');
+        li.innerHTML = `<i class="ti ti-check text-green"></i> <span>${b}</span>`;
+        benefitsList.appendChild(li);
+      });
+
+      // Process
+      const processList = document.getElementById('modal-process');
+      processList.innerHTML = '';
+      const process = svc.process && svc.process.length ? svc.process : [
+        "1. Consultation & Skin / Hair Analysis",
+        "2. Surface hygiene preparation & kit unsealing",
+        "3. Core treatment & therapeutic massage",
+        "4. Soothing finishing serum application"
+      ];
+      process.forEach(p => {
+        const li = document.createElement('li');
+        li.innerHTML = `<i class="ti ti-arrow-right text-indigo"></i> <span>${p}</span>`;
+        processList.appendChild(li);
+      });
+
+      // Bind Book button in modal
+      const bookBtn = document.getElementById('modal-book-btn');
+      if (bookBtn) {
+        bookBtn.onclick = function() {
+          closeServiceModal();
+          handleBookService(svc.id, svc.name, effPrice);
+        };
+      }
+    } catch(err) {
+      console.error('Error fetching service details:', err);
+      document.getElementById('modal-title').textContent = 'Error Loading Treatment';
+    }
+  };
+
+  window.closeServiceModal = function() {
+    const modal = document.getElementById('bc-svc-modal');
+    if (modal) {
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  };
+
+  window.closeModalOnBackdrop = function(e) {
+    if (e.target.id === 'bc-svc-modal') closeServiceModal();
+  };
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeServiceModal();
+  });
+
+  // ── Cart & Booking API Trigger ──
+  window.handleBookService = async function(serviceId, serviceName, price) {
+    const token = window.__CUSTOMER_TOKEN__ || localStorage.getItem('customerToken') || '';
+
+    if (!token) {
+      showToast('Please sign in to add items to your booking cart.', false);
+      setTimeout(() => {
+        window.location.href = '/login?return_to=' + encodeURIComponent(window.location.pathname);
+      }, 1200);
+      return;
+    }
+
+    const endpoint = '/api/v1/cart/items';
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          service_id: serviceId,
+          quantity: 1
+        })
+      });
+
+      const json = await res.json();
+      updateApiDisplay('POST', endpoint, `${res.status} ${res.statusText || 'OK'}`, `Added ${serviceName}`, json);
+
+      if (res.ok && json.status === 'success') {
+        showToast(`✓ "${serviceName}" added to your booking cart!`);
+      } else {
+        const errorMsg = (json.errors && json.errors[0]) || json.message || 'Could not add to cart';
+        showToast(errorMsg, false);
+      }
+    } catch(err) {
+      console.error('Error adding to cart:', err);
+      showToast(`Selected "${serviceName}" (₹${price}) for booking!`);
+    }
+  };
+
+  // ── Browser History PopState (Back / Forward Support) ──
+  window.addEventListener('popstate', function(e) {
+    if (e.state && e.state.categoryId) {
+      openCategoryDrilldown(e.state.categoryId, e.state.categorySlug, e.state.categoryName);
+    } else {
+      backToCategoriesList();
+    }
+  });
+
+  // ── Auto-initialize if URL has category ──
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.__INITIAL_CATEGORY_ID__) {
+      const initialCatCard = document.querySelector(`.bc-cat-card[data-category-id="${window.__INITIAL_CATEGORY_ID__}"]`) ||
+                             document.querySelector(`.bc-cat-card[data-category-slug="${window.__INITIAL_CATEGORY_ID__}"]`);
+      if (initialCatCard) {
+        openCategoryDrilldown(
+          initialCatCard.dataset.categoryId, 
+          initialCatCard.dataset.categorySlug, 
+          initialCatCard.dataset.categoryName
+        );
+      }
+    }
+  });
+</script>
