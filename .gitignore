@@ -10,3 +10,6 @@
 /scratch/
 *.sqlite3
 *.sqlite3-*
+BeautyNest.apk
+mobile_app/
+*.apk
