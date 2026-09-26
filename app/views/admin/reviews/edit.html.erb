@@ -1,0 +1,67 @@
+<% content_for :page_title, "Moderate Review ##{@review[:id]}" %>
+
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">Quality Moderation</div>
+      <h2 class="page-title fs-1 fw-bold">Moderate Review #<%= @review[:id] %></h2>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <%= link_to admin_review_path(@review[:id]), class: "btn btn-outline-secondary" do %>
+        <i class="ti ti-arrow-left me-1 fs-3"></i> Back to Review
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+        <h3 class="card-title fw-bold mb-0">Review Moderation Form</h3>
+        <div><%= review_status_badge(@review[:status]) %></div>
+      </div>
+      <%= form_with url: admin_review_path(@review[:id]), method: :patch, local: true do |f| %>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label text-secondary small">Submitted Feedback Comment</label>
+            <blockquote class="blockquote bg-surface-secondary border p-3 rounded-3 text-reset fs-4 fst-italic mb-0">
+              "<%= @review[:comment] %>"
+            </blockquote>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label" for="review_status">Moderation Status</label>
+              <select name="review[status]" id="review_status" class="form-select">
+                <option value="published" <%= "selected" if @review[:status] == "published" %>>Published (Visible)</option>
+                <option value="flagged" <%= "selected" if @review[:status] == "flagged" %>>Flagged for Investigation</option>
+                <option value="hidden" <%= "selected" if @review[:status] == "hidden" %>>Hidden / Quarantined</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="review_rating">Assigned Rating</label>
+              <select name="review[rating]" id="review_rating" class="form-select">
+                <% (1..5).to_a.reverse.each do |num| %>
+                  <option value="<%= num %>" <%= "selected" if @review[:rating] == num %>><%= num %> Stars</option>
+                <% end %>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="review_reply">Official Platform Response</label>
+            <textarea name="review[reply]" id="review_reply" class="form-control" rows="3" placeholder="Write a response to the customer..."></textarea>
+          </div>
+        </div>
+
+        <div class="card-footer border-top d-flex justify-content-between align-items-center bg-transparent">
+          <%= link_to "Cancel", admin_review_path(@review[:id]), class: "btn btn-link link-secondary" %>
+          <button type="submit" class="btn btn-primary">
+            <i class="ti ti-check me-1 fs-3"></i> Save Moderation Changes
+          </button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,198 @@
+<% content_for :page_title, "Categories" %>
+
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">Catalog</div>
+      <h2 class="page-title fs-1 fw-bold">Categories</h2>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <% if policy(Category).create? %>
+        <%= link_to new_admin_category_path, class: "btn btn-primary" do %>
+          <i class="ti ti-plus me-1 fs-3"></i> New Category
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- KPI Cards -->
+<div class="row row-cards mb-4">
+  <div class="col-sm-6 col-lg-3">
+    <div class="card card-sm shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-md rounded-3 bg-azure-lt text-azure me-3"><i class="ti ti-category fs-1"></i></span>
+          <div>
+            <div class="text-secondary small fw-medium">Total Categories</div>
+            <div class="fs-2 fw-bold"><%= @categories.size %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card card-sm shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-md rounded-3 bg-green-lt text-green me-3"><i class="ti ti-check fs-1"></i></span>
+          <div>
+            <div class="text-secondary small fw-medium">Active</div>
+            <div class="fs-2 fw-bold text-success"><%= @categories.count { |c| c.status == "active" } %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card card-sm shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-md rounded-3 bg-yellow-lt text-yellow me-3"><i class="ti ti-star fs-1"></i></span>
+          <div>
+            <div class="text-secondary small fw-medium">Featured</div>
+            <div class="fs-2 fw-bold text-warning"><%= @categories.count(&:featured?) %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card card-sm shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-md rounded-3 bg-purple-lt text-purple me-3"><i class="ti ti-subtask fs-1"></i></span>
+          <div>
+            <div class="text-secondary small fw-medium">Subcategories</div>
+            <div class="fs-2 fw-bold text-purple"><%= Subcategory.count %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Table Card -->
+<div class="card shadow-sm">
+  <div class="card-header border-bottom py-3">
+    <%= form_with url: admin_categories_path, method: :get, class: "w-100" do %>
+      <div class="row g-2 align-items-center">
+        <div class="col-md-4">
+          <div class="input-icon">
+            <span class="input-icon-addon"><i class="ti ti-search text-secondary fs-3"></i></span>
+            <input class="form-control" type="text" name="search" value="<%= params[:search] %>"
+                   placeholder="Search categories..." autocomplete="off">
+          </div>
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" name="status">
+            <option value="">All Statuses</option>
+            <option value="active" <%= "selected" if params[:status] == "active" %>>Active</option>
+            <option value="inactive" <%= "selected" if params[:status] == "inactive" %>>Inactive</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" name="featured">
+            <option value="">All</option>
+            <option value="true" <%= "selected" if params[:featured] == "true" %>>Featured Only</option>
+          </select>
+        </div>
+        <div class="col-auto">
+          <button type="submit" class="btn btn-secondary"><i class="ti ti-filter me-1"></i>Filter</button>
+        </div>
+        <div class="col-auto ms-auto text-secondary small">
+          <span class="fw-bold text-reset"><%= @categories.size %></span> categories
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-vcenter card-table table-hover">
+      <thead>
+        <tr>
+          <th style="width: 56px;">Image</th>
+          <th>Name</th>
+          <th>Subcategories</th>
+          <th>Services</th>
+          <th>Position</th>
+          <th>Featured</th>
+          <th>Status</th>
+          <th class="text-end pe-3">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if @categories.any? %>
+          <% @categories.each do |cat| %>
+            <tr>
+              <td>
+                <% cat_img = cat.image_url.presence || (cat.image.attached? && ((cat.image.url rescue nil) || (rails_blob_path(cat.image, only_path: true) rescue nil))) %>
+                <% if cat_img.present? %>
+                  <img src="<%= cat_img %>"
+                       class="rounded border shadow-sm"
+                       style="width:48px;height:36px;object-fit:cover;"
+                       alt="<%= cat.name %>"
+                       loading="lazy" />
+                <% else %>
+                  <span class="avatar avatar-sm rounded bg-secondary-lt text-secondary">
+                    <i class="ti ti-category"></i>
+                  </span>
+                <% end %>
+              </td>
+              <td>
+                <div class="fw-semibold text-reset"><%= link_to cat.name, admin_category_path(cat), class: "text-reset text-decoration-none" %></div>
+                <div class="text-secondary small font-monospace"><%= cat.slug %></div>
+              </td>
+              <td>
+                <%= link_to admin_category_subcategories_path(cat), class: "badge bg-azure-lt text-azure text-decoration-none fw-semibold" do %>
+                  <i class="ti ti-subtask me-1"></i> <%= cat.subcategories.size %>
+                <% end %>
+              </td>
+              <td><span class="badge bg-secondary-lt fw-bold"><%= cat.service_count %></span></td>
+              <td class="text-secondary"><%= cat.position %></td>
+              <td>
+                <% if cat.featured? %>
+                  <span class="badge bg-yellow-lt text-yellow"><i class="ti ti-star me-1"></i>Featured</span>
+                <% else %>
+                  <span class="text-muted small">—</span>
+                <% end %>
+              </td>
+              <td><%= active_status_badge(cat.status) %></td>
+              <td class="text-end pe-3">
+                <div class="btn-list justify-content-end">
+                  <%= link_to admin_category_path(cat), class: "btn btn-icon btn-ghost-secondary btn-sm", title: "View" do %>
+                    <i class="ti ti-eye fs-3"></i>
+                  <% end %>
+                  <% if policy(cat).update? %>
+                    <%= link_to edit_admin_category_path(cat), class: "btn btn-icon btn-ghost-primary btn-sm", title: "Edit" do %>
+                      <i class="ti ti-pencil fs-3"></i>
+                    <% end %>
+                  <% end %>
+                  <% if policy(cat).destroy? %>
+                    <%= button_to admin_category_path(cat), method: :delete,
+                          data: { 
+                            turbo_confirm: "Are you sure you want to delete category '#{cat.name}'? All services in this category will also be deleted.",
+                            confirm_title: "Delete Category",
+                            confirm_btn: "Delete Category"
+                          },
+                          class: "btn btn-icon btn-ghost-danger btn-sm", title: "Delete" do %>
+                      <i class="ti ti-trash fs-3"></i>
+                    <% end %>
+                  <% end %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        <% else %>
+          <tr>
+            <td colspan="8" class="text-center py-5 text-secondary">
+              <i class="ti ti-category-off fs-1 d-block mb-2 text-muted"></i>
+              No categories found. <%= link_to "Create the first one", new_admin_category_path %>.
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <%= render_pagination %>
+</div>

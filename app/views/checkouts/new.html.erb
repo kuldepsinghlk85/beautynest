@@ -1,0 +1,947 @@
+<% content_for :page_title, "Checkout — BeautyNest" %>
+
+<%= render "shared/public_nav", active: "cart" %>
+
+<div class="bn-checkout-page">
+  <div class="bn-checkout-container">
+    
+    <% if flash[:alert] %>
+      <div class="bn-flash-alert bn-flash-error">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span><%= flash[:alert] %></span>
+      </div>
+    <% end %>
+
+    <!-- Checkout Header -->
+    <div class="bn-co-header">
+      <div class="bn-co-breadcrumbs">
+        <%= link_to "Cart", cart_path, class: "bn-co-bc-link" %>
+        <span class="bn-co-bc-sep">/</span>
+        <span class="bn-co-bc-current">Checkout & Schedule</span>
+      </div>
+      <h1 class="bn-co-title">Complete Your Booking</h1>
+    </div>
+
+    <%= form_with url: checkout_path, method: :post, local: true, id: "bn-checkout-form" do |f| %>
+      <div class="bn-co-grid">
+        
+        <!-- Left Column: Address, Schedule, Payment -->
+        <div class="bn-co-main">
+          
+          <!-- 1. Appointment & Beautician Summary Card -->
+          <div class="bn-co-section-card">
+            <div class="bn-sc-header">
+              <span class="bn-sc-num">1</span>
+              <h2 class="bn-sc-title">Scheduled Appointment & Specialist</h2>
+            </div>
+            
+            <div class="bn-co-worker-strip">
+              <div class="bn-cws-avatar-wrap">
+                <% avatar_src = @worker ? @worker.display_avatar_url : ImageUrlResolver.fallback_for(:beautician) %>
+                <img src="<%= avatar_src %>" alt="<%= @cart.display_worker_name %>" class="bn-cws-avatar" onerror="this.src='<%= ImageUrlResolver.fallback_for(:beautician) %>'">
+                <% if @worker %>
+                  <span class="bn-cws-check">✓</span>
+                <% end %>
+              </div>
+              <div class="bn-cws-info">
+                <span class="bn-cws-tag"><i class="ti ti-sparkles"></i> Assigned Professional</span>
+                <h3 class="bn-cws-name"><%= @cart.display_worker_name %></h3>
+                <div class="bn-cws-meta">
+                  <% if @worker %>
+                    <span class="bn-cws-rating">★ <%= @worker.rating_display %></span>
+                    <span>•</span>
+                    <span class="bn-cws-exp"><%= @worker.experience_display %></span>
+                    <span>•</span>
+                  <% end %>
+                  <span class="bn-cws-city"><i class="ti ti-map-pin"></i> Serving <%= @cart.display_city_name %></span>
+                </div>
+              </div>
+
+              <div class="bn-cws-schedule-box">
+                <div class="bn-cws-slot">
+                  <i class="ti ti-calendar"></i>
+                  <strong><%= @cart.formatted_date || Date.tomorrow.strftime("%a, %d %b %Y") %></strong>
+                </div>
+                <div class="bn-cws-time">
+                  <i class="ti ti-clock"></i>
+                  <span><%= @cart.time_slot || "10:30 AM" %></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Delivery Address Selection / Input -->
+          <div class="bn-co-section-card">
+            <div class="bn-sc-header">
+              <span class="bn-sc-num">2</span>
+              <h2 class="bn-sc-title">Doorstep Service Address</h2>
+            </div>
+
+            <% if current_customer.present? && @addresses.any? %>
+              <!-- Saved Addresses List -->
+              <div class="bn-saved-addresses-list" id="bn-saved-addresses">
+                <% @addresses.each_with_index do |addr, idx| %>
+                  <label class="bn-address-card <%= 'active' if addr.is_default? || idx == 0 %>">
+                    <input type="radio" name="address_id" value="<%= addr.id %>" <%= 'checked' if addr.is_default? || idx == 0 %> class="bn-addr-radio" onchange="toggleAddressActive(this)">
+                    <div class="bn-addr-content">
+                      <div class="bn-addr-tag-row">
+                        <span class="bn-addr-badge"><%= addr.label.presence || 'Home' %></span>
+                        <% if addr.is_default? %>
+                          <span class="bn-addr-default-pill">Default</span>
+                        <% end %>
+                      </div>
+                      <p class="bn-addr-line"><%= addr.full_address %></p>
+                    </div>
+                  </label>
+                <% end %>
+              </div>
+
+              <div class="bn-new-addr-toggle-wrap">
+                <button type="button" class="bn-toggle-new-addr-btn" onclick="toggleNewAddressForm()">
+                  <i class="ti ti-plus"></i> Or Add a New Address
+                </button>
+              </div>
+            <% end %>
+
+            <!-- Inline New Address Form -->
+            <div id="bn-new-address-fields" class="bn-address-form-grid" style="<%= 'display: none;' if current_customer.present? && @addresses.any? %>">
+              <% unless customer_logged_in? %>
+                <div class="bn-form-row bn-form-col-2">
+                  <div class="bn-form-group">
+                    <label class="bn-form-label">Full Name <span class="text-danger">*</span></label>
+                    <input type="text" name="customer_name" id="bn-cust-name" class="bn-form-control" placeholder="e.g. Ananya Sharma" value="<%= current_user&.name %>">
+                  </div>
+                  <div class="bn-form-group">
+                    <label class="bn-form-label">Phone Number <span class="text-danger">*</span></label>
+                    <input type="tel" name="customer_phone" id="bn-cust-phone" class="bn-form-control" placeholder="10-digit mobile number" value="<%= current_user&.phone %>">
+                  </div>
+                </div>
+
+                <div class="bn-form-group">
+                  <label class="bn-form-label">Email Address (Optional for booking receipt)</label>
+                  <input type="email" name="customer_email" id="bn-cust-email" class="bn-form-control" placeholder="you@example.com" value="<%= current_user&.email %>">
+                </div>
+              <% end %>
+
+              <div class="bn-form-group">
+                <label class="bn-form-label">House / Flat / Block No. & Street <span class="text-danger">*</span></label>
+                <input type="text" name="line1" id="bn-addr-line1" class="bn-form-control" placeholder="e.g. Flat 302, Palm Heights, Outer Ring Road">
+              </div>
+
+              <div class="bn-form-row bn-form-col-3">
+                <div class="bn-form-group">
+                  <label class="bn-form-label">Landmark / Area (Optional)</label>
+                  <input type="text" name="line2" id="bn-addr-line2" class="bn-form-control" placeholder="Near Metro Station">
+                </div>
+                <div class="bn-form-group">
+                  <label class="bn-form-label">City <span class="text-danger">*</span></label>
+                  <select name="city" id="bn-addr-city" class="bn-form-control">
+                    <% @cities.each do |c| %>
+                      <option value="<%= c.name %>" <%= 'selected' if @city&.name == c.name %>><%= c.name %></option>
+                    <% end %>
+                  </select>
+                </div>
+                <div class="bn-form-group">
+                  <label class="bn-form-label">Pincode <span class="text-danger">*</span></label>
+                  <input type="text" name="pincode" id="bn-addr-pincode" class="bn-form-control" placeholder="e.g. 110001">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Payment Method Selection -->
+          <div class="bn-co-section-card">
+            <div class="bn-sc-header">
+              <span class="bn-sc-num">3</span>
+              <h2 class="bn-sc-title">Payment Method</h2>
+            </div>
+
+            <div class="bn-payment-options-grid">
+              <!-- Pay After Service (COD / UPI on visit) -->
+              <label class="bn-pay-card active">
+                <input type="radio" name="payment_method" value="cod" checked class="bn-pay-radio" onchange="togglePayActive(this)">
+                <div class="bn-pay-content">
+                  <div class="bn-pay-icon-box">
+                    <i class="ti ti-cash"></i>
+                  </div>
+                  <div class="bn-pay-text">
+                    <div class="bn-pay-title-row">
+                      <strong class="bn-pay-title">Pay After Service</strong>
+                      <span class="bn-pay-badge-rec">Recommended</span>
+                    </div>
+                    <p class="bn-pay-desc">Pay cash or scan QR code via Google Pay, PhonePe, or Paytm after the service is happily completed.</p>
+                  </div>
+                </div>
+              </label>
+
+              <!-- Online Payment -->
+              <label class="bn-pay-card">
+                <input type="radio" name="payment_method" value="upi" class="bn-pay-radio" onchange="togglePayActive(this)">
+                <div class="bn-pay-content">
+                  <div class="bn-pay-icon-box">
+                    <i class="ti ti-qrcode"></i>
+                  </div>
+                  <div class="bn-pay-text">
+                    <div class="bn-pay-title-row">
+                      <strong class="bn-pay-title">UPI & Instant Online Payment</strong>
+                      <span class="bn-pay-badge-safe">Instant</span>
+                    </div>
+                    <p class="bn-pay-desc">Pay via UPI Apps, Credit/Debit Cards, or Net Banking.</p>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- 4. Special Instructions -->
+          <div class="bn-co-section-card">
+            <div class="bn-sc-header">
+              <span class="bn-sc-num">4</span>
+              <h2 class="bn-sc-title">Special Instructions (Optional)</h2>
+            </div>
+            <textarea name="notes" class="bn-form-control bn-textarea" placeholder="Add instructions for beautician (e.g. Ring bell twice, sensitive skin, pet dog in home)..." rows="2"></textarea>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Order Review & Submit -->
+        <div class="bn-co-sidebar">
+          
+          <div class="bn-co-summary-card">
+            <h3 class="bn-cos-title">Booking Summary</h3>
+
+            <!-- Itemized List -->
+            <div class="bn-cos-items">
+              <% @cart_items.each do |item| %>
+                <div class="bn-cos-item-row">
+                  <div class="bn-cos-item-info">
+                    <span class="bn-cos-name"><%= item.service.name %></span>
+                    <span class="bn-cos-qty">Qty: <%= item.quantity %> • ₹<%= item.unit_price.to_i %> ea</span>
+                    <% if item.scheduled? || item.formatted_schedule.present? %>
+                      <span class="bn-cos-sched-tag"><i class="ti ti-calendar"></i> <%= item.formatted_schedule %> <%= "• #{item.worker.name.split.first}" if item.worker %></span>
+                    <% end %>
+                  </div>
+                  <span class="bn-cos-price">₹<%= item.line_total.to_i %></span>
+                </div>
+              <% end %>
+            </div>
+
+            <div class="bn-cos-divider"></div>
+
+            <!-- Price Calculations -->
+            <div class="bn-cos-totals">
+              <div class="bn-cos-row">
+                <span>Item Subtotal</span>
+                <span>₹<%= @cart.subtotal.to_i %></span>
+              </div>
+
+              <% if @cart.discount_amount > 0 %>
+                <div class="bn-cos-row bn-cos-discount">
+                  <span>Coupon (<%= @cart.coupon.code %>)</span>
+                  <span>-₹<%= @cart.discount_amount.to_i %></span>
+                </div>
+              <% end %>
+
+              <div class="bn-cos-row">
+                <span>Convenience & Kit Fee</span>
+                <span class="bn-free-tag">FREE</span>
+              </div>
+
+              <div class="bn-cos-divider"></div>
+
+              <div class="bn-cos-row bn-cos-grand">
+                <strong>Amount to Pay</strong>
+                <strong class="bn-cos-total-val">₹<%= @cart.grand_total.to_i %></strong>
+              </div>
+            </div>
+
+            <!-- Submit CTA -->
+            <div class="bn-cos-action">
+              <button type="submit" class="bn-btn-confirm-booking" id="bn-confirm-booking-btn">
+                <span>Confirm & Book Appointment</span>
+                <i class="ti ti-arrow-right"></i>
+              </button>
+            </div>
+
+            <div class="bn-cos-assurances">
+              <div class="bn-ca-row">
+                <i class="ti ti-shield-check"></i>
+                <span>Certified & verified beauticians</span>
+              </div>
+              <div class="bn-ca-row">
+                <i class="ti ti-sparkles"></i>
+                <span>Monodose sealed beauty kits</span>
+              </div>
+              <div class="bn-ca-row">
+                <i class="ti ti-refresh"></i>
+                <span>Free cancellation up to 2 hours before slot</span>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    <% end %>
+
+  </div>
+</div>
+
+<style>
+  .bn-checkout-page {
+    background: var(--bg, #f4f3f8);
+    min-height: 100vh;
+    padding-top: calc(68px + 1.5rem);
+    padding-bottom: 4rem;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
+    color: var(--text-1, #111827);
+  }
+  .bn-checkout-container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 1.25rem;
+  }
+
+  /* Flash Alert */
+  .bn-flash-alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 18px;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+  }
+  .bn-flash-error {
+    background: #fef2f2;
+    border: 1.5px solid #fecaca;
+    color: #991b1b;
+  }
+
+  /* Header */
+  .bn-co-header {
+    margin-bottom: 1.75rem;
+  }
+  .bn-co-breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--text-3, #4b5563);
+    margin-bottom: 4px;
+  }
+  .bn-co-bc-link {
+    color: var(--accent, #db2777);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .bn-co-bc-link:hover { text-decoration: underline; }
+  .bn-co-bc-sep { color: #d1d5db; }
+  .bn-co-bc-current { color: var(--text-1, #111827); font-weight: 700; }
+  .bn-co-title {
+    font-size: clamp(1.4rem, 2.5vw, 1.85rem);
+    font-weight: 800;
+    color: var(--text-1, #111827);
+    margin: 0;
+    letter-spacing: -0.022em;
+  }
+
+  /* Grid Layout */
+  .bn-co-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 1.75rem;
+    align-items: flex-start;
+  }
+  @media (max-width: 960px) {
+    .bn-co-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Main Column */
+  .bn-co-main {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  /* Section Card */
+  .bn-co-section-card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid var(--border, rgba(0,0,0,0.07));
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));
+    padding: 1.5rem;
+  }
+  .bn-sc-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+  .bn-sc-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--accent, #db2777);
+    color: #ffffff;
+    font-size: 0.78rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .bn-sc-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text-1, #111827);
+    margin: 0;
+    letter-spacing: -0.015em;
+  }
+
+  /* Worker Strip */
+  .bn-co-worker-strip {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: #fdf2f8;
+    border: 1.5px solid #fbcfe8;
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    flex-wrap: wrap;
+  }
+  .bn-cws-avatar-wrap {
+    position: relative;
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid #f472b6;
+    background: #fff;
+    flex-shrink: 0;
+  }
+  .bn-cws-avatar { width: 100%; height: 100%; object-fit: cover; }
+  .bn-cws-check {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    background: #10b981;
+    color: #fff;
+    border-radius: 50%;
+    width: 17px;
+    height: 17px;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid #fff;
+  }
+  .bn-cws-info { flex: 1; min-width: 200px; }
+  .bn-cws-tag {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--accent, #db2777);
+    display: block;
+    margin-bottom: 2px;
+  }
+  .bn-cws-name {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text-1, #111827);
+    margin: 0 0 2px;
+  }
+  .bn-cws-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: var(--text-3, #4b5563);
+  }
+  .bn-cws-rating { font-weight: 700; color: #b45309; }
+  .bn-cws-exp {
+    font-weight: 700;
+    color: #059669;
+    background: #ecfdf5;
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+  .bn-cws-city { font-weight: 600; color: var(--text-2, #374151); }
+
+  .bn-cws-schedule-box {
+    background: #ffffff;
+    border: 1px solid #fce7f3;
+    padding: 8px 14px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 0.8rem;
+  }
+  .bn-cws-slot, .bn-cws-time {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-1, #111827);
+  }
+  .bn-cws-slot i, .bn-cws-time i { color: var(--accent, #db2777); font-size: 0.9rem; }
+
+  /* Address Cards */
+  .bn-saved-addresses-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+  .bn-address-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1.5px solid #e5e7eb;
+    background: #ffffff;
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .bn-address-card:hover { border-color: #f472b6; background: #fdf2f8; }
+  .bn-address-card.active {
+    border-color: var(--accent, #db2777);
+    background: #fdf2f8;
+    box-shadow: 0 2px 8px rgba(219, 39, 119, 0.1);
+  }
+  .bn-addr-radio { margin-top: 3px; accent-color: var(--accent, #db2777); }
+  .bn-addr-content { flex: 1; }
+  .bn-addr-tag-row { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+  .bn-addr-badge {
+    background: #111827;
+    color: #ffffff;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+  .bn-addr-default-pill {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+  .bn-addr-line {
+    font-size: 0.83rem;
+    color: var(--text-2, #374151);
+    margin: 0;
+    line-height: 1.4;
+  }
+  .bn-new-addr-toggle-wrap { margin-top: 0.5rem; }
+  .bn-toggle-new-addr-btn {
+    background: none;
+    border: none;
+    color: var(--accent, #db2777);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+  }
+  .bn-toggle-new-addr-btn:hover { text-decoration: underline; }
+
+  /* Form Fields */
+  .bn-address-form-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 0.5rem;
+  }
+  .bn-form-row {
+    display: grid;
+    gap: 12px;
+  }
+  .bn-form-col-2 { grid-template-columns: 1fr 1fr; }
+  .bn-form-col-3 { grid-template-columns: 1fr 1fr 1fr; }
+  @media (max-width: 640px) {
+    .bn-form-col-2, .bn-form-col-3 { grid-template-columns: 1fr; }
+  }
+  .bn-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .bn-form-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-2, #374151);
+  }
+  .bn-form-control {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1.5px solid #d1d5db;
+    font-size: 0.85rem;
+    color: var(--text-1, #111827);
+    outline: none;
+    background: #ffffff;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .bn-form-control:focus {
+    border-color: var(--accent, #db2777);
+    box-shadow: 0 0 0 3px rgba(219, 39, 119, 0.12);
+  }
+  .bn-textarea { resize: vertical; min-height: 70px; }
+
+  /* Payment Options */
+  .bn-payment-options-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .bn-pay-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1.5px solid #e5e7eb;
+    background: #ffffff;
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .bn-pay-card:hover { border-color: #f472b6; background: #fdf2f8; }
+  .bn-pay-card.active {
+    border-color: var(--accent, #db2777);
+    background: #fdf2f8;
+    box-shadow: 0 2px 8px rgba(219, 39, 119, 0.1);
+  }
+  .bn-pay-radio { margin-top: 4px; accent-color: var(--accent, #db2777); }
+  .bn-pay-content { display: flex; align-items: flex-start; gap: 12px; flex: 1; }
+  .bn-pay-icon-box {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #ffffff;
+    border: 1px solid #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: var(--accent, #db2777);
+    flex-shrink: 0;
+  }
+  .bn-pay-text { flex: 1; }
+  .bn-pay-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 2px;
+  }
+  .bn-pay-title { font-size: 0.92rem; font-weight: 800; color: var(--text-1, #111827); }
+  .bn-pay-badge-rec {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 20px;
+  }
+  .bn-pay-badge-safe {
+    background: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 20px;
+  }
+  .bn-pay-desc {
+    font-size: 0.78rem;
+    color: var(--text-3, #4b5563);
+    margin: 0;
+    line-height: 1.35;
+  }
+
+  /* Sidebar */
+  .bn-co-sidebar {
+    position: sticky;
+    top: calc(68px + 1.5rem);
+  }
+  .bn-co-summary-card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid var(--border, rgba(0,0,0,0.07));
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));
+  }
+  .bn-cos-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text-1, #111827);
+    margin: 0 0 1.1rem;
+    letter-spacing: -0.015em;
+  }
+
+  .bn-cos-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+  .bn-cos-item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 0.82rem;
+  }
+  .bn-cos-item-info { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .bn-cos-name { font-weight: 700; color: var(--text-1, #111827); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bn-cos-qty { font-size: 0.72rem; color: var(--text-4, #64748b); }
+  .bn-cos-sched-tag {
+    font-size: 0.69rem;
+    font-weight: 700;
+    color: #db2777;
+    background: #fdf2f8;
+    border: 1px solid #fbcfe8;
+    padding: 1px 6px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    width: fit-content;
+    margin-top: 2px;
+  }
+  .bn-cos-price { font-weight: 800; color: var(--text-1, #111827); flex-shrink: 0; }
+
+  .bn-cos-divider {
+    height: 1px;
+    background: #f3f4f6;
+    margin: 12px 0;
+  }
+  .bn-cos-totals {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 1.25rem;
+  }
+  .bn-cos-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.84rem;
+    color: var(--text-3, #4b5563);
+  }
+  .bn-cos-discount { color: #059669; font-weight: 700; }
+  .bn-free-tag {
+    color: #059669;
+    font-size: 0.72rem;
+    font-weight: 800;
+    background: #ecfdf5;
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+  .bn-cos-grand {
+    font-size: 1.05rem;
+    color: var(--text-1, #111827);
+    padding-top: 4px;
+  }
+  .bn-cos-total-val {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--accent, #db2777);
+  }
+
+  .bn-btn-confirm-booking {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px 20px;
+    background: var(--accent, #db2777);
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(219, 39, 119, 0.35);
+    transition: all .16s ease;
+  }
+  .bn-btn-confirm-booking:hover {
+    background: #be185d;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(219, 39, 119, 0.45);
+  }
+  .bn-btn-confirm-booking:disabled {
+    opacity: 0.85;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: 0 4px 14px rgba(219, 39, 119, 0.25);
+  }
+  .bn-spinner-svg {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    animation: bn-spin 0.75s linear infinite;
+  }
+  @keyframes bn-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  .bn-input-error {
+    border-color: #ef4444 !important;
+    background-color: #fffafb !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+  }
+
+  .bn-cos-assurances {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid #f3f4f6;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .bn-ca-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.74rem;
+    color: var(--text-3, #4b5563);
+  }
+  .bn-ca-row i { color: #059669; font-size: 0.95rem; }
+</style>
+
+<script>
+  function toggleAddressActive(radio) {
+    document.querySelectorAll('.bn-address-card').forEach(function(card) {
+      card.classList.remove('active');
+    });
+    if (radio.checked) {
+      radio.closest('.bn-address-card').classList.add('active');
+      var form = document.getElementById('bn-new-address-fields');
+      if (form) form.style.display = 'none';
+    }
+  }
+
+  function togglePayActive(radio) {
+    document.querySelectorAll('.bn-pay-card').forEach(function(card) {
+      card.classList.remove('active');
+    });
+    if (radio.checked) {
+      radio.closest('.bn-pay-card').classList.add('active');
+    }
+  }
+
+  function toggleNewAddressForm() {
+    var form = document.getElementById('bn-new-address-fields');
+    if (!form) return;
+    if (form.style.display === 'none' || form.style.display === '') {
+      form.style.display = 'flex';
+      // Deselect saved addresses
+      document.querySelectorAll('.bn-addr-radio').forEach(function(r) { r.checked = false; });
+      document.querySelectorAll('.bn-address-card').forEach(function(c) { c.classList.remove('active'); });
+    } else {
+      form.style.display = 'none';
+      var firstRadio = document.querySelector('.bn-addr-radio');
+      if (firstRadio) {
+        firstRadio.checked = true;
+        firstRadio.closest('.bn-address-card').classList.add('active');
+      }
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var form = document.getElementById('bn-checkout-form');
+    var btn = document.getElementById('bn-confirm-booking-btn');
+    if (!form || !btn) return;
+
+    form.addEventListener('submit', function(e) {
+      var newAddrBox = document.getElementById('bn-new-address-fields');
+      var isNewAddrVisible = newAddrBox && newAddrBox.style.display !== 'none';
+      var savedAddrRadios = document.querySelectorAll('.bn-addr-radio');
+      var hasSavedAddresses = savedAddrRadios.length > 0;
+      
+      var isUsingSavedAddress = hasSavedAddresses && !isNewAddrVisible;
+      var missing = [];
+
+      // Clear previous error styles
+      document.querySelectorAll('.bn-input-error').forEach(function(el) {
+        el.classList.remove('bn-input-error');
+      });
+
+      if (isUsingSavedAddress) {
+        var anyChecked = Array.from(savedAddrRadios).some(function(r) { return r.checked; });
+        if (!anyChecked) {
+          missing.push('Delivery Address');
+        }
+      } else {
+        var nameInput = document.getElementById('bn-cust-name');
+        var phoneInput = document.getElementById('bn-cust-phone');
+        var line1Input = document.getElementById('bn-addr-line1');
+        var pincodeInput = document.getElementById('bn-addr-pincode');
+
+        if (nameInput && !nameInput.value.trim()) {
+          missing.push('Full Name');
+          nameInput.classList.add('bn-input-error');
+        }
+        if (phoneInput && !phoneInput.value.trim()) {
+          missing.push('Phone Number');
+          phoneInput.classList.add('bn-input-error');
+        } else if (phoneInput && phoneInput.value.trim().length < 8) {
+          missing.push('Valid 10-digit Phone');
+          phoneInput.classList.add('bn-input-error');
+        }
+
+        if (line1Input && !line1Input.value.trim()) {
+          missing.push('House / Street Address');
+          line1Input.classList.add('bn-input-error');
+        }
+        if (pincodeInput && !pincodeInput.value.trim()) {
+          missing.push('Pincode');
+          pincodeInput.classList.add('bn-input-error');
+        }
+      }
+
+      if (missing.length > 0) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var msg = 'Please provide required details: ' + missing.join(', ');
+        if (window.showNotification) {
+          window.showNotification(msg, 'error', 5000);
+        } else {
+          alert(msg);
+        }
+
+        var firstErr = document.querySelector('.bn-input-error');
+        if (firstErr) {
+          firstErr.focus();
+          firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return false;
+      }
+
+      // Valid! Show interactive loading spinner on button and submit
+      btn.disabled = true;
+      btn.innerHTML = [
+        '<span class="bn-spinner-svg"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></span>',
+        '<span>Securing Your Appointment...</span>'
+      ].join('');
+
+      // Allow form submission to proceed
+    });
+  });
+</script>

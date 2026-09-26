@@ -1,0 +1,270 @@
+<% content_for :page_title, "Premium Beauty Services at Home (Legacy)" %>
+
+<%= render "shared/public_nav", active: "home" %>
+
+<!-- ======= HERO ======= -->
+<section class="bc-hero" id="home">
+  <div class="bc-hero-text">
+    <div class="bc-pretitle">
+      <span class="green-blink-dot"></span>
+      Trusted by 10,000+ customers
+    </div>
+
+    <h1>
+      Professional Beauty<br>
+      <span class="highlight">At Your Doorstep</span>
+    </h1>
+
+    <p class="bc-hero-sub">
+      Certified beauticians come to you — facials, hair styling, bridal makeup,
+      nail art, massages and more. Book in minutes, relax at home.
+    </p>
+
+    <div class="bc-hero-actions">
+      <%= link_to "/services", class: "bc-btn-pink bc-btn-lg" do %>
+        <i class="ti ti-calendar-plus"></i> Book a Service
+      <% end %>
+      <a href="/about" class="bc-btn-ghost bc-btn-lg" style="color:#374151;">
+        <i class="ti ti-play-circle me-1"></i> How it works
+      </a>
+    </div>
+
+    <div class="bc-trust-row">
+      <div class="bc-trust-stat">
+        <div class="num"><%= number_with_delimiter(@stats[:customers]) %>+</div>
+        <div class="lbl">Happy Customers</div>
+      </div>
+      <div class="bc-trust-divider"></div>
+      <div class="bc-trust-stat">
+        <div class="num"><%= @stats[:workers] %>+</div>
+        <div class="lbl">Expert Beauticians</div>
+      </div>
+      <div class="bc-trust-divider"></div>
+      <div class="bc-trust-stat">
+        <div class="num"><%= @stats[:cities] %>+</div>
+        <div class="lbl">Cities Covered</div>
+      </div>
+      <div class="bc-trust-divider"></div>
+      <div class="bc-trust-stat">
+        <div class="num">4.9★</div>
+        <div class="lbl">Average Rating</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bc-hero-image">
+    <img src="/hero_beauty.jpg" alt="Professional beauty service at home">
+    <div class="bc-hero-badge">
+      <span class="dot"></span>
+      Beautician on the way · 12 min
+    </div>
+  </div>
+</section>
+
+
+<!-- ======= HOW IT WORKS ======= -->
+<section class="bc-section" id="how-it-works">
+  <div class="bc-section-header">
+    <span class="pretitle">Simple Process</span>
+    <h2>Get Glam in 3 Easy Steps</h2>
+    <p>From booking to a beautiful you — it all takes less than 3 minutes.</p>
+  </div>
+
+  <div class="bc-steps">
+    <div class="bc-step">
+      <div class="bc-step-num">1</div>
+      <h3>Choose a Service</h3>
+      <p>Browse our curated catalogue of 50+ professional beauty treatments across all categories.</p>
+    </div>
+    <div class="bc-step">
+      <div class="bc-step-num">2</div>
+      <h3>Pick a Time Slot</h3>
+      <p>Select a date and time that works for you. Our beauticians are available 7 days a week.</p>
+    </div>
+    <div class="bc-step">
+      <div class="bc-step-num">3</div>
+      <h3>Relax at Home</h3>
+      <p>Your certified beautician arrives at your door with all equipment. Sit back and enjoy!</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ======= SERVICES ======= -->
+<section style="background: #fff; border-top: 1px solid rgba(0,0,0,.06); border-bottom: 1px solid rgba(0,0,0,.06);">
+  <div class="bc-section" id="services">
+    <div class="bc-section-header">
+      <span class="pretitle">Our Services</span>
+      <h2>Everything Beauty, Delivered</h2>
+      <p>From everyday care to bridal glam — we cover every occasion.</p>
+    </div>
+
+    <div class="bc-services">
+      <% service_cards = [
+        { icon: "💆‍♀️", bg: "rgba(219,39,119,.10)", title: "Facial & Skincare",  desc: "Deep cleansing, anti-aging, glow facials by certified skin experts." },
+        { icon: "💇‍♀️", bg: "rgba(109,40,217,.10)", title: "Hair Styling",       desc: "Blow-dry, keratin, hair spa, coloring and cut at your convenience." },
+        { icon: "💅",    bg: "rgba(234,88,12,.10)",  title: "Nail Art & Care",   desc: "Manicure, pedicure, gel nails, nail art designs and more." },
+        { icon: "👰",    bg: "rgba(219,39,119,.10)", title: "Bridal Makeup",     desc: "Head-to-toe bridal looks for your wedding, engagement or reception." },
+        { icon: "🧖‍♀️", bg: "rgba(5,150,105,.10)",  title: "Massage Therapy",   desc: "Relaxing full-body, head and foot massages by trained therapists." },
+        { icon: "🪡",    bg: "rgba(180,83,9,.10)",   title: "Waxing & Threading", desc: "Full body waxing and eyebrow/facial threading, painlessly done." },
+      ] %>
+      <% service_cards.each do |svc| %>
+        <div class="bc-service-card">
+          <div class="bc-service-icon" style="background:<%= svc[:bg] %>; font-size: 1.5rem;">
+            <%= svc[:icon] %>
+          </div>
+          <div>
+            <h4><%= svc[:title] %></h4>
+            <p><%= svc[:desc] %></p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <div style="text-align:center; margin-top:2.5rem;">
+      <a href="/services" class="bc-btn-pink" style="font-size:.95rem; padding:12px 30px;">
+        <i class="ti ti-grid"></i> View All Services
+      </a>
+    </div>
+  </div>
+</section>
+
+
+<!-- ======= BEAUTICIANS TEASER ======= -->
+<section class="bc-section">
+  <div class="bc-section-header">
+    <span class="pretitle">Verified Professionals</span>
+    <h2>Meet Our Top Beauticians</h2>
+    <p>Background-verified, certified salon experts delivering premium care at your doorstep.</p>
+  </div>
+
+  <div class="bc-bcard-grid">
+    <% [
+      { img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80", name: "Sunita Sharma",    spec: "Korean Facial & O3+ Specialist", rating: "4.9", reviews: "480", city: "Varanasi" },
+      { img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&q=80",   name: "Pooja Maurya",     spec: "Bridal HD Makeup Artist",      rating: "4.9", reviews: "390", city: "Varanasi" },
+      { img: "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=400&q=80", name: "Rekha Vishwakarma", spec: "Keratin & Hair Botox Expert",   rating: "5.0", reviews: "610", city: "Varanasi" },
+    ].each do |b| %>
+      <div class="bc-bcard">
+        <div class="bc-bcard-avatar-img">
+          <img src="<%= b[:img] %>" alt="<%= b[:name] %>" class="bc-bcard-photo">
+        </div>
+        <div class="bc-bcard-info">
+          <h4><%= b[:name] %></h4>
+          <p><%= b[:spec] %></p>
+          <div class="bc-bcard-meta">
+            <span>★ <%= b[:rating] %> (<%= b[:reviews] %> reviews)</span>
+            <span><i class="ti ti-map-pin"></i> <%= b[:city] %></span>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div style="text-align:center; margin-top:2.5rem;">
+    <a href="/beauticians" class="bc-btn-ghost" style="font-size:.95rem; padding:12px 30px; color:#374151;">
+      View All Beauticians <i class="ti ti-arrow-right"></i>
+    </a>
+  </div>
+</section>
+
+
+<!-- ======= OFFERS & DEALS TEASER ======= -->
+<% if @coupons.present? && @coupons.any? %>
+  <section style="background: linear-gradient(180deg, #faf9ff 0%, #fff7ed 50%, #faf9ff 100%); border-top: 1px solid rgba(0,0,0,.06); border-bottom: 1px solid rgba(0,0,0,.06); padding: 4rem 0;">
+    <div class="bc-section" id="offers">
+      <div class="bc-section-header">
+        <span class="pretitle">Exclusive Discounts</span>
+        <h2>Active Offers &amp; Promo Codes</h2>
+        <p>Save more on every doorstep beauty service with verified discount vouchers.</p>
+      </div>
+
+      <div class="bc-coupons-grid">
+        <% @coupons.each do |c| %>
+          <div class="bc-coupon-card">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div class="bc-coupon-tag" style="background:<%= c.badge_color %>;"><%= c.display_tag %></div>
+              <span style="font-size: 0.72rem; color: #6b7280; font-weight: 600;">
+                <i class="ti ti-clock"></i> <%= c.valid_until ? "Till #{c.display_valid_until}" : "No Expiry" %>
+              </span>
+            </div>
+            <div class="bc-coupon-discount"><%= c.display_discount %></div>
+            <h3><%= c.description.presence || "#{c.display_discount} on Luxury Services" %></h3>
+            <div style="font-size: 0.74rem; color: #64748b; margin: 2px 0;">
+              Min spend: <%= c.display_min_order %> <%= "• Max save: #{c.display_max_discount}" if c.max_discount %>
+            </div>
+            <div class="bc-coupon-footer">
+              <button type="button" class="bc-coupon-code" onclick="copyPromoCode('<%= c.code %>')" style="cursor: pointer; border: none;" title="Click to copy code">
+                <i class="ti ti-ticket"></i> <%= c.code %>
+              </button>
+              <a href="/offers" class="bc-coupon-cta">
+                View Deal <i class="ti ti-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <div style="text-align:center; margin-top:2.5rem;">
+        <a href="/offers" class="bc-btn-pink" style="font-size:.95rem; padding:12px 30px;">
+          <i class="ti ti-tag"></i> Explore All Offers (<%= Coupon.valid_now.count %>)
+        </a>
+      </div>
+    </div>
+  </section>
+<% end %>
+
+
+<!-- ======= WHY US ======= -->
+<section style="background:#fff; border-top:1px solid rgba(0,0,0,.06); border-bottom:1px solid rgba(0,0,0,.06);">
+  <div class="bc-section" id="about">
+    <div class="bc-section-header">
+      <span class="pretitle">Why <%= site_name %></span>
+      <h2>Beauty You Can Trust</h2>
+      <p>We set the standard for professional in-home beauty services in India.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem;">
+      <% [
+        { icon: "ti-shield-check", color: "#15803d", bg: "rgba(21,128,61,.10)", title: "Verified Pros",    text: "Every beautician is background-checked, certified and rated." },
+        { icon: "ti-clock",        color: "#b45309", bg: "rgba(180,83,9,.10)",  title: "On-Time Always", text: "We guarantee arrival within your chosen time slot." },
+        { icon: "ti-currency-rupee", color: "#0369a1", bg: "rgba(3,105,161,.10)", title: "Transparent Pricing", text: "No hidden charges. Pay what you see, nothing more." },
+        { icon: "ti-star",         color: "#db2777", bg: "rgba(219,39,119,.10)", title: "5-Star Quality",  text: "Our 4.9★ average rating speaks for itself." },
+      ].each do |feat| %>
+        <div style="background:#fff; border-radius:18px; border:1px solid rgba(0,0,0,.07); box-shadow:0 2px 12px rgba(0,0,0,.04); padding:1.75rem 1.5rem; text-align:center;">
+          <div style="width:52px;height:52px;border-radius:14px;background:<%= feat[:bg] %>;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+            <i class="ti <%= feat[:icon] %>" style="font-size:1.5rem; color:<%= feat[:color] %>;"></i>
+          </div>
+          <div style="font-weight:700;font-size:.97rem;color:#111827;margin-bottom:.4rem;"><%= feat[:title] %></div>
+          <div style="font-size:.83rem;color:#6b7280;line-height:1.55;"><%= feat[:text] %></div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</section>
+
+
+<!-- ======= CTA ======= -->
+<div style="max-width:1200px; margin: 0 auto 2rem;">
+  <div class="bc-cta-section">
+    <h2>Ready for Your Glow-Up?</h2>
+    <p>Join thousands of happy customers — book your first service today.</p>
+    <div style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap; position:relative;z-index:1;">
+      <%= link_to "/services", class: "bc-btn-white" do %>
+        <i class="ti ti-calendar-plus"></i> Book Your First Service
+      <% end %>
+      <a href="/about" style="background:rgba(255,255,255,.15); color:#fff; border:1.5px solid rgba(255,255,255,.35); padding:13px 28px; border-radius:50px; font-weight:600; font-size:1rem; text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:all .15s ease;">
+        <i class="ti ti-info-circle"></i> Learn More
+      </a>
+    </div>
+  </div>
+</div>
+
+
+<%= render "shared/public_footer" %>
+
+<script>
+  window.addEventListener('scroll', function() {
+    var nav = document.querySelector('.bc-nav');
+    if (nav) nav.classList.toggle('scrolled', window.scrollY > 20);
+  });
+</script>

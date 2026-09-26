@@ -1,0 +1,69 @@
+<%# frozen_string_literal: true %>
+<!-- Restore Full Database Backup Modal -->
+<div class="modal modal-blur fade" id="importBackupModal" tabindex="-1" role="dialog" aria-labelledby="importBackupModalTitle" aria-hidden="true" style="z-index: 1060;">
+  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 520px;">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 18px; overflow: hidden; background: var(--surface, #ffffff);">
+      <div class="modal-status bg-purple" style="height: 4px;"></div>
+      
+      <div class="modal-header border-0 pb-0 pt-4 px-4">
+        <div class="d-flex align-items-center gap-3">
+          <div class="avatar avatar-md rounded-3 bg-purple-subtle text-purple" style="width: 44px; height: 44px;">
+            <i class="ti ti-database-import fs-1"></i>
+          </div>
+          <div>
+            <h4 class="modal-title fw-bold mb-1" id="importBackupModalTitle" style="letter-spacing: -0.015em;">
+              Restore / Import Backup
+            </h4>
+            <div class="text-secondary small">Single-file full database snapshot restore</div>
+          </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <%= form_with url: admin_backup_import_path, method: :post, multipart: true, data: { turbo: false } do |f| %>
+        <div class="modal-body py-4 px-4">
+          <!-- Safe Import Guarantee Banner -->
+          <div class="p-3 mb-3 rounded-3" style="background-color: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25);">
+            <div class="d-flex align-items-start gap-2">
+              <i class="ti ti-shield-check fs-2 text-success mt-1"></i>
+              <div>
+                <div class="fw-bold text-success" style="font-size: 0.88rem;">Non-Destructive Safe Import Guarantee</div>
+                <div class="text-secondary small mt-1" style="line-height: 1.5;">
+                  <strong>Existing live data will NOT be overwritten or modified.</strong><br>
+                  If any record already exists in the system, it is kept 100% untouched. Only missing records from the backup file will be added.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-1" for="backup_file">
+              Select Backup File (<code class="text-purple">.json</code>)
+            </label>
+            <input type="file" 
+                   name="backup_file" 
+                   id="backup_file" 
+                   class="form-control" 
+                   accept=".json,application/json" 
+                   required 
+                   style="border-radius: 10px; padding: 0.65rem 0.85rem;" />
+            <div class="form-text text-muted small mt-1">
+              Supports <code>beautynest-full-database-backup-*.json</code> files exported from the system.
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer border-0 pt-0 pb-4 px-4 bg-transparent">
+          <div class="d-flex w-100 justify-content-end gap-2">
+            <button type="button" class="btn btn-outline-secondary px-4 fw-medium" data-bs-dismiss="modal" style="border-radius: 10px;">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary px-4 fw-semibold shadow-sm" style="border-radius: 10px; background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); border: none;">
+              <i class="ti ti-upload me-1 fs-3"></i> Restore Backup
+            </button>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

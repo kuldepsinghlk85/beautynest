@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <title>BeautyNest Home Service Platform — Complete User Manual & Tutorial Guide</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
+
+    :root {
+      --primary: #d946ef;
+      --primary-dark: #a21caf;
+      --primary-light: #fdf4ff;
+      --accent: #6366f1;
+      --dark: #0f172a;
+      --text-1: #1e293b;
+      --text-2: #475569;
+      --text-3: #64748b;
+      --border: #e2e8f0;
+      --surface: #ffffff;
+      --surface-2: #f8fafc;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text-1);
+      background-color: var(--surface-2);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .container {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+
+    /* Print & PDF formatting */
+    @page {
+      size: A4 portrait;
+      margin: 14mm 14mm 16mm 14mm;
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+      }
+      .container {
+        max-width: 100%;
+        padding: 0;
+      }
+      .page-break {
+        page-break-before: always;
+        break-before: page;
+        margin-top: 24px;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .card, .step-box, .screenshot-container {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      .top-banner {
+        display: none;
+      }
+    }
+
+    /* Header / Cover Page */
+    .cover-header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #4a044e 100%);
+      color: #ffffff;
+      padding: 48px 40px;
+      border-radius: var(--radius-lg);
+      margin-bottom: 32px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cover-header::after {
+      content: "";
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(217, 70, 239, 0.25) 0%, rgba(0,0,0,0) 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(12px);
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    .cover-title {
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+
+    .cover-subtitle {
+      font-size: 16px;
+      color: #cbd5e1;
+      max-width: 780px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .cover-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      padding-top: 20px;
+      font-size: 13px;
+      color: #94a3b8;
+    }
+
+    .cover-meta strong {
+      color: #ffffff;
+    }
+
+    /* Table of contents */
+    .toc-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 24px 30px;
+      margin-bottom: 32px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .toc-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px 24px;
+    }
+
+    .toc-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--text-2);
+      text-decoration: none;
+      padding: 6px 0;
+      border-bottom: 1px dashed var(--border);
+    }
+
+    .toc-num {
+      width: 24px;
+      height: 24px;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* Sections */
+    .section-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--dark);
+      margin: 36px 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.015em;
+    }
+
+    .section-title .section-tag {
+      font-size: 13px;
+      font-weight: 700;
+      background: #f1f5f9;
+      color: var(--text-3);
+      padding: 3px 10px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .section-desc {
+      font-size: 15px;
+      color: var(--text-2);
+      margin-bottom: 24px;
+      line-height: 1.65;
+    }
+
+    /* Step Card */
+    .step-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      margin-bottom: 28px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04);
+    }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .step-badge {
+      background: linear-gradient(135deg, #d946ef 0%, #a855f7 100%);
+      color: #ffffff;
+      padding: 5px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .step-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    .step-content {
+      color: var(--text-2);
+      font-size: 14px;
+      line-height: 1.65;
+      margin-bottom: 18px;
+    }
+
+    .step-list {
+      margin: 12px 0 18px 20px;
+      color: var(--text-2);
+    }
+
+    .step-list li {
+      margin-bottom: 6px;
+    }
+
+    /* Screenshots */
+    .screenshot-container {
+      margin: 16px 0;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #000;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+    }
+
+    .screenshot-container img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .screenshot-caption {
+      background: #f8fafc;
+      border-top: 1px solid var(--border);
+      padding: 10px 16px;
+      font-size: 12px;
+      color: var(--text-3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .screenshot-caption strong {
+      color: var(--text-1);
+    }
+
+    /* Highlights & Alerts */
+    .alert-box {
+      padding: 14px 18px;
+      border-radius: var(--radius-sm);
+      margin: 16px 0;
+      font-size: 13.5px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      line-height: 1.55;
+    }
+
+    .alert-success {
+      background: rgba(16, 185, 129, 0.09);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #065f46;
+    }
+
+    .alert-warning {
+      background: rgba(245, 158, 11, 0.09);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #92400e;
+    }
+
+    .alert-info {
+      background: rgba(99, 102, 241, 0.09);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #3730a3;
+    }
+
+    .alert-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    /* Role Matrix Table */
+    .role-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      background: var(--surface);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .role-table th {
+      background: #f1f5f9;
+      text-align: left;
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--dark);
+      border-bottom: 2px solid var(--border);
+    }
+
+    .role-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-2);
+      font-size: 13.5px;
+    }
+
+    .role-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .badge-role {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge-admin { background: #fee2e2; color: #991b1b; }
+    .badge-customer { background: #e0f2fe; color: #075985; }
+    .badge-worker { background: #fef3c7; color: #92400e; }
+
+    /* Action bar / top bar */
+    .top-banner {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    }
+
+    .btn-download {
+      background: linear-gradient(135deg, #d946ef 0%, #4f46e5 100%);
+      color: #ffffff;
+      padding: 8px 18px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 6px -1px rgba(217, 70, 239, 0.25);
+    }
+
+    .btn-download:hover {
+      opacity: 0.92;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Web View Action Bar -->
+  <div class="top-banner no-print">
+    <div style="font-weight: 700; font-size: 15px; color: var(--dark); display: flex; align-items: center; gap: 8px;">
+      <span style="color: var(--primary); font-size: 20px;">✦</span> BeautyNest User Guide &amp; Official Tutorial
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <a href="/admin/dashboard" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 8px; text-decoration: none; color: var(--text-2); font-size: 13px; font-weight: 600;">
+        ← Back to Admin Panel
+      </a>
+      <a href="/beautynest-user-manual-and-tutorial.pdf" class="btn-download" target="_blank" download>
+        ⬇ Download PDF Version
+      </a>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- Document Cover Header -->
+    <div class="cover-header">
+      <div class="badge-pill">
+        <span>📖</span> BeautyNest Platform Documentation &bull; Version 2026.09
+      </div>
+      <h1 class="cover-title">
+        BeautyNest Home Service Platform<br>
+        सम्पूर्ण यूज़र मैन्युअल और स्टेप-बाय-स्टेप ट्यूटोरियल
+      </h1>
+      <p class="cover-subtitle">
+        कस्टमर वेब ऐप से सर्विस बुकिंग, ब्यूटीशियन स्लॉट मैनेजमेंट, एडमिन कंट्रोल पैनल, डेटा बैकअप &amp; सेफ रिस्टोर और रियल-टाइम ऑपरेशन्स के संचालन हेतु विस्तृत सचित्र मार्गदर्शिका।
+      </p>
+      <div class="cover-meta">
+        <div><strong>प्रणाली (System):</strong> BeautyNest Home Service Platform (Ruby on Rails 8 Monolith)</div>
+        <div><strong>संस्करण (Version):</strong> v2.4 (Enterprise Edition)</div>
+        <div><strong>लक्षित पाठक (Audience):</strong> Super Admin, Operations Team, Customer Support &amp; Beauticians</div>
+      </div>
+    </div>
+
+    <!-- Table of Contents -->
+    <div class="toc-card">
+      <div class="toc-title">
+        📑 विषय सूची (Table of Contents)
+      </div>
+      <div class="toc-grid">
+        <a href="#section-roles" class="toc-item">
+          <span class="toc-num">1</span>
+          <span>प्रणाली संरचना &amp; रोल्स (Architecture &amp; Roles)</span>
+        </a>
+        <a href="#section-customer-flow" class="toc-item">
+          <span class="toc-num">2</span>
+          <span>कस्टमर वेब ऐप: 6-स्टेप बुकिंग प्रक्रिया</span>
+        </a>
+        <a href="#section-admin-dashboard" class="toc-item">
+          <span class="toc-num">3</span>
+          <span>एडमिन डैशबोर्ड &amp; लाइव KPI मेट्रिक्स</span>
+        </a>
+        <a href="#section-admin-bookings" class="toc-item">
+          <span class="toc-num">4</span>
+          <span>सर्विस बुकिंग्स लेजर &amp; एक्शन ड्रॉपडाउन</span>
+        </a>
+        <a href="#section-beautician-calendar" class="toc-item">
+          <span class="toc-num">5</span>
+          <span>ब्यूटीशियन प्रोफाइल, 7-दिन कैलेंडर &amp; स्लॉट स्टेटस</span>
+        </a>
+        <a href="#section-backup-restore" class="toc-item">
+          <span class="toc-num">6</span>
+          <span>फुल डेटाबेस बैकअप &amp; सुरक्षित रिस्टोर (Zero-Overwrite)</span>
+        </a>
+        <a href="#section-workforce" class="toc-item">
+          <span class="toc-num">7</span>
+          <span>ब्यूटीशियन इनविटेशन, कस्टमर्स &amp; पेमेंट लेजर</span>
+        </a>
+        <a href="#section-faq" class="toc-item">
+          <span class="toc-num">8</span>
+          <span>महत्वपूर्ण नियम &amp; अक्सर पूछे जाने वाले प्रश्न (FAQ)</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Section 1: Architecture & Roles -->
+    <div id="section-roles">
+      <div class="section-title">
+        <span>1. प्रणाली संरचना &amp; रोल्स (Architecture &amp; Roles)</span>
+        <span class="section-tag">Core Concept</span>
+      </div>
+      <p class="section-desc">
+        BeautyNest एक आधुनिक होम ब्यूटी एवं वेलनेस सर्विस प्लेटफॉर्म है। यह सिस्टम मुख्य रूप से तीन प्रमुख स्टेकहोल्डर्स के समन्वय पर कार्य करता है:
+      </p>
+
+      <table class="role-table">
+        <thead>
+          <tr>
+            <th>रोल (Role)</th>
+            <th>पहुंच (Access Portal)</th>
+            <th>प्रमुख जिम्मेदारियां (Primary Responsibilities)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge-role badge-admin">Super Admin</span></td>
+            <td><code>/admin/dashboard</code></td>
+            <td>सम्पूर्ण प्लेटफॉर्म नियंत्रण, बुकिंग अनुमोदन/रीअसाइनमेंट, ब्यूटीशियन स्लॉट मॉनिटरिंग, कूपन निर्माण, पेमेंट लेजर और <strong>डेटाबेस बैकअप/इम्पोर्ट</strong>।</td>
+          </tr>
+          <tr>
+            <td><span class="badge-role badge-customer">Customer</span></td>
+            <td><code>/</code>, <code>/categories</code>, <code>/cart</code></td>
+            <td>घर बैठे ब्यूटी सर्विसेज ब्राउज करना, पसंदीदा ब्यूटीशियन या ऑटो-असाइनमेंट चुनना, स्लॉट चयन, कूपन डिस्काउंट, और सर्विस के बाद रेटिंग/रिव्यू देना।</td>
+          </tr>
+          <tr>
+            <td><span class="badge-role badge-worker">Beautician / Worker</span></td>
+            <td><code>/admin/workers/:id</code> &amp; Mobile API</td>
+            <td>दैनिक अपॉइंटमेंट कैलेंडर देखना, सर्विस स्टेटस अपडेट (In Progress &rarr; Completed), और आपातकालीन स्थिति में <em>Cannot Reach</em> रीशेड्यूल रिक्वेस्ट भेजना।</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Section 2: Customer Flow -->
+    <div id="section-customer-flow" class="page-break">
+      <div class="section-title">
+        <span>2. कस्टमर वेब ऐप: 6-स्टेप बुकिंग प्रक्रिया (Customer Booking Journey)</span>
+        <span class="section-tag">Front-End Portal</span>
+      </div>
+      <p class="section-desc">
+        ग्राहक मोबाइल ब्राउज़र या कंप्यूटर के माध्यम से घर बैठे किसी भी ब्यूटी एवं होम सर्विस को कुछ ही क्लिक्स में बुक कर सकते हैं:
+      </p>
+
+      <!-- Step 1: Browse -->
+      <div class="step-card">
+        <div class="step-header">
+          <span class="step-badge">Step 1</span>
+          <h3 class="step-title">होम पेज एवं सर्विस कैटलॉग एक्सप्लोर करना</h3>
+        </div>
+        <div class="step-content">
+          ग्राहक वेबसाइट के होम पेज (<code>/</code>) या कैटेगरी पेज (<code>/categories</code>) पर जाकर उपलब्ध सर्विसेज (जैसे Facial Treatments, Hair Styling, Kitchen Deep Clean आदि) देख सकते हैं। प्रत्येक सर्विस कार्ड पर उसकी अवधि (Duration) और मूल्य (Price) स्पष्ट रूप से अंकित रहता है।
+        </div>
+        <div class="screenshot-container">
+          <img src="tutorial_screenshots/01_customer_home.png" alt="Customer Landing Page">
+          <div class="screenshot-caption">
+            <span><strong>चित्र 2.1:</strong> BeautyNest कस्टमर पोर्टल — होम पेज एवं ट्रेंडिंग सर्विसेज</span>
+            <span>URL: /</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Service Selection & Cart -->
+      <div class="step-card">
+        <div class="step-header">
+          <span class="step-badge">Step 2</span>
+          <h3 class="step-title">तारीख एवं समय स्लॉट चयन (Mandatory Slot Validation)</h3>
+        </div>
+        <div class="step-content">
+          सर्विस को कार्ट में जोड़ने से पहले ग्राहक को सर्विस की <strong>तारीख (Appointment Date)</strong> और <strong>समय स्लॉट (Time Slot)</strong> का चयन करना अनिवार्य होता है। सिस्टम बैकएंड पर ब्यूटीशियन की उपलब्धता और 30-मिनट के ट्रेवल बफर (Travel Buffer) को स्वतः वैलिडेट करता है ताकि कोई क्लैश न हो।
+        </div>
+        <div class="screenshot-container">
+          <img src="tutorial_screenshots/02_customer_services.png" alt="Categories & Services Catalog">
+          <div class="screenshot-caption">
+            <span><strong>चित्र 2.2:</strong> सर्विसेज एवं सब-कैटेगरी कैटलॉग</span>
+            <span>URL: /categories</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Cart Review & Coupons -->
+      <div class="step-card page-break">
+        <div class="step-header">
+          <span class="step-badge">Step 3</span>
+          <h3 class="step-title">कार्ट पेज: कूपन कोड &amp; बिल विवरण</h3>
+        </div>
+        <div class="step-content">
+          कार्ट पेज (<code>/cart</code>) पर ग्राहक अपने चयनित सर्विसेज, असाइन ब्यूटीशियन, और तय समय स्लॉट की समीक्षा कर सकते हैं।
+          <ul class="step-list">
+            <li><strong>कूपन कोड लागू करना:</strong> ग्राहक उपलब्ध प्रोमो कोड (जैसे <code>WELCOME20</code> या <code>FLAT200</code>) दर्ज करके तुरंत छूट प्राप्त कर सकते हैं।</li>
+            <li><strong>पारदर्शी बिलिंग:</strong> सर्विस सब-टोटल, सेफ्टी &amp; हाइजीन किट शुल्क (Free), और फाइनल देय राशि (Amount to Pay) स्पष्ट रूप से प्रदर्शित होती है।</li>
+          </ul>
+        </div>
+        <div class="screenshot-container">
+          <img src="tutorial_screenshots/03_customer_cart.png" alt="Customer Service Cart">
+          <div class="screenshot-caption">
+            <span><strong>चित्र 2.3:</strong> कस्टमर सर्विस कार्ट — अपॉइंटमेंट विवरण एवं कूपन डिस्काउंट</span>
+            <span>URL: /cart</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Checkout & Address -->
+      <div class="step-card">
+        <div class="step-header">
+          <span class="step-badge">Step 4</span>
+          <h3 class="step-title">चेकआउट: डोरस्टेप सर्विस एड्रेस &amp; पेमेंट विकल्प</h3>
+        </div>
+        <div class="step-content">
+          चेकआउट पेज (<code>/checkout</code>) पर ग्राहक 3 सरल खंडों में बुकिंग पूर्ण करते हैं:
+          <ol class="step-list">
+            <li><strong>तय शेड्यूल &amp; स्पेशलिस्ट:</strong> चयनित समय (उदा. Wed, 23 Sep at 02:00 PM - 03:00 PM)।</li>
+            <li><strong>सर्विस का पता (Doorstep Address):</strong> सेव किया हुआ डिफॉल्ट एड्रेस चुनें या नया एड्रेस जोड़ें।</li>
+            <li><strong>भुगतान विधि (Payment Method):</strong>
+              <ul>
+                <li><strong>Pay After Service (अनुशंसित):</strong> काम पूरा होने पर ब्यूटीशियन को नकद या UPI क्यूआर कोड से भुगतान करें।</li>
+                <li><strong>UPI &amp; Instant Online:</strong> ऑनलाइन गेटवे द्वारा तत्काल डिजिटल भुगतान।</li>
+              </ul>
+            </li>
+          </ol>
+          <em>"Confirm &amp; Book Appointment"</em> पर क्लिक करते ही बुकिंग तुरंत बन जाती है और ग्राहक को बुकिंग कन्फर्मेशन स्क्रीन मिलती है।
+        </div>
+        <div class="screenshot-container">
+          <img src="tutorial_screenshots/04_customer_checkout.png" alt="Checkout and Address Completion">
+          <div class="screenshot-caption">
+            <span><strong>चित्र 2.4:</strong> चेकआउट स्क्रीन — डोरस्टेप एड्रेस व पेमेंट चयन</span>
+            <span>URL: /checkout</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: Admin Dashboard -->
+    <div id="section-admin-dashboard" class="page-break">
+      <div class="section-title">
+        <span>3. एडमिन कंट्रोल पैनल: डैशबोर्ड &amp; ऑपरेशन्स (Admin Dashboard)</span>
+        <span class="section-tag">Control Center</span>
+      </div>
+      <p class="section-desc">
+        एडमिन पैनल प्लेटफॉर्म का केंद्रीय मस्तिष्क (Control Center) है। सुरक्षित लॉगिन (<code>/login</code>) के पश्चात एडमिन को सम्पूर्ण प्लेटफॉर्म का वास्तविक समय (Real-time) डेटा दिखता है:
+      </p>
+
+      <div class="step-card">
+        <div class="step-header">
+          <span class="step-badge">Control Hub</span>
+          <h3 class="step-title">एग्जीक्यूटिव डैशबोर्ड व बिजनेस एनालिटिक्स</h3>
+        </div>
+        <div class="step-content">
+          <ul class="step-list">
+            <li><strong>शीर्ष KPI कार्ड्स:</strong> Total Customers (कुल पंजीकृत ग्राहक), Active Workers (ड्यूटी पर सक्रिय ब्यूटीशियन्स), Total Bookings (प्लेटफॉर्म की सभी बुकिंग्स), और Gross Revenue (कुल एकत्रित राजस्व)।</li>
+            <li><strong>Bookings Trend:</strong> पिछले 6 महीनों में बुकिंग्स की वृद्धि का इंटरएक्टिव ग्राफ।</li>
+            <li><strong>Revenue Trajectory:</strong> राजस्व अर्जन का विस्तृत रेखाचित्र।</li>
+            <li><strong>Status Breakdown:</strong> बुकिंग स्थिति (Completed, Accepted/Confirmed, Pending, Cancelled) का डोनट चार्ट।</li>
+            <li><strong>Recent Bookings Ledger:</strong> हाल ही में दर्ज हुई नवीनतम बुकिंग्स की त्वरित सूची।</li>
+          </ul>
+        </div>
+        <div class="screenshot-container">
+          <img src="tutorial_screenshots/06_admin_dashboard.png" alt="Admin Executive Dashboard">
+          <div class="screenshot-caption">
+            <span><strong>चित्र 3.1:</strong> BeautyConnect एडमिन एग्जीक्यूटिव डैशबोर्ड</span>
+            <span>URL: /admin/dashboard</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: Admin Bookings Ledger -->
+    <div id="section-admin-bookings" class="page-break">
+      <div class="section-title">
+        <span>4. सर्विस बुकिंग्स प्रबंधन &amp; एक्शन ड्रॉपडाउन (Bookings Management)</span>
+        <span class="section-tag">Operations</span>
+      </div>
+      <p class="section-desc">
+        एडमिन बुकिंग्स पेज (<code>/admin/bookings</code>) से सभी ऑर्डर्स को ट्रैक, फिल्टर और प्रबंधित किया जाता है:
+      </p>
+
+      <div class="step-card">
+        <div class="step-header">
+          <span class="step-badge">Operations Table</span>
+          <h3 class="step-title">बुकिंग्स ग्रिड, स्टेटस फिल्टर्स एवं एक्शन मेनू</h3>
+        </div>
+        <div class="step-content">
+          <ul class="step-list">
+            <li><strong>क्विक स्टेटस फिल्टर्स (Pill Badges):</strong> एक क्लिक पर केवल विशिष्ट श्रेणी की बुकिंग्स देखें — <code>All (84)</code>, <code>Pending</code>, <code>Confirmed</code>, <code>Completed</code>, <code>Cancelled</code>, या <code>Cannot Reach (2)</code> (ब्यूटीशियन द्वारा भेजी गई विलंब या रीशेड्यूल रिक्वेस्ट)।</li>
+            <li><strong>सर्च एवं फिल्टर बार:</strong> कस्टमर नाम, फोन नंबर, बुकिंग नंबर, ब्यूटीशियन, पेमेंट स्थिति या टाइमफ्रेम द्वारा त्वरित खोज।</li>
+            <li><strong>एक्शन ड्रॉपडाउन मेनू (Actions):</strong>
+              प्रत्येक पंक्ति के अंत में उपलब्ध 3-डॉट मेनू से एडमिन बुकिंग को <em>Accept</em>, <em>Reject</em>, <em>Complete Service</em>, <em>Collect Payment</em>, या <em>Reschedule</em> कर सकता है। (यह ड्रॉपडाउन स्टेटस बैज को कभी नहीं छुपाता)।
+            </li>
+          </ul>
+        </div>
+        <div class="screenshot-container">
+          <img src="tutorial_screenshots/07_admin_bookings.png" alt="Admin Bookings Ledger">
+          <div class="screenshot-caption">
+            <span><strong>चित्र 4.1:</strong> सर्विस बुकिंग्स लेजर — स्टेटस फिल्टर्स, ग्रिड व एक्शन ड्रॉपडाउन</span>
+            <span>URL: /admin/bookings</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 5: Beautician Profile & Availability Calendar -->
+    <div id="section-beautician-calendar" class="page-break">
+      <div class="section-title">
+        <span>5. ब्यूटीशियन प्रोफाइल, 7-दिन कैलेंडर &amp; स्लॉट स्टेटस</span>
+        <span class="section-tag">Workforce &amp; Calendar</span>
+      </div>
+      <p class="section-desc">
+        ब्यूटीशियन प्रोफाइल पेज (<code>/admin/workers/:id</code>) पर एडमिन किसी भी ब्यूटीशियन का पूरा इतिहास और आगामी शेड्यूल देख सकता है:
+      </p>
+
+      <div class="step-card">
+        <div class="step-header">
+          <span class="step-badge">Smart Calendar</span>
+          <h3 class="step-title">7-डे कैलेंडर, स्लॉट उपलब्धता (Khali / Booked) व सर्विस इतिहास</h3>
+        </div>
+        <div class="step-content">
+          <ul class="step-list">
+            <li><strong>शीर्ष ओवरव्यू कार्ड:</strong> ब्यूटीशियन का नाम, रेटिंग (उदा. 4.7 &starf;), कुल पूर्ण किए गए काम (Jobs Done: 12), कुल अर्जित राजस्व (&rupee;13,988), और वर्तमान उपलब्धता स्थिति (🟢 Available Today)।</li>
+            <li><strong>7-डे अपॉइंटमेंट कैलेंडर (7-Day Calendar):</strong>
+              कैलेंडर में प्रत्येक दिन के नीचे स्पष्ट बैज दिखाई देता है:
+              <ul>
+                <li><span style="color: #10b981; font-weight: 700;">🟢 Khali (Available):</span> उस दिन स्लॉट पूरी तरह खाली है और नए ग्राहक बुक कर सकते हैं।</li>
+                <li><span style="color: #ef4444; font-weight: 700;">🔴 X Booked:</span> उस दिन कितने स्लॉट बुक हो चुके हैं।</li>
+                <li><span style="color: #64748b; font-weight: 600;">⚪ Off Duty:</span> ब्यूटीशियन का अवकाश (साप्ताहिक छुट्टी)।</li>
+              </ul>
+            </li>
+            <li><strong>दिन के समय स्लॉट बॉक्सेस:</strong> किसी भी तारीख पर क्लिक करने पर नीचे <code>09:00 AM</code>, <code>10:30 AM</code>, <code>12:00 PM</code>, <code>01:30 PM</code> आदि स्लॉट बॉक्सेस दिखते हैं।</li>
+            <li><strong>सर्विस हिस्ट्री टैब (Service History):</strong> ब्यूटीशियन द्वारा पूर्व में संपन्न की गई सभी सर्विसेज का पूरा रिकॉर्ड ग्राहक के नाम और तारीख के साथ।</li>
+            <li><strong>कस्टमर रिव्यूज टैब (Customer Reviews):</strong> ग्राहकों द्वारा दी गई वास्तविक स्टार रेटिंग्स और टिप्पणियाँ।</li>
+          </ul>
+        </div>
+        <div class="screenshot-container">
+          <img src="tutorial_screenshots/08_admin_worker_calendar.png" alt="Beautician 7-Day Appointment Calendar">
+          <div class="screenshot-caption">
+            <span><strong>चित्र 5.1:</strong> ब्यूटीशियन वर्कफोर्स प्रोफाइल — 7-दिवसीय स्लॉट कैलेंडर एवं सर्विस इतिहास</span>
+            <span>URL: /admin/workers/:id</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 6: Database Backup & Non-Destructive Restore -->
+    <div id="section-backup-restore" class="page-break">
+      <div class="section-title">
+        <span>6. फुल डेटाबेस बैकअप &amp; सुरक्षित रिस्टोर (Zero-Overwrite Guarantee)</span>
+        <span class="section-tag">Data Security</span>
+      </div>
+      <p class="section-desc">
+        प्लेटफॉर्म की सुरक्षा और बैकअप हेतु सिंगल-क्लिक एक्सपोर्ट और नॉन-डिस्ट्रक्टिव सुरक्षित रिस्टोर की सुविधा प्रदान की गई है:
+      </p>
+
+      <div class="step-card">
+        <div class="step-header">
+          <span class="step-badge">Safe Import</span>
+          <h3 class="step-title">डेटा एक्सपोर्ट &amp; इम्पोर्ट की कार्यप्रणाली</h3>
+        </div>
+        <div class="step-content">
+          <div class="alert-box alert-success">
+            <span class="alert-icon">🛡️</span>
+            <div>
+              <strong>Non-Destructive Safe Import Guarantee (शून्य-ओवरराइट नियम):</strong><br>
+              इम्पोर्ट करते समय पुराना डेटा नए वाले डेटा पर कभी भी ओवरलैप या ओवरराइट नहीं होगा। यदि कोई रिकॉर्ड डेटाबेस में पहले से मौजूद है, तो वह <strong>100% अछूता (untouched)</strong> रहेगा और उसमें कोई संशोधन नहीं किया जाएगा। केवल वही रिकॉर्ड जुड़ेंगे जो डेटाबेस में नहीं हैं।
+            </div>
+          </div>
+
+          <h4 style="margin: 14px 0 8px 0; color: var(--dark); font-size: 15px;">बैकअप कैसे डाउनलोड करें (Export Backup):</h4>
+          <ol class="step-list">
+            <li>Bookings (<code>/admin/bookings</code>) या Beauticians (<code>/admin/workers</code>) पेज पर जाएं।</li>
+            <li>ऊपरी दाएं कोने में <strong>"Export &darr;"</strong> बटन पर क्लिक करें।</li>
+            <li>ड्रॉपडाउन में <strong>"Full Database Backup (JSON)"</strong> पर क्लिक करें। आपका सम्पूर्ण डेटाबेस <code>beautynest-full-database-backup-YYYYMMDDHHMM.json</code> के रूप में डाउनलोड हो जाएगा।</li>
+          </ol>
+
+          <h4 style="margin: 14px 0 8px 0; color: var(--dark); font-size: 15px;">बैकअप कैसे रिस्टोर करें (Single-File Restore):</h4>
+          <ol class="step-list">
+            <li>उसी Export ड्रॉपडाउन मेनू में <strong>"Restore / Import Backup (JSON)"</strong> पर क्लिक करें।</li>
+            <li>एक Apple-styled मोडल खुलेगा जिसमें सुरक्षित इम्पोर्ट की गारंटी प्रदर्शित होगी।</li>
+            <li>अपनी <code>.json</code> बैकअप फ़ाइल चुनें और <strong>"Restore Backup"</strong> बटन दबाएं।</li>
+            <li>सिस्टम तुरंत मिसिंग रिकॉर्ड्स को रिस्टोर करेगा और स्पष्ट सूचना देगा कि कितने रिकॉर्ड्स नए जुड़े और कितने मौजूदा रिकॉर्ड्स सुरक्षित रखे गए।</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 7: Workforce, Customers & Payments -->
+    <div id="section-workforce" class="page-break">
+      <div class="section-title">
+        <span>7. वर्कफोर्स प्रबंधन, कस्टमर्स &amp; पेमेंट लेजर</span>
+        <span class="section-tag">Management</span>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header">
+          <span class="step-badge">Staff &amp; Ledger</span>
+          <h3 class="step-title">ब्यूटीशियन इनविटेशन, कस्टमर डायरेक्टरी एवं पेमेंट्स</h3>
+        </div>
+        <div class="step-content">
+          <ul class="step-list">
+            <li><strong>ब्यूटीशियन इनविटेशन (Invite Worker):</strong> <code>/admin/workers</code> पेज से नए ब्यूटीशियन्स को ईमेल/SMS इनविटेशन लिंक भेजा जा सकता है जिससे वे अपना KYC और स्लॉट टाइमिंग स्वयं सेट कर सकें।</li>
+            <li><strong>कस्टमर डायरेक्टरी (Customers):</strong> <code>/admin/customers</code> पेज पर सभी पंजीकृत ग्राहकों के नाम, फोन, ईमेल, कुल बुकिंग्स और सक्रिय/निष्क्रिय स्थिति देखी जा सकती है।</li>
+            <li><strong>पेमेंट लेजर (Payment Ledger):</strong> <code>/admin/payments</code> पर हर ट्रांजैक्शन की विधि (Cash, Online, UPI), राशि और स्थिति (Completed, Pending, Refunded) का पारदर्शी ब्योरा उपलब्ध रहता है।</li>
+          </ul>
+        </div>
+        <div class="screenshot-container">
+          <img src="tutorial_screenshots/09_admin_workers_list.png" alt="Admin Workers Directory">
+          <div class="screenshot-caption">
+            <span><strong>चित्र 7.1:</strong> ब्यूटीशियन डायरेक्टरी — स्पेशलिटी, रेटिंग व स्टेटस</span>
+            <span>URL: /admin/workers</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 8: FAQ & Rules -->
+    <div id="section-faq" class="page-break">
+      <div class="section-title">
+        <span>8. महत्वपूर्ण नियम &amp; अक्सर पूछे जाने वाले प्रश्न (FAQ &amp; Best Practices)</span>
+        <span class="section-tag">Guidelines</span>
+      </div>
+
+      <div class="step-card">
+        <h4 style="color: var(--dark); font-size: 15px; margin-bottom: 8px;">Q1: क्या ग्राहक बिना स्लॉट चुने बुकिंग कर सकता है?</h4>
+        <p style="color: var(--text-2); font-size: 13.5px; margin-bottom: 16px;">
+          <strong>उत्तर:</strong> नहीं। ब्यूटीशियन की उपलब्धता सुनिश्चित करने के लिए कार्ट में सर्विस जोड़ते समय तारीख और स्लॉट का चयन अनिवार्य (Mandatory) है।
+        </p>
+
+        <h4 style="color: var(--dark); font-size: 15px; margin-bottom: 8px;">Q2: ट्रेवल बफर (Travel Buffer) क्या है?</h4>
+        <p style="color: var(--text-2); font-size: 13.5px; margin-bottom: 16px;">
+          <strong>उत्तर:</strong> प्रत्येक सर्विस के बाद सिस्टम स्वतः 30 मिनट का ट्रेवल बफर जोड़ता है ताकि ब्यूटीशियन एक ग्राहक के घर से दूसरे ग्राहक के घर बिना देरी के सुरक्षित पहुंच सके।
+        </p>
+
+        <h4 style="color: var(--dark); font-size: 15px; margin-bottom: 8px;">Q3: यदि ब्यूटीशियन समय पर न पहुंच पाए तो क्या होगा?</h4>
+        <p style="color: var(--text-2); font-size: 13.5px; margin-bottom: 16px;">
+          <strong>उत्तर:</strong> ब्यूटीशियन अपने मोबाइल पोर्टल से "Cannot Reach / Request Reschedule" भेज सकती है। यह एडमिन के पास <code>Cannot Reach</code> टैग के साथ आ जाता है जहाँ एडमिन स्लॉट बदल सकता है या दूसरी ब्यूटीशियन असाइन कर सकता है।
+        </p>
+
+        <h4 style="color: var(--dark); font-size: 15px; margin-bottom: 8px;">Q4: क्या बैकअप रिस्टोर करने से मेरी नई बुकिंग्स मिट जाएंगी?</h4>
+        <p style="color: var(--text-2); font-size: 13.5px; margin-bottom: 0;">
+          <strong>उत्तर:</strong> बिल्कुल नहीं! बैकअप रिस्टोर में <em>Zero-Overwrite Safety Rule</em> लागू है। आपके नए ऑर्डर्स और मौजूदा डेटा पर 1% भी ओवरलैप नहीं होगा; केवल वही डेटा जुड़ेगा जो सिस्टम में गायब था।
+        </p>
+      </div>
+
+      <div style="text-align: center; color: var(--text-3); font-size: 12px; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border);">
+        &copy; 2026 BeautyNest Home Service Platform. All rights reserved. &bull; Enterprise Operations Manual
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

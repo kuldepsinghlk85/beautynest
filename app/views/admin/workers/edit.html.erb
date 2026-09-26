@@ -1,0 +1,388 @@
+<% content_for :page_title, "Edit Worker" %>
+
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">Workforce Management</div>
+      <h2 class="page-title fs-1 fw-bold">Edit Worker: <%= @worker.name %></h2>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <%= link_to admin_worker_path(@worker), class: "btn btn-outline-secondary" do %>
+        <i class="ti ti-arrow-left me-1 fs-3"></i> Back to Profile
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<%= form_with model: [:admin, @worker], scope: :worker, url: admin_worker_path(@worker), method: :patch do |f| %>
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card shadow-sm border mb-4">
+        <div class="card-header border-bottom d-flex justify-content-between align-items-center py-3">
+          <h3 class="card-title fw-bold mb-0">Worker Details & Verification</h3>
+          <div><%= worker_status_badge(@worker.status) %></div>
+        </div>
+
+        <% if @worker.errors.any? %>
+          <div class="card-body border-bottom bg-danger-lt py-3">
+            <div class="d-flex align-items-start">
+              <i class="ti ti-alert-triangle text-danger fs-2 me-2 mt-1"></i>
+              <div>
+                <div class="fw-bold text-danger mb-1">Please correct the following errors:</div>
+                <ul class="mb-0 ps-3 text-danger small">
+                  <% @worker.errors.full_messages.each do |msg| %>
+                    <li><%= msg %></li>
+                  <% end %>
+                </ul>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <div class="card-body">
+          <!-- Profile Picture Section -->
+          <div class="p-3 mb-4 border rounded-3 bg-surface-secondary">
+            <label class="form-label fw-semibold mb-2">Profile Picture / Avatar</label>
+            <div class="d-flex align-items-center gap-3">
+              <div id="worker-avatar-preview-wrap">
+                <% if @worker.avatar_url.present? %>
+                  <img id="worker-avatar-current-img" src="<%= @worker.avatar_url %>" alt="<%= @worker.name %>" class="avatar avatar-xl rounded-circle shadow-sm" style="object-fit: cover;" />
+                  <img id="worker-avatar-preview-img" src="#" alt="Preview" class="avatar avatar-xl rounded-circle shadow-sm" style="object-fit: cover; display: none;" />
+                <% else %>
+                  <span class="avatar avatar-xl rounded-circle bg-indigo-lt text-indigo fs-1 fw-bold shadow-sm" id="worker-avatar-placeholder">
+                    <%= @worker.initials %>
+                  </span>
+                  <img id="worker-avatar-preview-img" src="#" alt="Preview" class="avatar avatar-xl rounded-circle shadow-sm" style="object-fit: cover; display: none;" />
+                <% end %>
+              </div>
+              <div class="flex-grow-1">
+                <%# Hidden carry-over so existing URL isn't wiped on save if no new file uploaded %>
+                <input type="hidden" name="worker[avatar_url]" value="<%= @worker.avatar_url %>">
+                <%= f.file_field :avatar, class: "form-control mb-1", id: "worker_avatar_input", accept: "image/jpeg,image/png,image/webp,image/gif" %>
+                <div class="form-hint">Upload new photo (JPEG, PNG, WebP up to 5MB). Automatically updates everywhere.</div>
+                <% if @worker.avatar_url.present? %>
+                  <label class="form-check mt-2 cursor-pointer text-danger small fw-semibold">
+                    <input type="checkbox" name="worker[remove_avatar]" value="1" class="form-check-input" id="worker_remove_avatar">
+                    <i class="ti ti-trash me-1"></i> Remove current photo
+                  </label>
+                <% end %>
+              </div>
+            </div>
+          </div>
+
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold" for="worker_name">Full Name <span class="text-danger">*</span></label>
+              <%= f.text_field :name, class: "form-control", id: "worker_name", required: true %>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold" for="worker_speciality">Primary Speciality</label>
+              <select name="worker[speciality]" id="worker_speciality" class="form-select">
+                <% current_spec = @worker.worker_profile&.bio.presence || @worker[:speciality] %>
+                <% ["Hair Styling", "Skincare & Facial", "Nail Art", "Massage Therapy", "Bridal Makeup", "Hair Coloring", "Waxing & Threading"].each do |spec| %>
+                  <option value="<%= spec %>" <%= "selected" if current_spec == spec %>><%= spec %></option>
+                <% end %>
+              </select>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold" for="worker_email">Email Address <span class="text-danger">*</span></label>
+              <%= f.email_field :email, class: "form-control", id: "worker_email", required: true %>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold" for="worker_phone">Phone Number <span class="text-danger">*</span></label>
+              <%= f.telephone_field :phone, class: "form-control", id: "worker_phone", required: true %>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <label class="form-label fw-semibold" for="worker_city">Serving City</label>
+              <select name="worker[city]" id="worker_city" class="form-select">
+                <% current_city = @worker.serving_city %>
+                <% if @cities.present? && @cities.any? %>
+                  <% @cities.each do |city| %>
+                    <option value="<%= city.name %>" <%= "selected" if current_city == city.name %>><%= city.name %><%= " (#{city.state})" if city.state.present? %></option>
+                  <% end %>
+                <% else %>
+                  <% ["Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai", "Pune", "Jaipur", "Kolkata", "Coimbatore"].each do |city| %>
+                    <option value="<%= city %>" <%= "selected" if current_city == city %>><%= city %></option>
+                  <% end %>
+                <% end %>
+              </select>
+              <div class="form-hint">Operational base city.</div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold" for="worker_experience_years">Experience (Years)</label>
+              <input type="number" name="worker[experience_years]" id="worker_experience_years" class="form-control" min="0" max="40" value="<%= @worker.worker_profile&.experience_years || 0 %>">
+              <div class="form-hint">Years in practice.</div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold" for="worker_worker_tier_id">Worker Tier <span class="text-danger">*</span></label>
+              <select name="worker[worker_tier_id]" id="worker_worker_tier_id" class="form-select" required>
+                <% tiers = (@worker_tiers.presence || WorkerTier.active.ordered).to_a %>
+                <% current_tier_id = @profile&.worker_tier_id || tiers.find { |t| t.slug == "bronze" }&.id || tiers.first&.id %>
+                <% tiers.each do |tier| %>
+                  <option value="<%= tier.id %>" <%= "selected" if current_tier_id.to_s == tier.id.to_s %>>
+                    <%= tier.name %> (<%= '%.2f' % tier.price_multiplier %>x)
+                  </option>
+                <% end %>
+              </select>
+              <div class="form-hint">Bronze / Silver / Gold pricing.</div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold" for="worker_status">Account Status</label>
+              <%= f.select :status, [["Active & Verified", "active"], ["Inactive / Suspended", "inactive"]], {}, class: "form-select", id: "worker_status" %>
+              <div class="form-hint">Account active state.</div>
+            </div>
+          </div>
+
+          <!-- KYC & Identity -->
+          <div class="mb-1 pb-2 border-bottom">
+            <span class="text-secondary small fw-semibold text-uppercase" style="letter-spacing:.06em;">KYC Verification & Identity</span>
+          </div>
+          <div class="row g-3 mb-4 mt-1">
+            <div class="col-md-12">
+              <label class="form-label fw-semibold">KYC Status <span class="text-danger">*</span></label>
+              <% current_kyc = @profile&.kyc_status || "pending" %>
+              <div class="d-flex gap-2" style="border: 1px solid var(--border-strong); border-radius: 12px; padding: 6px; background: var(--surface-2);">
+                <label class="flex-fill text-center" style="cursor:pointer;">
+                  <input type="radio" name="worker[kyc_status]" value="approved" class="d-none kyc-radio"
+                         <%= "checked" if current_kyc == "approved" %>>
+                  <span class="d-block py-2 px-3 rounded-2 fw-semibold small kyc-pill"
+                        style="transition: all .16s ease; <%= current_kyc == 'approved' ? 'background:#15803d;color:#fff;box-shadow:0 2px 8px rgba(21,128,61,.28);' : 'color:var(--text-3);' %>">
+                    <i class="ti ti-shield-check me-1"></i>KYC Cleared
+                  </span>
+                </label>
+                <label class="flex-fill text-center" style="cursor:pointer;">
+                  <input type="radio" name="worker[kyc_status]" value="pending" class="d-none kyc-radio"
+                         <%= "checked" if current_kyc == "pending" %>>
+                  <span class="d-block py-2 px-3 rounded-2 fw-semibold small kyc-pill"
+                        style="transition: all .16s ease; <%= current_kyc == 'pending' ? 'background:#b45309;color:#fff;box-shadow:0 2px 8px rgba(180,83,9,.28);' : 'color:var(--text-3);' %>">
+                    <i class="ti ti-clock me-1"></i>Pending Review
+                  </span>
+                </label>
+                <label class="flex-fill text-center" style="cursor:pointer;">
+                  <input type="radio" name="worker[kyc_status]" value="rejected" class="d-none kyc-radio"
+                         <%= "checked" if current_kyc == "rejected" %>>
+                  <span class="d-block py-2 px-3 rounded-2 fw-semibold small kyc-pill"
+                        style="transition: all .16s ease; <%= current_kyc == 'rejected' ? 'background:#b91c1c;color:#fff;box-shadow:0 2px 8px rgba(185,28,28,.28);' : 'color:var(--text-3);' %>">
+                    <i class="ti ti-shield-x me-1"></i>Rejected
+                  </span>
+                </label>
+              </div>
+              <div class="form-hint mt-2"><i class="ti ti-id-badge me-1"></i>Click a pill to switch KYC state. Saves on form submit.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold" for="worker_aadhaar_number">Aadhaar Number (12-digit)</label>
+              <input type="text" name="worker[aadhaar_number]" id="worker_aadhaar_number"
+                     class="form-control" inputmode="numeric" maxlength="12" pattern="\d{12}"
+                     placeholder="e.g. 543210987654"
+                     title="Must be exactly 12 digits"
+                     value="<%= @profile&.aadhaar_number %>">
+              <div class="form-hint">12-digit government ID number.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold" for="worker_upi_id">Payout UPI ID</label>
+              <input type="text" name="worker[upi_id]" id="worker_upi_id"
+                     class="form-control" placeholder="e.g. worker@okhdfcbank"
+                     value="<%= @profile&.upi_id %>">
+              <div class="form-hint">UPI handle for earnings payout.</div>
+            </div>
+          </div>
+
+          <!-- Available Days (Worker selects available days) -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Available Working Days <span class="text-danger">*</span></label>
+            <div class="d-flex flex-wrap gap-2 pt-1">
+              <% current_days = @worker.available_days %>
+              <% WorkerProfile::DAYS_OF_WEEK.each do |day| %>
+                <% checked = current_days.include?(day) %>
+                <label class="form-check form-check-inline border rounded px-3 py-2 bg-surface cursor-pointer mb-0">
+                  <input class="form-check-input me-2" type="checkbox" name="worker[available_days][]" value="<%= day %>" <%= "checked" if checked %>>
+                  <span class="badge bg-secondary-lt text-secondary me-1" style="font-size: 0.7rem;"><%= WorkerProfile::DAY_CODES[day] %></span>
+                  <span class="form-check-label fw-semibold text-reset"><%= day %></span>
+                </label>
+              <% end %>
+            </div>
+            <div class="form-hint mt-2">
+              <i class="ti ti-calendar me-1"></i> Check the days this worker accepts bookings. Coverage is active throughout the scheduled day.
+            </div>
+          </div>
+
+          <!-- Time Slot & Duty Availability -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Time Slot Availability</label>
+              <div class="card card-sm bg-surface-secondary border p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                  <div>
+                    <div class="fw-bold text-reset">
+                      <i class="ti ti-clock text-primary me-1"></i> Full Day (Throughout the Day)
+                    </div>
+                    <div class="text-secondary small mt-1">Worker is available throughout each chosen working day.</div>
+                  </div>
+                  <span class="badge bg-purple-lt">Fixed Full-Day</span>
+                </div>
+              </div>
+              <input type="hidden" name="worker[time_slot]" value="Full Day (Throughout the Day)">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold" for="worker_is_available">Duty Status</label>
+              <select name="worker[is_available]" id="worker_is_available" class="form-select">
+                <option value="1" <%= "selected" if @worker.worker_profile&.is_available != false %>>🟢 Available for Bookings</option>
+                <option value="0" <%= "selected" if @worker.worker_profile&.is_available == false %>>🔴 Off Duty / On Leave</option>
+              </select>
+              <div class="form-hint">Master availability toggle.</div>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold" for="worker_password">Reset Password</label>
+              <%= f.password_field :password, class: "form-control", id: "worker_password", placeholder: "Leave blank to keep current password" %>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold" for="worker_password_confirmation">Confirm Password</label>
+              <%= f.password_field :password_confirmation, class: "form-control", id: "worker_password_confirmation", placeholder: "Confirm new password" %>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold" for="worker_bio">Bio & Professional Summary</label>
+            <textarea name="worker[bio]" id="worker_bio" class="form-control" rows="3" placeholder="Background check, qualifications..."><%= @worker.worker_profile&.bio %></textarea>
+          </div>
+        </div>
+        <div class="card-footer border-top d-flex justify-content-between align-items-center bg-transparent py-3">
+          <%= link_to "Cancel", admin_worker_path(@worker), class: "btn btn-link link-secondary" %>
+          <button type="submit" class="btn btn-primary shadow-sm">
+            <i class="ti ti-check me-1 fs-3"></i> Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <!-- KYC Status Quick-card -->
+      <div class="card shadow-sm border mb-4" id="kyc-status-card">
+        <div class="card-header border-bottom py-3">
+          <h3 class="card-title fw-bold mb-0">
+            <i class="ti ti-shield-check me-2 text-primary"></i>KYC Status
+          </h3>
+        </div>
+        <div class="card-body">
+          <% profile = @worker.worker_profile %>
+          <% kyc = profile&.kyc_status || "pending" %>
+
+          <!-- Visual state display -->
+          <div class="d-flex align-items-center gap-3 p-3 rounded-3 mb-3"
+               style="background: var(--surface-2); border: 1px solid var(--border);">
+            <% if kyc == "approved" %>
+              <span class="avatar rounded-2" style="background:rgba(21,128,61,.15); color:#15803d; width:42px; height:42px;">
+                <i class="ti ti-shield-check fs-2"></i>
+              </span>
+              <div>
+                <div class="fw-bold" style="color:#15803d;">KYC Verified</div>
+                <div class="text-secondary small">Identity documents cleared</div>
+              </div>
+            <% elsif kyc == "rejected" %>
+              <span class="avatar rounded-2" style="background:rgba(185,28,28,.15); color:#b91c1c; width:42px; height:42px;">
+                <i class="ti ti-shield-x fs-2"></i>
+              </span>
+              <div>
+                <div class="fw-bold" style="color:#b91c1c;">KYC Rejected</div>
+                <div class="text-secondary small">Verification failed</div>
+              </div>
+            <% else %>
+              <span class="avatar rounded-2" style="background:rgba(180,83,9,.15); color:#b45309; width:42px; height:42px;">
+                <i class="ti ti-clock fs-2"></i>
+              </span>
+              <div>
+                <div class="fw-bold" style="color:#b45309;">Pending Review</div>
+                <div class="text-secondary small">Awaiting verification</div>
+              </div>
+            <% end %>
+          </div>
+
+          <!-- Aadhaar display -->
+          <% aadhaar = profile&.aadhaar_number.presence %>
+          <div class="d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom">
+            <span class="text-secondary small">Aadhaar</span>
+            <span class="fw-semibold font-monospace small text-reset">
+              <%= aadhaar ? "XXXX-XXXX-#{aadhaar.last(4)}" : "—" %>
+            </span>
+          </div>
+
+          <!-- UPI display -->
+          <div class="d-flex align-items-center justify-content-between">
+            <span class="text-secondary small">Payout UPI</span>
+            <span class="fw-semibold small font-monospace text-reset">
+              <%= profile&.upi_id.presence || "—" %>
+            </span>
+          </div>
+
+          <div class="form-hint mt-3"><i class="ti ti-pencil me-1"></i>Change KYC status using the toggle in the main form above.</div>
+        </div>
+      </div>
+
+      <!-- Live Availability card -->
+      <div class="card shadow-sm border mb-4">
+        <div class="card-header border-bottom py-3">
+          <h3 class="card-title fw-bold mb-0">Live Availability</h3>
+        </div>
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+            <span class="text-secondary">Today's Status</span>
+            <span><%= worker_availability_badge(@worker) %></span>
+          </div>
+          <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+            <span class="text-secondary">Operating City</span>
+            <span class="fw-semibold text-reset"><%= @worker.serving_city %></span>
+          </div>
+          <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+            <span class="text-secondary">Time Slot</span>
+            <span class="badge bg-purple-lt">Full Day</span>
+          </div>
+          <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+            <span class="text-secondary">Completed Jobs</span>
+            <span class="fw-bold fs-3 text-primary"><%= @worker.bookings_count %></span>
+          </div>
+          <div class="d-flex align-items-center justify-content-between">
+            <span class="text-secondary">Average Rating</span>
+            <span class="text-warning fw-bold fs-4">
+              <i class="ti ti-star-filled me-1"></i><%= @worker.worker_profile&.rating_avg || 0.0 %> / 5.0
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<script>
+  // Live KYC toggle — update pill styles when a radio is selected
+  document.addEventListener("DOMContentLoaded", function() {
+    const radios = document.querySelectorAll(".kyc-radio");
+    const styles = {
+      approved: "background:#15803d;color:#fff;box-shadow:0 2px 8px rgba(21,128,61,.30);",
+      pending:  "background:#b45309;color:#fff;box-shadow:0 2px 8px rgba(180,83,9,.30);",
+      rejected: "background:#b91c1c;color:#fff;box-shadow:0 2px 8px rgba(185,28,28,.30);"
+    };
+    function updatePills() {
+      radios.forEach(function(r) {
+        const pill = r.nextElementSibling;
+        if (r.checked) {
+          pill.style.cssText = styles[r.value];
+        } else {
+          pill.style.cssText = "color:var(--text-3);background:transparent;box-shadow:none;";
+        }
+      });
+    }
+    radios.forEach(function(r) { r.addEventListener("change", updatePills); });
+  });
+</script>
+
+

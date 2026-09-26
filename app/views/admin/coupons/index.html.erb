@@ -1,0 +1,266 @@
+<% content_for :page_title, "Coupons & Discounts" %>
+
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">Promotions & Growth</div>
+      <h2 class="page-title fs-1 fw-bold">Coupons & Discounts</h2>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <% if policy(Coupon).create? %>
+        <%= link_to new_admin_coupon_path, class: "btn btn-primary shadow-sm" do %>
+          <i class="ti ti-plus me-1 fs-3"></i> Create Coupon
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- KPI Metric Cards -->
+<div class="row row-cards mb-4">
+  <div class="col-sm-6 col-lg-3">
+    <div class="card card-sm shadow-sm border">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-md rounded-3 bg-primary-lt text-primary me-3">
+            <i class="ti ti-tag fs-1"></i>
+          </span>
+          <div>
+            <div class="text-secondary small fw-medium">Total Coupons</div>
+            <div class="fs-2 fw-bold"><%= @all_coupons.size %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card card-sm shadow-sm border">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-md rounded-3 bg-green-lt text-green me-3">
+            <i class="ti ti-circle-check fs-1"></i>
+          </span>
+          <div>
+            <div class="text-secondary small fw-medium">Active Coupons</div>
+            <div class="fs-2 fw-bold text-success"><%= @all_coupons.count { |c| c.status == 'active' } %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card card-sm shadow-sm border">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-md rounded-3 bg-azure-lt text-azure me-3">
+            <i class="ti ti-shopping-cart-discount fs-1"></i>
+          </span>
+          <div>
+            <div class="text-secondary small fw-medium">Total Redemptions</div>
+            <div class="fs-2 fw-bold text-azure"><%= @all_coupons.sum(:usage_count) %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card card-sm shadow-sm border">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-md rounded-3 bg-purple-lt text-purple me-3">
+            <i class="ti ti-percentage fs-1"></i>
+          </span>
+          <div>
+            <div class="text-secondary small fw-medium">Percentage vs Flat</div>
+            <div class="fs-2 fw-bold text-purple">
+              <%= @all_coupons.count { |c| c.discount_type == 'percentage' } %> / <%= @all_coupons.count { |c| c.discount_type == 'flat' } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Coupons Table & Interactive Filter -->
+<div class="card shadow-sm border">
+  <div class="card-header border-bottom py-3">
+    <%= form_with url: admin_coupons_path, method: :get, class: "w-100" do %>
+      <div class="row g-2 align-items-center">
+        <!-- Search Keyword -->
+        <div class="col-md-4">
+          <div class="input-icon">
+            <span class="input-icon-addon">
+              <i class="ti ti-search text-secondary fs-3"></i>
+            </span>
+            <input class="form-control" type="text" name="search" value="<%= params[:search] %>"
+                   placeholder="Search promo code or description..." autocomplete="off">
+          </div>
+        </div>
+
+        <!-- Status Filter -->
+        <div class="col-md-2">
+          <select class="form-select" name="status">
+            <option value="all">All Statuses</option>
+            <option value="active" <%= "selected" if params[:status] == "active" %>>Active</option>
+            <option value="inactive" <%= "selected" if params[:status] == "inactive" %>>Inactive</option>
+            <option value="expired" <%= "selected" if params[:status] == "expired" %>>Expired</option>
+          </select>
+        </div>
+
+        <!-- Discount Type Filter -->
+        <div class="col-md-2">
+          <select class="form-select" name="discount_type">
+            <option value="all">All Types</option>
+            <option value="percentage" <%= "selected" if params[:discount_type] == "percentage" %>>Percentage (%)</option>
+            <option value="flat" <%= "selected" if params[:discount_type] == "flat" %>>Flat Amount (₹)</option>
+          </select>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="col-auto">
+          <button type="submit" class="btn btn-secondary">
+            <i class="ti ti-filter me-1"></i> Filter
+          </button>
+          <% if params[:search].present? || params[:status].present? || params[:discount_type].present? %>
+            <%= link_to "Clear", admin_coupons_path, class: "btn btn-outline-secondary ms-1" %>
+          <% end %>
+        </div>
+
+        <div class="col-auto ms-auto text-secondary small">
+          Showing <span class="fw-bold text-reset"><%= @coupons.size %></span> matching coupons
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-vcenter card-table table-hover">
+      <thead>
+        <tr>
+          <th>Promo Code</th>
+          <th>Discount</th>
+          <th>Min. Spend</th>
+          <th>Max. Cap</th>
+          <th>Redemptions</th>
+          <th>Validity</th>
+          <th>Status</th>
+          <th class="text-end pe-3">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if @coupons.any? %>
+          <% @coupons.each do |c| %>
+            <tr>
+              <!-- Code -->
+              <td>
+                <div class="d-flex align-items-center">
+                  <span class="badge bg-primary-lt font-monospace fs-4 px-2 py-1 me-2 border">
+                    <i class="ti ti-tag me-1"></i><%= c.code %>
+                  </span>
+                </div>
+                <% if c.description.present? %>
+                  <div class="text-secondary small mt-1 text-truncate" style="max-width: 220px;" title="<%= c.description %>">
+                    <%= c.description %>
+                  </div>
+                <% end %>
+              </td>
+
+              <!-- Discount -->
+              <td>
+                <span class="fw-bold fs-3 text-reset"><%= c.display_discount %></span>
+                <div class="text-secondary small"><%= c.display_type %></div>
+              </td>
+
+              <!-- Min Spend -->
+              <td>
+                <span class="text-secondary small fw-medium"><%= c.display_min_order %></span>
+              </td>
+
+              <!-- Max Cap -->
+              <td>
+                <span class="text-secondary small fw-medium"><%= c.display_max_discount %></span>
+              </td>
+
+              <!-- Redemptions Progress -->
+              <td>
+                <div class="fw-semibold text-reset"><%= c.display_usage %></div>
+                <% if c.usage_limit.present? && c.usage_limit > 0 %>
+                  <% percent = [((c.usage_count.to_f / c.usage_limit) * 100).to_i, 100].min %>
+                  <div class="progress progress-xs mt-1" style="width: 90px;">
+                    <div class="progress-bar <%= percent >= 90 ? 'bg-danger' : 'bg-primary' %>" style="width: <%= percent %>%"></div>
+                  </div>
+                <% end %>
+              </td>
+
+              <!-- Validity -->
+              <td>
+                <div class="text-secondary small"><%= c.display_valid_until %></div>
+                <% if c.expired? %>
+                  <span class="badge bg-danger-lt text-danger mt-1">Expired</span>
+                <% end %>
+              </td>
+
+              <!-- Status Badge -->
+              <td>
+                <% case c.status %>
+                <% when "active" %>
+                  <span class="badge bg-green-lt text-success fw-bold">Active</span>
+                <% when "inactive" %>
+                  <span class="badge bg-secondary-lt text-secondary fw-bold">Inactive</span>
+                <% when "expired" %>
+                  <span class="badge bg-danger-lt text-danger fw-bold">Expired</span>
+                <% else %>
+                  <span class="badge bg-secondary-lt"><%= c.status.titleize %></span>
+                <% end %>
+              </td>
+
+              <!-- Actions -->
+              <td class="text-end pe-3">
+                <div class="btn-list justify-content-end">
+                  <!-- View Details -->
+                  <%= link_to admin_coupon_path(c), class: "btn btn-icon btn-ghost-secondary btn-sm", title: "View Details" do %>
+                    <i class="ti ti-eye fs-3"></i>
+                  <% end %>
+
+                  <!-- Edit -->
+                  <%= link_to edit_admin_coupon_path(c), class: "btn btn-icon btn-ghost-primary btn-sm", title: "Edit Coupon" do %>
+                    <i class="ti ti-pencil fs-3"></i>
+                  <% end %>
+
+                  <!-- Toggle Active Status -->
+                  <%= button_to toggle_status_admin_coupon_path(c), method: :patch,
+                        class: "btn btn-icon #{c.active? ? 'btn-ghost-warning' : 'btn-ghost-success'} btn-sm",
+                        title: c.active? ? "Deactivate Coupon" : "Activate Coupon" do %>
+                    <i class="ti <%= c.active? ? 'ti-power' : 'ti-check' %> fs-3"></i>
+                  <% end %>
+
+                  <!-- Delete -->
+                  <%= button_to admin_coupon_path(c), method: :delete,
+                        data: { turbo_confirm: "Are you sure you want to delete coupon '#{c.code}'?" },
+                        class: "btn btn-icon btn-ghost-danger btn-sm", title: "Delete Coupon" do %>
+                    <i class="ti ti-trash fs-3"></i>
+                  <% end %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        <% else %>
+          <tr>
+            <td colspan="8" class="text-center py-5 text-secondary">
+              <i class="ti ti-ticket-off fs-1 d-block mb-2 text-muted"></i>
+              <div class="fw-semibold fs-3">No coupons found</div>
+              <div class="small">Try adjusting your search filters or create a new coupon.</div>
+              <% if policy(Coupon).create? %>
+                <%= link_to new_admin_coupon_path, class: "btn btn-primary btn-sm mt-3" do %>
+                  <i class="ti ti-plus me-1"></i> Create First Coupon
+                <% end %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <%= render_pagination %>
+</div>

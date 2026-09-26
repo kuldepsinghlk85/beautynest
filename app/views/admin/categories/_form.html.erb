@@ -1,0 +1,169 @@
+<%= form_with model: [:admin, category], multipart: true, class: "card shadow-sm" do |f| %>
+  <div class="card-header border-bottom">
+    <h3 class="card-title fw-bold mb-0"><%= category.persisted? ? "Edit Category" : "New Category" %></h3>
+  </div>
+
+  <% if category.errors.any? %>
+    <div class="card-body border-bottom">
+      <div class="alert alert-danger">
+        <ul class="mb-0">
+          <% category.errors.full_messages.each do |msg| %>
+            <li><%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="card-body">
+    <div class="row g-4">
+      <!-- Name -->
+      <div class="col-md-8">
+        <label class="form-label fw-semibold" for="category_name">Name <span class="text-danger">*</span></label>
+        <%= f.text_field :name, class: "form-control", placeholder: "e.g. Salon for Women", id: "category_name" %>
+      </div>
+
+      <!-- Display Position -->
+      <div class="col-md-4">
+        <label class="form-label fw-semibold" for="category_position">Display Position</label>
+        <%= f.number_field :position, class: "form-control", min: 0, id: "category_position" %>
+        <div class="form-hint">Order in which category appears in the catalog.</div>
+      </div>
+
+      <!-- Description -->
+      <div class="col-12">
+        <label class="form-label fw-semibold" for="category_description">Description</label>
+        <%= f.text_area :description, class: "form-control", rows: 3, placeholder: "Brief description shown on the app home screen.", id: "category_description" %>
+      </div>
+
+      <!-- Image Upload with Local File Picker & Preview -->
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Cover Image (Cloudinary Storage)</label>
+        
+        <% existing_img = category.image_url.presence || (category.image.attached? && (category.image.url rescue nil) || (rails_blob_path(category.image, only_path: true) rescue nil)) %>
+        <div class="p-3 mb-2 rounded border bg-light-subtle text-center position-relative" id="category-preview-box" style="min-height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+          <% if existing_img.present? %>
+            <img id="category-preview-img"
+                 src="<%= existing_img %>"
+                 alt="<%= category.name %>"
+                 class="rounded border shadow-sm mb-2"
+                 style="max-width: 220px; max-height: 150px; object-fit: cover; display: block;" />
+            <div id="category-preview-badge" class="mb-2">
+              <span class="badge bg-green-lt text-success"><i class="ti ti-check me-1"></i> Current image</span>
+            </div>
+            <div class="form-check form-check-inline text-start mt-1">
+              <%= f.check_box :remove_image, class: "form-check-input", id: "category_remove_image" %>
+              <label for="category_remove_image" class="form-check-label text-danger small fw-semibold">
+                <i class="ti ti-trash me-1"></i> Remove image (delete from Cloudinary on save)
+              </label>
+            </div>
+          <% else %>
+            <img id="category-preview-img"
+                 src="#"
+                 alt="Preview"
+                 class="rounded border shadow-sm mb-2"
+                 style="max-width: 220px; max-height: 150px; object-fit: cover; display: none;" />
+            <div id="category-preview-badge">
+              <span class="badge bg-secondary-lt text-secondary"><i class="ti ti-photo me-1"></i> No image attached</span>
+            </div>
+          <% end %>
+          <div id="category-file-info" class="text-secondary small mt-1 font-monospace" style="display: none;"></div>
+        </div>
+
+        <div class="mb-1">
+          <label class="form-label small text-secondary fw-semibold mb-1" for="category-image-input">Choose Image from Computer</label>
+          <%= f.file_field :image, class: "form-control", id: "category-image-input", accept: "image/jpeg,image/png,image/webp,image/gif" %>
+          <div class="form-hint mt-1">Accepts JPEG, PNG, WebP, GIF (max 5 MB). Automatically uploaded to Cloudinary and replaces old image on save.</div>
+        </div>
+      </div>
+
+      <!-- Position & Featured -->
+      <div class="col-md-3">
+        <label class="form-label fw-semibold" for="category_position">Display Order</label>
+        <%= f.number_field :position, class: "form-control", min: 0, id: "category_position" %>
+        <div class="form-hint">Lower = shown first.</div>
+      </div>
+
+      <div class="col-md-3 d-flex flex-column justify-content-end">
+        <div class="mb-3">
+          <label class="form-check form-switch">
+            <%= f.check_box :featured, class: "form-check-input", role: "switch" %>
+            <span class="form-check-label fw-semibold">Featured</span>
+          </label>
+          <div class="form-hint">Show on app home screen highlights.</div>
+        </div>
+        <div>
+          <label class="form-label fw-semibold" for="category_status">Status</label>
+          <%= f.select :status, [["Active", "active"], ["Inactive", "inactive"]],
+                {}, class: "form-select", id: "category_status" %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-footer d-flex gap-2">
+    <%= f.submit category.persisted? ? "Save Changes" : "Create Category",
+          class: "btn btn-primary" %>
+    <%= link_to "Cancel", admin_categories_path, class: "btn btn-outline-secondary" %>
+  </div>
+<% end %>
+
+<script>
+  (function initCategoryPreview() {
+    function setup() {
+      var fileInput = document.getElementById("category-image-input");
+      var removeCheckbox = document.getElementById("category_remove_image");
+      var img = document.getElementById("category-preview-img");
+      var badge = document.getElementById("category-preview-badge");
+      var info = document.getElementById("category-file-info");
+
+      if (fileInput && !fileInput.dataset.previewAttached) {
+        fileInput.dataset.previewAttached = "true";
+        fileInput.addEventListener("change", function() {
+          var file = this.files && this.files[0];
+          if (file) {
+            if (removeCheckbox) removeCheckbox.checked = false;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+              if (img) {
+                img.src = e.target.result;
+                img.style.display = "block";
+                img.style.opacity = "1";
+              }
+              if (badge) {
+                badge.innerHTML = '<span class="badge bg-azure-lt text-azure"><i class="ti ti-upload me-1"></i> New image selected (replaces old file on save)</span>';
+              }
+              if (info) {
+                info.textContent = file.name + " (" + (file.size / 1024).toFixed(1) + " KB)";
+                info.style.display = "block";
+              }
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      }
+
+      if (removeCheckbox && !removeCheckbox.dataset.previewAttached) {
+        removeCheckbox.dataset.previewAttached = "true";
+        removeCheckbox.addEventListener("change", function() {
+          if (this.checked) {
+            if (img) img.style.opacity = "0.25";
+            if (badge) badge.innerHTML = '<span class="badge bg-danger-lt text-danger"><i class="ti ti-trash me-1"></i> Marked for deletion on save</span>';
+          } else {
+            if (img) img.style.opacity = "1";
+            if (badge) badge.innerHTML = '<span class="badge bg-green-lt text-success"><i class="ti ti-check me-1"></i> Image retained</span>';
+          }
+        });
+      }
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", setup);
+    } else {
+      setup();
+    }
+    document.addEventListener("turbo:load", setup);
+  })();
+</script>
+
+

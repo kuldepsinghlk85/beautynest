@@ -1,0 +1,383 @@
+<% content_for :page_title, "Dashboard" %>
+
+<%
+  labels        = @stats[:monthly_labels].to_json
+  bookings_data = @stats[:monthly_bookings].to_json
+  revenue_data  = @stats[:monthly_revenue].to_json
+  bd            = @stats[:booking_breakdown]
+%>
+
+<!-- Page title and actions -->
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">Overview</div>
+      <h2 class="page-title fs-1 fw-bold">Executive Dashboard</h2>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <div class="btn-list">
+        <%= link_to admin_bookings_path, class: "btn btn-outline-secondary d-none d-sm-inline-block" do %>
+          <i class="ti ti-calendar-event me-1 fs-3"></i> View Schedule
+        <% end %>
+        <%= link_to new_admin_booking_path, class: "btn btn-primary d-inline-block" do %>
+          <i class="ti ti-plus me-1 fs-3"></i> New Dispatch
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- KPI Cards Grid -->
+<div class="row row-deck row-cards mb-4">
+  <div class="col-sm-6 col-lg-3">
+    <div class="card card-sm shadow-sm">
+      <div class="card-body">
+        <div class="row align-items-center">
+          <div class="col-auto">
+            <span class="avatar avatar-md rounded-3 bg-azure-lt text-azure">
+              <i class="ti ti-users fs-1"></i>
+            </span>
+          </div>
+          <div class="col">
+            <div class="text-secondary small fw-medium">Total Customers</div>
+            <div class="fs-2 fw-bold mt-1"><%= number_with_delimiter(@stats[:total_customers]) %></div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center mt-3 small text-secondary">
+          <span class="text-success d-inline-flex align-items-center me-1 fw-bold">
+            <i class="ti ti-trending-up me-1"></i> +<%= @stats[:new_customers_this_month] %>
+          </span>
+          <span>registered this month</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-lg-3">
+    <div class="card card-sm shadow-sm">
+      <div class="card-body">
+        <div class="row align-items-center">
+          <div class="col-auto">
+            <span class="avatar avatar-md rounded-3 bg-indigo-lt text-indigo">
+              <i class="ti ti-user-check fs-1"></i>
+            </span>
+          </div>
+          <div class="col">
+            <div class="text-secondary small fw-medium">Active Workers</div>
+            <div class="fs-2 fw-bold mt-1"><%= number_with_delimiter(@stats[:active_workers] || @stats[:total_workers]) %></div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center mt-3 small text-secondary">
+          <span class="text-success d-inline-flex align-items-center me-1 fw-bold">
+            <i class="ti ti-check me-1"></i> <%= @stats[:approved_workers] || @stats[:active_workers] %> active
+          </span>
+          <span>ready for dispatch</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-lg-3">
+    <div class="card card-sm shadow-sm">
+      <div class="card-body">
+        <div class="row align-items-center">
+          <div class="col-auto">
+            <span class="avatar avatar-md rounded-3 bg-green-lt text-green">
+              <i class="ti ti-calendar-check fs-1"></i>
+            </span>
+          </div>
+          <div class="col">
+            <div class="text-secondary small fw-medium">Total Bookings</div>
+            <div class="fs-2 fw-bold mt-1"><%= number_with_delimiter(@stats[:total_bookings]) %></div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center mt-3 small text-secondary">
+          <span class="text-success d-inline-flex align-items-center me-1 fw-bold">
+            <i class="ti ti-arrow-up-right me-1"></i> <%= @stats[:bookings_this_month] %>
+          </span>
+          <span>scheduled this month</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-lg-3">
+    <div class="card card-sm shadow-sm">
+      <div class="card-body">
+        <div class="row align-items-center">
+          <div class="col-auto">
+            <span class="avatar avatar-md rounded-3 bg-yellow-lt text-yellow">
+              <i class="ti ti-cash fs-1"></i>
+            </span>
+          </div>
+          <div class="col">
+            <div class="text-secondary small fw-medium">Gross Revenue</div>
+            <div class="fs-2 fw-bold mt-1"><%= @stats[:total_revenue] %></div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center mt-3 small text-secondary">
+          <span class="text-success d-inline-flex align-items-center me-1 fw-bold">
+            <i class="ti ti-trending-up me-1"></i> <%= @stats[:revenue_this_month] %>
+          </span>
+          <span>collected this month</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row row-cards mb-4">
+  <!-- Bookings Trend Chart -->
+  <div class="col-lg-4">
+    <div class="card h-100 shadow-sm">
+      <div class="card-header border-bottom">
+        <h3 class="card-title fw-bold">
+          <i class="ti ti-chart-line text-primary me-2"></i> Bookings Trend
+        </h3>
+        <div class="card-actions text-secondary small">Last 6 months</div>
+      </div>
+      <div class="card-body">
+        <div class="chart-container-sm">
+          <canvas id="bookingsChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Revenue Trend Chart -->
+  <div class="col-lg-4">
+    <div class="card h-100 shadow-sm">
+      <div class="card-header border-bottom">
+        <h3 class="card-title fw-bold">
+          <i class="ti ti-chart-arrows text-success me-2"></i> Revenue Trajectory
+        </h3>
+        <div class="card-actions text-secondary small">Last 6 months</div>
+      </div>
+      <div class="card-body">
+        <div class="chart-container-sm">
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking Status Donut Chart -->
+  <div class="col-lg-4">
+    <div class="card h-100 shadow-sm">
+      <div class="card-header border-bottom">
+        <h3 class="card-title fw-bold">
+          <i class="ti ti-chart-donut text-warning me-2"></i> Status Breakdown
+        </h3>
+      </div>
+      <div class="card-body d-flex flex-column justify-content-center">
+        <div class="d-flex align-items-center justify-content-between gap-3">
+          <div style="width: 120px; height: 120px; flex-shrink: 0;">
+            <canvas id="statusChart" width="120" height="120"></canvas>
+          </div>
+          <div class="flex-fill ps-2">
+            <div class="d-flex justify-content-between align-items-center mb-1 small">
+              <span><span class="status-dot status-success me-1"></span> Completed</span>
+              <strong class="text-reset"><%= number_with_delimiter(bd[:completed]) %></strong>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-1 small">
+              <span><span class="status-dot status-azure me-1"></span> Active / Confirmed</span>
+              <strong class="text-reset"><%= bd[:active] %></strong>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-1 small">
+              <span><span class="status-dot status-warning me-1"></span> Pending</span>
+              <strong class="text-reset"><%= bd[:pending] %></strong>
+            </div>
+            <div class="d-flex justify-content-between align-items-center small">
+              <span><span class="status-dot status-danger me-1"></span> Cancelled</span>
+              <strong class="text-reset"><%= bd[:cancelled] %></strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Bookings Ledger -->
+<div class="card shadow-sm">
+  <div class="card-header border-bottom d-flex justify-content-between align-items-center py-3">
+    <div>
+      <h3 class="card-title fw-bold mb-0">Recent Bookings Ledger</h3>
+      <p class="card-subtitle text-secondary mb-0 mt-1 small">Latest home service requests across all regions</p>
+    </div>
+    <div class="card-actions">
+      <%= link_to admin_bookings_path, class: "btn btn-outline-primary btn-sm" do %>
+        View all bookings <i class="ti ti-arrow-right ms-1"></i>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-vcenter card-table table-hover table-striped-columns">
+      <thead>
+        <tr>
+          <th>Booking Number</th>
+          <th>Booked On</th>
+          <th>Customer</th>
+          <th>Service</th>
+          <th>Assigned Worker</th>
+          <th>Scheduled Slot</th>
+          <th>Total</th>
+          <th>Booking Status</th>
+          <th>Service Status</th>
+          <th class="w-1"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if @recent_bookings.any? %>
+          <% @recent_bookings.each do |b| %>
+            <%
+              cust_name = b.respond_to?(:customer_name) ? b.customer_name : b[:customer].to_s
+              svc_name  = b.respond_to?(:display_service) ? b.display_service : b[:service].to_s
+              wrk_name  = b.respond_to?(:worker_name) ? b.worker_name : b[:worker].to_s
+              amt_str   = b.respond_to?(:display_amount) ? b.display_amount : b[:amount].to_s
+              date_str  = b.respond_to?(:display_date) ? b.display_date : b[:date].to_s
+              time_str  = b.respond_to?(:display_time) ? b.display_time : b[:time].to_s
+              disp_id   = b.respond_to?(:display_id) ? b.display_id : (b[:booking_number] || b[:id].to_s)
+              b_id      = b.respond_to?(:id) ? b.id : b[:id]
+              b_status  = b.try(:booking_status) || b[:booking_status] || b[:status] || "pending"
+              s_status  = b.try(:service_status) || b[:service_status] || "pending"
+            %>
+            <tr>
+              <td class="font-monospace fw-bold text-reset fs-4"><%= disp_id %></td>
+              <td class="text-secondary small text-nowrap">
+                <div class="d-flex align-items-center gap-1">
+                  <% if b.created_at && b.created_at > 10.minutes.ago %>
+                    <span class="badge bg-green-lt text-green fw-bold py-0 px-1" style="font-size: 0.65rem;">NEW</span>
+                  <% end %>
+                  <span class="fw-semibold text-reset"><%= b.respond_to?(:display_booked_on) ? b.display_booked_on : b[:booked_on] %></span>
+                </div>
+                <div class="text-muted" style="font-size: 0.72rem;">
+                  <%= b.created_at&.strftime("%d %b %Y, %I:%M %p") %>
+                </div>
+              </td>
+              <td>
+                <div class="d-flex align-items-center">
+                  <span class="avatar avatar-xs rounded-circle bg-azure-lt me-2 fw-semibold">
+                    <%= cust_name[0..1].upcase %>
+                  </span>
+                  <span class="fw-semibold text-reset"><%= cust_name %></span>
+                </div>
+              </td>
+              <td>
+                <span class="badge bg-secondary-lt fw-medium"><%= svc_name %></span>
+              </td>
+              <td class="text-secondary"><%= wrk_name %></td>
+              <td class="text-secondary small">
+                <i class="ti ti-calendar me-1"></i><%= date_str %>
+                <span class="text-muted ms-1"><i class="ti ti-clock me-1"></i><%= time_str %></span>
+              </td>
+              <td class="fw-bold text-reset"><%= amt_str %></td>
+              <td><%= booking_status_badge(b_status) %></td>
+              <td><%= service_status_badge(s_status) %></td>
+              <td>
+                <%= link_to admin_booking_path(b_id), class: "btn btn-icon btn-ghost-secondary btn-sm", title: "View details" do %>
+                  <i class="ti ti-chevron-right fs-3"></i>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        <% else %>
+          <tr>
+            <td colspan="9" class="text-center py-4 text-secondary">
+              <i class="ti ti-inbox fs-1 d-block mb-2 text-muted"></i>
+              No recent bookings found.
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+window.bcInitDashCharts = function() {
+  if (typeof Chart === 'undefined') {
+    // Retry shortly if Chart.js is still loading
+    setTimeout(window.bcInitDashCharts, 120);
+    return;
+  }
+
+  var bCanvas = document.getElementById('bookingsChart');
+  if (!bCanvas) return;
+
+  var labels       = <%= labels.html_safe %>;
+  var bookingsData = <%= bookings_data.html_safe %>;
+  var revenueData  = <%= revenue_data.html_safe %>;
+  var donutData    = [<%= bd[:completed] %>, <%= bd[:active] %>, <%= bd[:pending] %>, <%= bd[:cancelled] %>];
+
+  var dark = document.documentElement.getAttribute('data-bs-theme') === 'dark' || document.documentElement.getAttribute('data-theme') === 'dark';
+  var gridColor = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+  var tickColor = dark ? '#94a3b8' : '#4b5563';
+  var primaryColor = dark ? '#0a84ff' : '#0071e3';
+  var successColor = dark ? '#34d399' : '#15803d';
+
+  function lineOpts() {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+      scales: {
+        x: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 12, family: '-apple-system, sans-serif', weight: '500' } }, border: { display: false } },
+        y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 12, family: '-apple-system, sans-serif', weight: '500' } }, border: { display: false } }
+      },
+      elements: { line: { tension: 0.35, borderWidth: 2.5 }, point: { radius: 3, hoverRadius: 5 } }
+    };
+  }
+
+  function makeChart(id, config) {
+    var canvas = document.getElementById(id);
+    if (!canvas) return;
+    var existing = Chart.getChart(canvas);
+    if (existing) existing.destroy();
+    return new Chart(canvas.getContext('2d'), config);
+  }
+
+  /* Bookings Line Chart */
+  var bG = bCanvas.getContext('2d').createLinearGradient(0, 0, 0, 180);
+  bG.addColorStop(0, dark ? 'rgba(10, 132, 255, 0.35)' : 'rgba(0, 113, 227, 0.20)');
+  bG.addColorStop(1, 'rgba(0, 113, 227, 0)');
+  makeChart('bookingsChart', {
+    type: 'line',
+    data: { labels: labels, datasets: [{ label: 'Bookings', data: bookingsData, borderColor: primaryColor, backgroundColor: bG, fill: true }] },
+    options: lineOpts()
+  });
+
+  /* Revenue Line Chart */
+  var rCanvas = document.getElementById('revenueChart');
+  if (rCanvas) {
+    var rG = rCanvas.getContext('2d').createLinearGradient(0, 0, 0, 180);
+    rG.addColorStop(0, dark ? 'rgba(52, 211, 153, 0.32)' : 'rgba(21, 128, 61, 0.18)');
+    rG.addColorStop(1, 'rgba(21, 128, 61, 0)');
+    makeChart('revenueChart', {
+      type: 'line',
+      data: { labels: labels, datasets: [{ label: 'Revenue (₹)', data: revenueData, borderColor: successColor, backgroundColor: rG, fill: true }] },
+      options: lineOpts()
+    });
+  }
+
+  /* Donut Chart */
+  var donutColors = dark
+    ? ['#34d399', '#0a84ff', '#fbbf24', '#f87171']
+    : ['#15803d', '#0071e3', '#b45309', '#b91c1c'];
+
+  makeChart('statusChart', {
+    type: 'doughnut',
+    data: {
+      labels: ['Completed', 'Active', 'Pending', 'Cancelled'],
+      datasets: [{ data: donutData, backgroundColor: donutColors, borderWidth: 0, hoverOffset: 4 }]
+    },
+    options: { responsive: false, cutout: '74%', plugins: { legend: { display: false }, tooltip: { mode: 'nearest' } } }
+  });
+};
+
+document.addEventListener('DOMContentLoaded', window.bcInitDashCharts);
+document.addEventListener('turbo:load', window.bcInitDashCharts);
+window.addEventListener('theme:changed', window.bcInitDashCharts);
+</script>

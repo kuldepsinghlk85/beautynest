@@ -1,0 +1,127 @@
+<% content_for :page_title, "About — #{site_name} Story & Mission" %>
+
+<%= render "shared/public_nav", active: "about" %>
+
+<!-- Page Header -->
+<section class="bc-page-hero" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);">
+  <div class="bc-page-hero-inner">
+    <span class="bc-page-pretitle"><i class="ti ti-heart"></i> OUR STORY &amp; MISSION</span>
+    <h1>More Than Beauty,<br><em style="font-style:italic; color:#db2777;">It's Care ❤️</em></h1>
+    <p>Born in India, built for every woman who values her time, personal safety, and uncompromised salon hygiene.</p>
+  </div>
+</section>
+
+<!-- Why We Exist -->
+<section class="bc-section">
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:center;">
+    <div>
+      <span class="pretitle">OUR ORIGIN</span>
+      <h2 style="font-family:'Playfair Display',serif; font-size:2rem; font-weight:700; color:#0f0a1e; margin:0 0 1.25rem; letter-spacing:-.025em;">Why <%= site_name %> Was Created</h2>
+      <p style="color:#4b5563; line-height:1.8; margin-bottom:1rem;">
+        Traditional salons often mean long travel in traffic, waiting in crowded lobbies, and questioning the hygiene of reused towels or unsealed creams. We believe professional self-care should happen in your sanctuary — your home.
+      </p>
+      <p style="color:#4b5563; line-height:1.8; margin-bottom:1.5rem;">
+        <%= site_name %> brings certified salon professionals to your doorstep with single-use hygienic disposables, sealed branded cosmetics, and transparent pricing where you never pay inflated salon overhead costs.
+      </p>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+        <div class="bc-about-card" style="background:#fdf2f8;">
+          <i class="ti ti-shield-check" style="color:#db2777; font-size:1.5rem;"></i>
+          <h4>Safety First</h4>
+          <p>Every professional is Aadhaar-verified and police background cleared. Service starts only when you share your secret OTP.</p>
+        </div>
+        <div class="bc-about-card" style="background:#f0fdf4;">
+          <i class="ti ti-sparkles" style="color:#15803d; font-size:1.5rem;"></i>
+          <h4>Monodose Packaging</h4>
+          <p>Wax, facials, and creams are opened in single-use sachets right in front of your eyes. Zero contamination.</p>
+        </div>
+        <div class="bc-about-card" style="background:#eff6ff;">
+          <i class="ti ti-currency-rupee" style="color:#0369a1; font-size:1.5rem;"></i>
+          <h4>Transparent Pricing</h4>
+          <p>No hidden charges, no salon rent markup. Pay exactly what you see — full clarity at every step.</p>
+        </div>
+        <div class="bc-about-card" style="background:#fefce8;">
+          <i class="ti ti-star-filled" style="color:#d97706; font-size:1.5rem;"></i>
+          <h4>5-Star Rated</h4>
+          <p>4.9★ average across 11,500+ genuine customer reviews. Quality isn't a promise — it's our record.</p>
+        </div>
+      </div>
+    </div>
+    <div class="bc-about-right">
+      <div class="bc-stats-showcase">
+        <% [
+          { num: "10,000+", lbl: "Happy Customers" },
+          { num: "50+",     lbl: "Expert Beauticians" },
+          { num: "30+",     lbl: "Cities Covered" },
+          { num: "4.9★",   lbl: "Average Rating" },
+        ].each do |s| %>
+          <div class="bc-showcase-stat">
+            <div class="bc-showcase-num"><%= s[:num] %></div>
+            <div class="bc-showcase-lbl"><%= s[:lbl] %></div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Our Values -->
+<section style="background:#fff; border-top:1px solid rgba(0,0,0,.06); border-bottom:1px solid rgba(0,0,0,.06);">
+  <div class="bc-section">
+    <div class="bc-section-header">
+      <span class="pretitle">OUR VALUES</span>
+      <h2>What We Stand For</h2>
+    </div>
+    <div style="display:grid; grid-template-columns: repeat(3,1fr); gap:1.5rem;">
+      <% [
+        { icon: "ti-heart", color: "#db2777", bg: "rgba(219,39,119,.08)", title: "Women First", text: "Built exclusively for women — every design, policy, and beautician selection is made with female safety and comfort at heart." },
+        { icon: "ti-leaf", color: "#15803d", bg: "rgba(21,128,61,.08)", title: "Clean Beauty", text: "We partner only with brands that use paraben-free, dermatologist-approved products. Your skin deserves nothing less." },
+        { icon: "ti-users", color: "#7c3aed", bg: "rgba(124,58,237,.08)", title: "Beautician Welfare", text: "Fair pay, respectful treatment, and growth opportunities for every beautician on our platform. Their happiness = your great service." },
+      ].each do |v| %>
+        <div style="padding:2rem; background:<%=v[:bg]%>; border-radius:20px; border:1px solid rgba(0,0,0,.06);">
+          <div style="width:52px;height:52px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;box-shadow:0 2px 8px rgba(0,0,0,.08);">
+            <i class="ti <%=v[:icon]%>" style="font-size:1.5rem; color:<%=v[:color]%>;"></i>
+          </div>
+          <h3 style="font-size:1.05rem;font-weight:700;color:#111827;margin:0 0 .5rem;"><%=v[:title]%></h3>
+          <p style="font-size:.88rem;color:#6b7280;line-height:1.65;margin:0;"><%=v[:text]%></p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</section>
+
+<!-- Serving Cities -->
+<section class="bc-section" style="text-align:center;">
+  <div class="bc-section-header">
+    <span class="pretitle">COVERAGE</span>
+    <h2>Proudly Serving India</h2>
+    <p>From major metros to tier-2 cities — <%= site_name %> is growing fast.</p>
+  </div>
+  <div class="bc-cities-list">
+    <% %w[Varanasi Lucknow Agra Kanpur Prayagraj Meerut Allahabad Gorakhpur Jhansi Mathura].each do |city| %>
+      <span class="bc-city-pill"><i class="ti ti-map-pin"></i> <%= city %></span>
+    <% end %>
+  </div>
+  <div style="margin-top:2.5rem;">
+    <%= link_to "/contact", class: "bc-btn-pink", style: "font-size:.95rem; padding:12px 30px;" do %>
+      <i class="ti ti-map-pin"></i> Request Your City
+    <% end %>
+  </div>
+</section>
+
+<!-- CTA -->
+<div style="max-width:1200px; margin: 0 auto 4rem; padding: 0 2rem;">
+  <div class="bc-cta-section">
+    <h2>Ready to Experience the <%= site_name %> Difference?</h2>
+    <p>Book your first service today and join thousands of happy customers.</p>
+    <div style="display:flex;justify-content:center;gap:14px;flex-wrap:wrap;position:relative;z-index:1;">
+      <%= link_to "/services", class: "bc-btn-white" do %>
+        <i class="ti ti-calendar-plus"></i> Book a Service
+      <% end %>
+      <a href="/contact" style="background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.35);padding:13px 28px;border-radius:50px;font-weight:600;font-size:1rem;text-decoration:none;display:inline-flex;align-items:center;gap:8px;">
+        <i class="ti ti-mail"></i> Contact Us
+      </a>
+    </div>
+  </div>
+</div>
+
+<%= render "shared/public_footer" %>

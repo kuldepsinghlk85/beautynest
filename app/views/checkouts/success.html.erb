@@ -1,0 +1,613 @@
+<% content_for :page_title, "Booking Confirmed — BeautyNest" %>
+
+<%= render "shared/public_nav", active: "home" %>
+
+<div class="bn-success-page">
+  <div class="bn-success-container">
+
+    <div class="bn-success-card">
+      
+      <!-- Animated Tick Section ("Tick Page" celebration) -->
+      <div class="bn-tick-celebration-box">
+        <div class="bn-tick-ripple-ring bn-ring-1"></div>
+        <div class="bn-tick-ripple-ring bn-ring-2"></div>
+        
+        <div class="bn-tick-icon-container">
+          <!-- Animated SVG Drawing Tick -->
+          <svg class="bn-tick-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+            <circle class="bn-tick-circle" cx="50" cy="50" r="44" fill="none" />
+            <path class="bn-tick-check" fill="none" d="M30 52 l14 14 l26 -28" />
+          </svg>
+          <div class="bn-tick-sparkle bn-sparkle-1">✦</div>
+          <div class="bn-tick-sparkle bn-sparkle-2">✦</div>
+        </div>
+      </div>
+
+      <span class="bn-sc-pretitle">Appointment Confirmed</span>
+      <h1 class="bn-sc-title">Booking Confirmed!</h1>
+      <p class="bn-sc-subtitle">Your appointment has been reserved and assigned to your beauty specialist.</p>
+
+      <!-- Booking ID Pill -->
+      <div class="bn-booking-id-pill">
+        <span>Booking Reference:</span>
+        <strong><%= @booking.booking_number || "BN-#{@booking.id.first(8).upcase}" %></strong>
+      </div>
+
+      <!-- Auto-Redirect to Home Card -->
+      <div class="bn-redirect-countdown-card" id="bn-redirect-card">
+        <div class="bn-rc-icon">
+          <i class="ti ti-home-share"></i>
+        </div>
+        <div class="bn-rc-body">
+          <div class="bn-rc-text">
+            Redirecting to home page in <strong id="bn-countdown-num">4</strong>s...
+          </div>
+          <div class="bn-rc-bar-track">
+            <div class="bn-rc-bar-fill" id="bn-rc-fill"></div>
+          </div>
+        </div>
+        <div class="bn-rc-actions">
+          <%= link_to root_path(booking_confirmed: true, ref: @booking.booking_number), class: "bn-rc-btn-go", id: "bn-go-home-btn" do %>
+            <span>Go Now</span>
+            <i class="ti ti-arrow-right"></i>
+          <% end %>
+          <button type="button" class="bn-rc-btn-pause" id="bn-pause-btn" onclick="toggleAutoRedirect()">
+            Pause
+          </button>
+        </div>
+      </div>
+
+      <!-- Details Summary Grid -->
+      <div class="bn-sc-details-grid">
+        
+        <!-- Assigned Beautician -->
+        <div class="bn-scd-card">
+          <span class="bn-scd-label">Assigned Specialist</span>
+          <div class="bn-scd-worker">
+            <% worker = @booking.worker %>
+            <% avatar_src = worker ? worker.display_avatar_url : ImageUrlResolver.fallback_for(:beautician) %>
+            <div class="bn-scd-avatar-wrap">
+              <img src="<%= avatar_src %>" alt="<%= worker&.name || 'Specialist' %>" onerror="this.src='<%= ImageUrlResolver.fallback_for(:beautician) %>'">
+              <span class="bn-scd-check">✓</span>
+            </div>
+            <div>
+              <strong class="bn-scd-worker-name"><%= worker&.name || "Assigned Specialist" %></strong>
+              <div class="bn-scd-worker-meta">
+                <span>★ <%= worker&.rating_display || '4.9' %></span>
+                <span>•</span>
+                <span class="text-success fw-bold"><%= worker&.experience_display || 'Verified' %></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Appointment Time & Date -->
+        <div class="bn-scd-card">
+          <span class="bn-scd-label">Scheduled Date & Time</span>
+          <div class="bn-scd-slot-wrap">
+            <i class="ti ti-calendar-event"></i>
+            <div>
+              <strong><%= @booking.scheduled_at ? @booking.scheduled_at.strftime("%a, %d %b %Y") : @booking.date %></strong>
+              <p><%= @booking.time_slot || (@booking.scheduled_at ? @booking.scheduled_at.strftime("%I:%M %p") : "10:30 AM") %></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Service Location -->
+        <div class="bn-scd-card">
+          <span class="bn-scd-label">Delivery Address</span>
+          <div class="bn-scd-slot-wrap">
+            <i class="ti ti-map-pin"></i>
+            <div>
+              <strong><%= @booking.address&.label || "Doorstep Delivery" %></strong>
+              <p><%= @booking.address&.full_address || "Doorstep service at #{@booking.city&.name || 'your location'}" %></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Mode -->
+        <div class="bn-scd-card">
+          <span class="bn-scd-label">Payment Mode</span>
+          <div class="bn-scd-slot-wrap">
+            <i class="ti ti-wallet"></i>
+            <div>
+              <strong class="text-success">₹<%= @booking.total_amount.to_i %></strong>
+              <p><%= @booking.payment_method == 'upi' ? 'Online Payment (UPI/Card)' : 'Pay After Service (Cash / UPI)' %></p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Booked Items Breakdown -->
+      <div class="bn-sc-items-box">
+        <h3 class="bn-sc-items-title">Booked Services</h3>
+        <div class="bn-sc-items-list">
+          <% @booking.booking_items.each do |item| %>
+            <div class="bn-sc-item-row">
+              <div class="bn-sc-item-info">
+                <strong><%= item.service&.name || item.service_name_snapshot || "Beauty Service" %></strong>
+                <span>Qty: <%= item.quantity %></span>
+                <% if item.scheduled? || item.formatted_schedule.present? %>
+                  <span class="bn-sc-item-sched"><i class="ti ti-calendar"></i> <%= item.formatted_schedule %> <%= "• #{item.display_worker_name}" if item.worker %></span>
+                <% end %>
+              </div>
+              <span class="bn-sc-item-price">₹<%= item.line_total.to_i %></span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Secondary Action Buttons -->
+      <div class="bn-sc-actions">
+        <%= link_to root_path(booking_confirmed: true, ref: @booking.booking_number), class: "bn-btn-primary" do %>
+          <i class="ti ti-home"></i> Back to Home
+        <% end %>
+        <%= link_to "Explore More Services", public_categories_path, class: "bn-btn-secondary" %>
+      </div>
+
+      <p class="bn-sc-footer-note">
+        <i class="ti ti-info-circle"></i> A booking confirmation notification has been sent. Your beautician will arrive on time with all sanitized equipment.
+      </p>
+
+    </div>
+
+  </div>
+</div>
+
+<style>
+  .bn-success-page {
+    background: var(--bg, #f4f3f8);
+    min-height: 100vh;
+    padding-top: calc(68px + 2rem);
+    padding-bottom: 4rem;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
+    color: var(--text-1, #111827);
+  }
+  .bn-success-container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 1.25rem;
+  }
+  .bn-success-card {
+    background: #ffffff;
+    border-radius: 24px;
+    border: 1px solid var(--border, rgba(0,0,0,0.07));
+    box-shadow: 0 16px 40px -10px rgba(0,0,0,0.09);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ---- Animated Tick Hero ("Tick Page" Effect) ---- */
+  .bn-tick-celebration-box {
+    position: relative;
+    width: 104px;
+    height: 104px;
+    margin: 0 auto 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .bn-tick-ripple-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(16, 185, 129, 0.4);
+    animation: bn-ripple 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  }
+  .bn-ring-1 {
+    width: 90px;
+    height: 90px;
+  }
+  .bn-ring-2 {
+    width: 104px;
+    height: 104px;
+    animation-delay: 0.6s;
+  }
+  @keyframes bn-ripple {
+    0% { transform: scale(0.85); opacity: 0.8; }
+    50% { transform: scale(1.15); opacity: 0.25; }
+    100% { transform: scale(1.35); opacity: 0; }
+  }
+
+  .bn-tick-icon-container {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+    border: 3px solid #a7f3d0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px -4px rgba(16, 185, 129, 0.35);
+    animation: bn-tick-pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+  @keyframes bn-tick-pop {
+    0% { transform: scale(0.3); opacity: 0; }
+    70% { transform: scale(1.08); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .bn-tick-svg {
+    width: 54px;
+    height: 54px;
+  }
+  .bn-tick-circle {
+    stroke: #10b981;
+    stroke-width: 5;
+    stroke-dasharray: 280;
+    stroke-dashoffset: 280;
+    animation: bn-draw-circle 0.8s cubic-bezier(0.65, 0, 0.45, 1) 0.1s forwards;
+  }
+  .bn-tick-check {
+    stroke: #059669;
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 60;
+    stroke-dashoffset: 60;
+    animation: bn-draw-check 0.45s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards;
+  }
+  @keyframes bn-draw-circle {
+    to { stroke-dashoffset: 0; }
+  }
+  @keyframes bn-draw-check {
+    to { stroke-dashoffset: 0; }
+  }
+
+  .bn-tick-sparkle {
+    position: absolute;
+    color: #10b981;
+    font-size: 14px;
+    animation: bn-sparkle 1.8s ease-in-out infinite alternate;
+  }
+  .bn-sparkle-1 { top: -4px; right: -4px; animation-delay: 0.2s; }
+  .bn-sparkle-2 { bottom: -2px; left: -2px; animation-delay: 0.8s; font-size: 11px; }
+  @keyframes bn-sparkle {
+    0% { transform: scale(0.7) rotate(0deg); opacity: 0.3; }
+    100% { transform: scale(1.3) rotate(25deg); opacity: 1; }
+  }
+
+  .bn-sc-pretitle {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #059669;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .bn-sc-title {
+    font-size: clamp(1.6rem, 3vw, 2.1rem);
+    font-weight: 800;
+    color: var(--text-1, #111827);
+    margin: 0 0 0.4rem;
+    letter-spacing: -0.025em;
+  }
+  .bn-sc-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-3, #4b5563);
+    margin: 0 0 1.25rem;
+    line-height: 1.45;
+  }
+
+  .bn-booking-id-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-size: 0.82rem;
+    margin-bottom: 1.5rem;
+  }
+  .bn-booking-id-pill span { color: var(--text-3, #4b5563); }
+  .bn-booking-id-pill strong { color: var(--accent, #db2777); font-weight: 800; letter-spacing: 0.02em; }
+
+  /* ---- Auto-Redirect Countdown Card ---- */
+  .bn-redirect-countdown-card {
+    background: linear-gradient(135deg, #fdf2f8, #fef2f2);
+    border: 1px solid rgba(219, 39, 119, 0.2);
+    border-radius: 16px;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 1.75rem;
+    text-align: left;
+    box-shadow: 0 4px 14px rgba(219, 39, 119, 0.06);
+  }
+  .bn-rc-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #fff;
+    color: var(--accent, #db2777);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  }
+  .bn-rc-body {
+    flex: 1;
+    min-width: 0;
+  }
+  .bn-rc-text {
+    font-size: 0.85rem;
+    color: #374151;
+    margin-bottom: 5px;
+  }
+  .bn-rc-text strong {
+    color: var(--accent, #db2777);
+    font-weight: 800;
+  }
+  .bn-rc-bar-track {
+    width: 100%;
+    height: 5px;
+    background: rgba(219, 39, 119, 0.15);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .bn-rc-bar-fill {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #db2777, #f43f5e);
+    border-radius: 4px;
+    transform-origin: left;
+    transition: width 0.1s linear;
+  }
+  .bn-rc-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .bn-rc-btn-go {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--accent, #db2777);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 800;
+    padding: 6px 14px;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    box-shadow: 0 2px 8px rgba(219, 39, 119, 0.3);
+  }
+  .bn-rc-btn-go:hover {
+    background: #be185d;
+    color: #fff;
+    transform: translateY(-1px);
+  }
+  .bn-rc-btn-pause {
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    color: #4b5563;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .bn-rc-btn-pause:hover {
+    background: #f3f4f6;
+    color: #111827;
+  }
+
+  /* Details Grid */
+  .bn-sc-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    text-align: left;
+    margin-bottom: 1.5rem;
+  }
+  @media (max-width: 580px) {
+    .bn-sc-details-grid { grid-template-columns: 1fr; }
+    .bn-redirect-countdown-card { flex-direction: column; align-items: stretch; gap: 10px; }
+    .bn-rc-actions { justify-content: flex-end; }
+  }
+  .bn-scd-card {
+    background: #f9fafb;
+    border: 1px solid #f3f4f6;
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .bn-scd-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-4, #64748b);
+  }
+  .bn-scd-worker {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .bn-scd-avatar-wrap {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1.5px solid #f472b6;
+    flex-shrink: 0;
+  }
+  .bn-scd-avatar-wrap img { width: 100%; height: 100%; object-fit: cover; }
+  .bn-scd-check {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    background: #10b981;
+    color: #fff;
+    border-radius: 50%;
+    width: 14px;
+    height: 14px;
+    font-size: 8px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #fff;
+  }
+  .bn-scd-worker-name { font-size: 0.92rem; font-weight: 800; color: var(--text-1, #111827); display: block; }
+  .bn-scd-worker-meta { font-size: 0.74rem; color: var(--text-3, #4b5563); display: flex; gap: 4px; }
+
+  .bn-scd-slot-wrap {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .bn-scd-slot-wrap i { color: var(--accent, #db2777); font-size: 1.1rem; margin-top: 2px; }
+  .bn-scd-slot-wrap strong { font-size: 0.88rem; font-weight: 800; color: var(--text-1, #111827); display: block; }
+  .bn-scd-slot-wrap p { font-size: 0.76rem; color: var(--text-3, #4b5563); margin: 2px 0 0; }
+
+  /* Items Box */
+  .bn-sc-items-box {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    text-align: left;
+    margin-bottom: 1.75rem;
+  }
+  .bn-sc-items-title {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--text-1, #111827);
+    margin: 0 0 0.75rem;
+  }
+  .bn-sc-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .bn-sc-item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.82rem;
+  }
+  .bn-sc-item-info { display: flex; flex-direction: column; gap: 2px; }
+  .bn-sc-item-info strong { color: var(--text-1, #111827); font-weight: 700; }
+  .bn-sc-item-info span { font-size: 0.72rem; color: var(--text-4, #64748b); }
+  .bn-sc-item-sched {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #db2777;
+    background: #fdf2f8;
+    border: 1px solid #fbcfe8;
+    padding: 1px 6px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    width: fit-content;
+    margin-top: 2px;
+  }
+  .bn-sc-item-price { font-weight: 800; color: var(--text-1, #111827); }
+
+  /* Actions */
+  .bn-sc-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .bn-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent, #db2777);
+    color: #ffffff;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 0.88rem;
+    font-weight: 800;
+    text-decoration: none;
+    transition: background .15s ease;
+    box-shadow: 0 3px 10px rgba(219,39,119,0.3);
+  }
+  .bn-btn-primary:hover { background: #be185d; color: #fff; }
+  .bn-btn-secondary {
+    background: #ffffff;
+    color: var(--text-2, #374151);
+    border: 1.5px solid var(--border-strong, rgba(0,0,0,0.14));
+    padding: 11px 22px;
+    border-radius: 50px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all .15s ease;
+  }
+  .bn-btn-secondary:hover { background: #f9fafb; color: #111827; }
+
+  .bn-sc-footer-note {
+    font-size: 0.74rem;
+    color: var(--text-4, #64748b);
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 0;
+  }
+</style>
+
+<script>
+  (function() {
+    var totalSeconds = 4;
+    var remaining = totalSeconds;
+    var isPaused = false;
+    var countdownEl = document.getElementById('bn-countdown-num');
+    var fillEl = document.getElementById('bn-rc-fill');
+    var pauseBtn = document.getElementById('bn-pause-btn');
+    var homeUrl = "<%= root_path(booking_confirmed: true, ref: @booking.booking_number) %>";
+
+    // Trigger toast notification on the tick page as well
+    if (window.showNotification) {
+      window.showNotification("🎉 Booking Confirmed! Your appointment reference is <%= @booking.booking_number %>.", "success", 5000);
+    }
+
+    window.toggleAutoRedirect = function() {
+      isPaused = !isPaused;
+      if (pauseBtn) {
+        pauseBtn.textContent = isPaused ? "Resume" : "Pause";
+        pauseBtn.style.color = isPaused ? "#db2777" : "#4b5563";
+      }
+    };
+
+    var interval = setInterval(function() {
+      if (isPaused) return;
+
+      remaining -= 0.1;
+      if (remaining <= 0) {
+        clearInterval(interval);
+        window.location.href = homeUrl;
+        return;
+      }
+
+      if (countdownEl) {
+        countdownEl.textContent = Math.ceil(remaining);
+      }
+      if (fillEl) {
+        var pct = (remaining / totalSeconds) * 100;
+        fillEl.style.width = pct + "%";
+      }
+    }, 100);
+  })();
+</script>

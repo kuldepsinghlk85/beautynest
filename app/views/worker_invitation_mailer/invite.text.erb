@@ -1,0 +1,11 @@
+Hello <%= @invitation.name.presence || "Partner" %>,
+
+<%= @invited_by&.name || "The #{@site_name} Team" %> has invited you to join <%= @site_name %> as a verified beauty & wellness service professional.
+
+<% if @invitation.speciality.present? %>Speciality: <%= @invitation.speciality %><% end %>
+<% if @invitation.city.present? %>Operating City: <%= @invitation.city.name %><% end %>
+
+To accept your invitation, set up your credentials, and start accepting customer bookings, visit the link below:
+<%= @accept_url %>
+
+This invitation is valid until <%= @invitation.expires_at.strftime("%B %d, %Y") %>.

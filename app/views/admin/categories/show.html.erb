@@ -1,0 +1,285 @@
+<% content_for :page_title, @category.name %>
+
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">Catalog › Categories</div>
+      <h2 class="page-title fs-1 fw-bold"><%= @category.name %></h2>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <div class="btn-list">
+        <%= link_to admin_categories_path, class: "btn btn-outline-secondary" do %>
+          <i class="ti ti-arrow-left me-1 fs-3"></i> Back
+        <% end %>
+        <% if policy(@category).update? %>
+          <%= link_to edit_admin_category_path(@category), class: "btn btn-outline-primary" do %>
+            <i class="ti ti-pencil me-1 fs-3"></i> Edit
+          <% end %>
+        <% end %>
+        <% if policy(Subcategory).create? %>
+          <%= link_to new_admin_category_subcategory_path(@category), class: "btn btn-outline-primary" do %>
+            <i class="ti ti-plus me-1 fs-3"></i> Add Subcategory
+          <% end %>
+        <% end %>
+        <%= link_to new_admin_category_service_path(@category), class: "btn btn-primary" do %>
+          <i class="ti ti-plus me-1 fs-3"></i> Add Service
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Main Column -->
+  <div class="col-lg-8">
+    <!-- Category Details -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+        <h3 class="card-title fw-bold mb-0">Category Details</h3>
+        <div class="d-flex gap-2">
+          <%= active_status_badge(@category.status) %>
+          <% if @category.featured? %>
+            <span class="badge bg-yellow-lt text-yellow"><i class="ti ti-star me-1"></i>Featured</span>
+          <% end %>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row g-3 align-items-start">
+          <% cat_img = @category.image_url.presence || (@category.image.attached? && ((@category.image.url rescue nil) || (rails_blob_path(@category.image, only_path: true) rescue nil))) %>
+          <% if cat_img.present? %>
+            <div class="col-auto">
+              <img src="<%= cat_img %>"
+                   class="rounded border shadow-sm"
+                   style="width:200px;height:150px;object-fit:cover;"
+                   alt="<%= @category.name %>" />
+            </div>
+          <% end %>
+          <div class="col">
+            <div class="row g-3">
+              <div class="col-sm-6">
+                <div class="card card-sm bg-surface-secondary border p-3">
+                  <div class="text-secondary small">Slug</div>
+                  <div class="fw-semibold font-monospace mt-1"><%= @category.slug %></div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="card card-sm bg-surface-secondary border p-3">
+                  <div class="text-secondary small">Subcategories</div>
+                  <div class="fw-bold fs-3 text-azure mt-1"><%= @category.subcategories.count %></div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="card card-sm bg-surface-secondary border p-3">
+                  <div class="text-secondary small">Display Position</div>
+                  <div class="fw-semibold mt-1"><%= @category.position %></div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="card card-sm bg-surface-secondary border p-3">
+                  <div class="text-secondary small">Active Services</div>
+                  <div class="fw-bold fs-3 text-primary mt-1"><%= @category.service_count %></div>
+                </div>
+              </div>
+            </div>
+            <% if @category.description.present? %>
+              <div class="mt-3 text-secondary"><%= @category.description %></div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sub-Categories -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+          <h3 class="card-title fw-bold mb-0">Subcategories</h3>
+          <span class="badge bg-secondary-lt"><%= @sub_categories.size %></span>
+        </div>
+        <% if policy(Subcategory).create? %>
+          <%= link_to new_admin_category_subcategory_path(@category), class: "btn btn-sm btn-primary" do %>
+            <i class="ti ti-plus me-1"></i> Add Subcategory
+          <% end %>
+        <% end %>
+      </div>
+      <% if @sub_categories.empty? %>
+        <div class="card-body text-center py-4">
+          <p class="text-secondary mb-2">No subcategories defined for this category yet.</p>
+          <% if policy(Subcategory).create? %>
+            <%= link_to new_admin_category_subcategory_path(@category), class: "btn btn-sm btn-outline-primary" do %>
+              <i class="ti ti-plus me-1"></i> Create First Subcategory
+            <% end %>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="table-responsive">
+          <table class="table table-vcenter card-table table-hover">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Services</th>
+                <th>Status</th>
+                <th class="text-end pe-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @sub_categories.each do |sub| %>
+                <tr>
+                  <td>
+                    <div class="fw-semibold">
+                      <%= link_to sub.name, admin_subcategory_path(sub), class: "text-reset text-decoration-none" %>
+                    </div>
+                    <div class="text-secondary small font-monospace"><%= sub.slug %></div>
+                  </td>
+                  <td><span class="badge bg-secondary-lt"><%= sub.service_count %></span></td>
+                  <td><%= active_status_badge(sub.status) %></td>
+                  <td class="text-end pe-3">
+                    <div class="btn-list justify-content-end">
+                      <%= link_to admin_subcategory_path(sub), class: "btn btn-icon btn-ghost-secondary btn-sm", title: "View" do %>
+                        <i class="ti ti-eye fs-3"></i>
+                      <% end %>
+                      <% if policy(sub).update? %>
+                        <%= link_to edit_admin_subcategory_path(sub), class: "btn btn-icon btn-ghost-primary btn-sm", title: "Edit" do %>
+                          <i class="ti ti-pencil fs-3"></i>
+                        <% end %>
+                      <% end %>
+                      <% if policy(sub).destroy? %>
+                        <%= button_to admin_subcategory_path(sub), method: :delete,
+                              data: {
+                                turbo_confirm: "Are you sure you want to delete subcategory '#{sub.name}'?"
+                              },
+                              class: "btn btn-icon btn-ghost-danger btn-sm", title: "Delete" do %>
+                          <i class="ti ti-trash fs-3"></i>
+                        <% end %>
+                      <% end %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Services in this Category -->
+    <div class="card shadow-sm">
+      <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+        <h3 class="card-title fw-bold mb-0">Services</h3>
+        <div class="d-flex gap-2 align-items-center">
+          <span class="badge bg-secondary-lt"><%= @services.size %></span>
+          <%= link_to new_admin_category_service_path(@category), class: "btn btn-sm btn-primary" do %>
+            <i class="ti ti-plus me-1"></i> Add
+          <% end %>
+        </div>
+      </div>
+      <% if @services.any? %>
+        <div class="table-responsive">
+          <table class="table table-vcenter card-table table-hover">
+            <thead>
+              <tr>
+                <th style="width:56px;">Image</th>
+                <th>Service</th>
+                <th>Price</th>
+                <th>Duration</th>
+                <th>Status</th>
+                <th class="text-end pe-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @services.each do |svc| %>
+                <tr>
+                  <td>
+                    <% svc_img = svc.image_url.presence || (svc.image.attached? && ((svc.image.url rescue nil) || (rails_blob_path(svc.image, only_path: true) rescue nil))) %>
+                    <% if svc_img.present? %>
+                      <img src="<%= svc_img %>"
+                           class="rounded border shadow-sm"
+                           style="width:48px;height:48px;object-fit:cover;"
+                           alt="<%= svc.name %>"
+                           loading="lazy" />
+                    <% else %>
+                      <span class="avatar avatar-sm rounded bg-secondary-lt text-secondary"><i class="ti ti-scissors"></i></span>
+                    <% end %>
+                  </td>
+                  <td>
+                    <div class="fw-semibold"><%= svc.name %></div>
+                    <% if svc.featured? %>
+                      <span class="badge bg-yellow-lt text-yellow small"><i class="ti ti-star me-1"></i>Featured</span>
+                    <% end %>
+                  </td>
+                  <td>
+                    <div class="fw-bold"><%= svc.display_price %></div>
+                    <% if svc.on_sale? %>
+                      <div class="text-muted small text-decoration-line-through"><%= svc.display_base_price %></div>
+                    <% end %>
+                  </td>
+                  <td class="text-secondary small"><%= svc.duration_minutes %> min</td>
+                  <td><%= active_status_badge(svc.status) %></td>
+                  <td class="text-end pe-3">
+                    <div class="btn-list justify-content-end">
+                      <%= link_to admin_service_path(svc), class: "btn btn-icon btn-ghost-secondary btn-sm", title: "View" do %>
+                        <i class="ti ti-eye fs-3"></i>
+                      <% end %>
+                      <%= link_to edit_admin_service_path(svc), class: "btn btn-icon btn-ghost-primary btn-sm", title: "Edit" do %>
+                        <i class="ti ti-pencil fs-3"></i>
+                      <% end %>
+                      <% if policy(svc).destroy? %>
+                        <%= button_to admin_service_path(svc), method: :delete,
+                              data: {
+                                turbo_confirm: "Are you sure you want to delete service '#{svc.name}'?",
+                                confirm_title: "Delete Service",
+                                confirm_btn: "Delete Service"
+                              },
+                              class: "btn btn-icon btn-ghost-danger btn-sm", title: "Delete" do %>
+                          <i class="ti ti-trash fs-3"></i>
+                        <% end %>
+                      <% end %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <div class="card-body text-center py-5 text-secondary">
+          <i class="ti ti-scissors-off fs-1 d-block mb-2 text-muted"></i>
+          No services yet. <%= link_to "Add the first service", new_admin_category_service_path(@category) %>.
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Right Sidebar -->
+  <div class="col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-header border-bottom">
+        <h3 class="card-title fw-bold">Quick Actions</h3>
+      </div>
+      <div class="card-body d-flex flex-column gap-2">
+        <%= link_to new_admin_category_service_path(@category), class: "btn btn-outline-primary w-100 justify-content-start" do %>
+          <i class="ti ti-plus me-2 fs-3"></i> Add Service to Category
+        <% end %>
+        <%= link_to new_admin_category_path(parent_id: @category.id), class: "btn btn-outline-secondary w-100 justify-content-start" do %>
+          <i class="ti ti-folder-plus me-2 fs-3"></i> Add Sub-Category
+        <% end %>
+        <% if policy(@category).update? %>
+          <%= link_to edit_admin_category_path(@category), class: "btn btn-outline-secondary w-100 justify-content-start" do %>
+            <i class="ti ti-pencil me-2 fs-3"></i> Edit Category
+          <% end %>
+        <% end %>
+        <% if policy(@category).destroy? %>
+          <%= button_to admin_category_path(@category), method: :delete,
+                data: { 
+                  turbo_confirm: "Are you sure you want to delete category '#{@category.name}'? All sub-categories and associated services will be deleted.",
+                  confirm_title: "Delete Category",
+                  confirm_btn: "Delete Category"
+                },
+                class: "btn btn-outline-danger w-100 justify-content-start" do %>
+            <i class="ti ti-trash me-2 fs-3"></i> Delete Category
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

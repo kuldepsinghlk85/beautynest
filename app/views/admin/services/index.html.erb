@@ -1,0 +1,316 @@
+<% content_for :page_title, "Services" %>
+
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">Catalog</div>
+      <h2 class="page-title fs-1 fw-bold">Services</h2>
+    </div>
+    <div class="col-auto ms-auto">
+      <% if policy(Service).create? %>
+        <%= link_to new_admin_service_path, class: "btn btn-primary" do %>
+          <i class="ti ti-plus me-1 fs-3"></i> New Service
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<%
+  stats = @service_stats || {
+    total: @services.size,
+    active: @services.count { |s| s.status == "active" },
+    featured: @services.count(&:featured?),
+    on_sale: @services.count(&:on_sale?),
+    avg_price: (@services.map(&:base_price).compact.sum / [@services.size, 1].max).round,
+    avg_duration: (@services.map(&:duration_minutes).compact.sum / [@services.size, 1].max).round
+  }
+%>
+
+<!-- KPI Overview Cards -->
+<div class="row row-deck row-cards mb-4">
+  <!-- Card 1: Total & Active Services -->
+  <div class="col-sm-6 col-lg-3">
+    <div class="card card-sm shadow-sm h-100">
+      <div class="card-body">
+        <div class="row align-items-center">
+          <div class="col-auto">
+            <span class="avatar avatar-md rounded-3 bg-azure-lt text-azure">
+              <i class="ti ti-sparkles fs-1"></i>
+            </span>
+          </div>
+          <div class="col">
+            <div class="text-secondary small fw-medium">Total Services</div>
+            <div class="fs-2 fw-bold mt-1"><%= number_with_delimiter(stats[:total]) %></div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mt-3 small">
+          <span class="badge bg-success-lt text-success">
+            <i class="ti ti-check me-1"></i><%= stats[:active] %> Active
+          </span>
+          <span class="text-secondary"><%= stats[:total] - stats[:active] %> inactive</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 2: Featured Offerings -->
+  <div class="col-sm-6 col-lg-3">
+    <a href="<%= admin_services_path(featured: params[:featured] == 'true' ? nil : 'true') %>" class="card card-sm shadow-sm h-100 text-reset text-decoration-none <%= 'border-primary shadow' if params[:featured] == 'true' %>">
+      <div class="card-body">
+        <div class="row align-items-center">
+          <div class="col-auto">
+            <span class="avatar avatar-md rounded-3 bg-yellow-lt text-yellow">
+              <i class="ti ti-star fs-1"></i>
+            </span>
+          </div>
+          <div class="col">
+            <div class="text-secondary small fw-medium">Featured Catalog</div>
+            <div class="fs-2 fw-bold mt-1"><%= number_with_delimiter(stats[:featured]) %></div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mt-3 small text-secondary">
+          <span class="badge <%= params[:featured] == 'true' ? 'bg-primary text-white' : 'bg-yellow-lt text-yellow' %>">
+            <i class="ti ti-award me-1"></i><%= params[:featured] == 'true' ? 'Filter Active' : 'Top Picks' %>
+          </span>
+          <span>Promoted on app</span>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Card 3: Promotional Deals / On Sale -->
+  <div class="col-sm-6 col-lg-3">
+    <a href="<%= admin_services_path(on_sale: params[:on_sale] == 'true' ? nil : 'true') %>" class="card card-sm shadow-sm h-100 text-reset text-decoration-none <%= 'border-primary shadow' if params[:on_sale] == 'true' %>">
+      <div class="card-body">
+        <div class="row align-items-center">
+          <div class="col-auto">
+            <span class="avatar avatar-md rounded-3 bg-purple-lt text-purple">
+              <i class="ti ti-discount-2 fs-1"></i>
+            </span>
+          </div>
+          <div class="col">
+            <div class="text-secondary small fw-medium">Discounted / Deals</div>
+            <div class="fs-2 fw-bold mt-1"><%= number_with_delimiter(stats[:on_sale]) %></div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mt-3 small text-secondary">
+          <span class="badge <%= params[:on_sale] == 'true' ? 'bg-primary text-white' : 'bg-purple-lt text-purple' %>">
+            <i class="ti ti-percentage me-1"></i><%= params[:on_sale] == 'true' ? 'Filter Active' : 'On Sale' %>
+          </span>
+          <span>Special campaign rates</span>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Card 4: Pricing & Duration Benchmark -->
+  <div class="col-sm-6 col-lg-3">
+    <div class="card card-sm shadow-sm h-100">
+      <div class="card-body">
+        <div class="row align-items-center">
+          <div class="col-auto">
+            <span class="avatar avatar-md rounded-3 bg-teal-lt text-teal">
+              <i class="ti ti-currency-rupee fs-1"></i>
+            </span>
+          </div>
+          <div class="col">
+            <div class="text-secondary small fw-medium">Average Price</div>
+            <div class="fs-2 fw-bold mt-1">₹<%= number_with_delimiter(stats[:avg_price]) %></div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mt-3 small text-secondary">
+          <span class="badge bg-teal-lt text-teal">
+            <i class="ti ti-clock me-1"></i>~<%= stats[:avg_duration] %> min
+          </span>
+          <span>Average session time</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-header border-bottom py-3">
+    <%= form_with url: admin_services_path, method: :get, class: "w-100" do %>
+      <% if params[:featured].present? %>
+        <input type="hidden" name="featured" value="<%= params[:featured] %>">
+      <% end %>
+      <% if params[:on_sale].present? %>
+        <input type="hidden" name="on_sale" value="<%= params[:on_sale] %>">
+      <% end %>
+      <div class="row g-2 align-items-center">
+        <div class="col-md-3">
+          <div class="input-icon">
+            <span class="input-icon-addon"><i class="ti ti-search text-secondary fs-3"></i></span>
+            <input class="form-control" type="text" name="search" value="<%= params[:search] %>"
+                   placeholder="Search services..." autocomplete="off">
+          </div>
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" name="category_id">
+            <option value="">All Categories</option>
+            <% Category.active.ordered.each do |cat| %>
+              <option value="<%= cat.id %>" <%= "selected" if params[:category_id] == cat.id.to_s %>><%= cat.name %></option>
+            <% end %>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" name="tag">
+            <option value="">All Tags</option>
+            <option value="facial" <%= "selected" if params[:tag] == "facial" %>>Facial</option>
+            <option value="korean-glow" <%= "selected" if params[:tag] == "korean-glow" %>>Korean Glow</option>
+            <option value="mani-padi" <%= "selected" if params[:tag] == "mani-padi" %>>Mani-Pedi</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" name="status">
+            <option value="">All Statuses</option>
+            <option value="active" <%= "selected" if params[:status] == "active" %>>Active</option>
+            <option value="inactive" <%= "selected" if params[:status] == "inactive" %>>Inactive</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" name="sort">
+            <option value="">Default Order</option>
+            <option value="price_asc"    <%= "selected" if params[:sort] == "price_asc" %>>Price: Low → High</option>
+            <option value="price_desc"   <%= "selected" if params[:sort] == "price_desc" %>>Price: High → Low</option>
+            <option value="duration_asc" <%= "selected" if params[:sort] == "duration_asc" %>>Duration: Shortest</option>
+            <option value="newest"       <%= "selected" if params[:sort] == "newest" %>>Newest First</option>
+          </select>
+        </div>
+        <div class="col-auto">
+          <button type="submit" class="btn btn-secondary"><i class="ti ti-filter me-1"></i>Apply</button>
+        </div>
+        <% if params.slice(:search, :category_id, :tag, :status, :featured, :on_sale, :sort).values.any?(&:present?) %>
+          <div class="col-auto">
+            <%= link_to admin_services_path, class: "btn btn-outline-secondary" do %>
+              <i class="ti ti-x me-1"></i>Clear
+            <% end %>
+          </div>
+        <% end %>
+        <div class="col-auto ms-auto text-secondary small">
+          <span class="fw-bold text-reset"><%= @services.size %></span> services
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-vcenter card-table table-hover">
+      <thead>
+        <tr>
+          <th style="width:56px;">Image</th>
+          <th>Service</th>
+          <th>Category</th>
+          <th>Tag</th>
+          <th>Price</th>
+          <th>Rating</th>
+          <th>Duration</th>
+          <th>Featured</th>
+          <th>Status</th>
+          <th class="text-end pe-3">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if @services.any? %>
+          <% @services.each do |svc| %>
+            <tr>
+              <td>
+                <% svc_img = svc.image_url.presence || (svc.image.attached? && ((svc.image.url rescue nil) || (rails_blob_path(svc.image, only_path: true) rescue nil))) %>
+                <% if svc_img.present? %>
+                  <img src="<%= svc_img %>"
+                       class="rounded border shadow-sm"
+                       style="width:48px;height:48px;object-fit:cover;"
+                       alt="<%= svc.name %>"
+                       loading="lazy" />
+                <% else %>
+                  <span class="avatar avatar-sm rounded bg-secondary-lt text-secondary">
+                    <i class="ti ti-scissors"></i>
+                  </span>
+                <% end %>
+              </td>
+              <td>
+                <div class="fw-semibold text-reset"><%= link_to svc.name, admin_service_path(svc), class: "text-reset text-decoration-none" %></div>
+              </td>
+              <td>
+                <% if svc.category %>
+                  <div class="small fw-semibold text-secondary"><%= svc.category.name %></div>
+                <% end %>
+                <% if svc.subcategory %>
+                  <%= link_to svc.subcategory.name, admin_subcategory_path(svc.subcategory), class: "badge bg-azure-lt text-azure text-decoration-none" %>
+                <% else %>
+                  <span class="text-secondary">—</span>
+                <% end %>
+              </td>
+              <td>
+                <% tag_badge_class = case svc.tag
+                   when "facial"      then "bg-purple-lt text-purple"
+                   when "korean-glow" then "bg-pink-lt text-pink"
+                   when "mani-padi"   then "bg-teal-lt text-teal"
+                   else "bg-secondary-lt text-secondary"
+                   end %>
+                <span class="badge <%= tag_badge_class %>">
+                  <%= svc.tag_label %>
+                </span>
+              </td>
+              <td>
+                <div class="fw-bold"><%= svc.display_price %></div>
+                <% if svc.on_sale? %>
+                  <div class="text-muted small text-decoration-line-through"><%= svc.display_base_price %></div>
+                <% end %>
+              </td>
+              <td>
+                <div class="d-flex align-items-center">
+                  <span class="text-warning me-1">★</span>
+                  <span class="fw-bold"><%= svc.average_rating %></span>
+                  <span class="text-secondary small ms-1">(<%= svc.reviews_count %>)</span>
+                </div>
+              </td>
+              <td class="text-secondary small"><%= svc.duration_minutes %> min</td>
+              <td>
+                <% if svc.featured? %>
+                  <span class="badge bg-yellow-lt text-yellow"><i class="ti ti-star me-1"></i>Yes</span>
+                <% else %>
+                  <span class="text-muted small">—</span>
+                <% end %>
+              </td>
+              <td><%= active_status_badge(svc.status) %></td>
+              <td class="text-end pe-3">
+                <div class="btn-list justify-content-end">
+                  <%= link_to admin_service_path(svc), class: "btn btn-icon btn-ghost-secondary btn-sm", title: "View" do %>
+                    <i class="ti ti-eye fs-3"></i>
+                  <% end %>
+                  <% if policy(svc).update? %>
+                    <%= link_to edit_admin_service_path(svc), class: "btn btn-icon btn-ghost-primary btn-sm", title: "Edit" do %>
+                      <i class="ti ti-pencil fs-3"></i>
+                    <% end %>
+                  <% end %>
+                  <% if policy(svc).destroy? %>
+                    <%= button_to admin_service_path(svc), method: :delete,
+                          data: { 
+                            turbo_confirm: "Are you sure you want to delete service '#{svc.name}'?",
+                            confirm_title: "Delete Service",
+                            confirm_btn: "Delete Service"
+                          },
+                          class: "btn btn-icon btn-ghost-danger btn-sm", title: "Delete" do %>
+                      <i class="ti ti-trash fs-3"></i>
+                    <% end %>
+                  <% end %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        <% else %>
+          <tr>
+            <td colspan="8" class="text-center py-5 text-secondary">
+              <i class="ti ti-scissors-off fs-1 d-block mb-2 text-muted"></i>
+              No services found. <%= link_to "Create the first one", new_admin_service_path %>.
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <%= render_pagination %>
+</div>

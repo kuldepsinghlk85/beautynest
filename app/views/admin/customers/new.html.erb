@@ -1,0 +1,65 @@
+<% content_for :page_title, "Add New Customer" %>
+
+<div class="page-header">
+  <div class="page-header-left">
+    <h1>Add New Customer</h1>
+    <p>Register a customer manually in the platform</p>
+  </div>
+  <div class="page-header-actions">
+    <%= link_to admin_customers_path, class: "btn btn-secondary" do %>
+      <svg data-feather="arrow-left"></svg> Back to Customers
+    <% end %>
+  </div>
+</div>
+
+<div class="card" style="max-width: 820px;">
+  <%= form_with url: admin_customers_path, method: :post, local: true do |f| %>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+        <div class="form-group">
+          <label class="form-label" for="customer_name">Full Name *</label>
+          <input type="text" name="customer[name]" id="customer_name" class="form-control" placeholder="e.g. Shalini Roy" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="customer_email">Email Address *</label>
+          <input type="email" name="customer[email]" id="customer_email" class="form-control" placeholder="e.g. shalini.roy@gmail.com" required>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+        <div class="form-group">
+          <label class="form-label" for="customer_phone">Phone Number *</label>
+          <input type="text" name="customer[phone]" id="customer_phone" class="form-control" placeholder="e.g. +91 98765 12345" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="customer_city">City *</label>
+          <select name="customer[city]" id="customer_city" class="form-control">
+            <% ["Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai", "Pune", "Ahmedabad", "Kolkata", "Jaipur", "Lucknow", "Bhopal"].each do |city| %>
+              <option value="<%= city %>"><%= city %></option>
+            <% end %>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom:16px;">
+        <label class="form-label" for="customer_status">Account Status</label>
+        <select name="customer[status]" id="customer_status" class="form-control">
+          <option value="active" selected>Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-bottom:24px;">
+        <label class="form-label" for="customer_notes">Internal Admin Notes</label>
+        <textarea name="customer[notes]" id="customer_notes" class="form-control" rows="3" placeholder="Address landmark, preferences, or initial referral source..."></textarea>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:flex-end;gap:12px;padding-top:16px;border-top:1px solid var(--border);">
+        <%= link_to "Cancel", admin_customers_path, class: "btn btn-secondary" %>
+        <button type="submit" class="btn btn-primary">
+          <svg data-feather="user-plus"></svg> Create Customer
+        </button>
+      </div>
+    </div>
+  <% end %>
+</div>

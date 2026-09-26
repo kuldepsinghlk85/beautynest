@@ -1,0 +1,444 @@
+<% content_for :page_title, "Offers & Deals — Exclusive Beauty Discounts" %>
+
+<%= render "shared/public_nav", active: "offers" %>
+
+<!-- Page Header -->
+<section class="bc-page-hero" style="background: linear-gradient(135deg, #fff7ed 0%, #fdf2f8 50%, #fed7aa 100%);">
+  <div class="bc-page-hero-inner">
+    <div class="bc-offers-hero-badge">
+      <i class="ti ti-tag"></i> SAVINGS &amp; PAMPERING
+    </div>
+    <h1>Exclusive Offers &amp; Promo Codes</h1>
+    <p>Enjoy luxury doorstep salon &amp; beauty treatments with our verified discount vouchers and promo codes.</p>
+    <div class="bc-offers-count-pill">
+      <span class="bc-live-dot"></span>
+      <strong><%= @coupons&.size || 0 %> Verified Deals</strong> Available Today
+    </div>
+  </div>
+</section>
+
+<!-- Active Promo Codes Section -->
+<section class="bc-section" id="active-offers">
+  <div class="bc-section-header">
+    <span class="pretitle">Verified Discounts</span>
+    <h2>Today's Best Beauty Deals</h2>
+    <p>Tap on any promo code to copy it instantly and redeem it at checkout.</p>
+  </div>
+
+  <!-- Filter Pills -->
+  <div class="bc-offers-filter-bar">
+    <button type="button" class="bc-offer-filter-btn active" data-filter="all" onclick="filterOffers('all', this)">
+      <i class="ti ti-sparkles"></i> All Offers (<%= @coupons&.size || 0 %>)
+    </button>
+    <button type="button" class="bc-offer-filter-btn" data-filter="percentage" onclick="filterOffers('percentage', this)">
+      <i class="ti ti-percentage"></i> Percentage Off (<%= @percentage_coupons&.size || 0 %>)
+    </button>
+    <button type="button" class="bc-offer-filter-btn" data-filter="flat" onclick="filterOffers('flat', this)">
+      <i class="ti ti-currency-rupee"></i> Flat Discounts (<%= @flat_coupons&.size || 0 %>)
+    </button>
+  </div>
+
+  <% if @coupons.present? && @coupons.any? %>
+    <div class="bc-coupons-grid" id="bc-coupons-container">
+      <% @coupons.each do |c| %>
+        <div class="bc-coupon-card" data-discount-type="<%= c.discount_type %>">
+          <div class="bc-coupon-header-row">
+            <div class="bc-coupon-tag" style="background:<%= c.badge_color %>;"><%= c.display_tag %></div>
+            <% if c.valid_until.present? %>
+              <span class="bc-coupon-expiry"><i class="ti ti-clock"></i> Till <%= c.display_valid_until %></span>
+            <% else %>
+              <span class="bc-coupon-expiry text-success"><i class="ti ti-infinity"></i> No Expiry</span>
+            <% end %>
+          </div>
+
+          <div class="bc-coupon-discount"><%= c.display_discount %></div>
+          <h3><%= c.description.presence || "#{c.display_discount} on Luxury Services" %></h3>
+
+          <div class="bc-coupon-terms-row">
+            <span class="bc-term-pill">
+              <i class="ti ti-shopping-bag"></i> Min order: <%= c.display_min_order %>
+            </span>
+            <% if c.max_discount.present? %>
+              <span class="bc-term-pill">
+                <i class="ti ti-arrow-up"></i> Max saving: <%= c.display_max_discount %>
+              </span>
+            <% end %>
+          </div>
+
+          <div class="bc-coupon-footer">
+            <button type="button" class="bc-coupon-code" onclick="copyPromoCode('<%= c.code %>')" title="Click to copy code">
+              <i class="ti ti-ticket"></i>
+              <span class="bc-code-text"><%= c.code %></span>
+              <span class="bc-copy-badge"><i class="ti ti-copy"></i> Copy</span>
+            </button>
+
+            <% if current_cart.item_count > 0 %>
+              <%= button_to apply_coupon_cart_path(code: c.code), method: :post, class: "bc-coupon-cta-btn", title: "Apply to your cart" do %>
+                <span>Apply to Cart</span>
+                <i class="ti ti-check"></i>
+              <% end %>
+            <% else %>
+              <%= link_to public_categories_path, class: "bc-coupon-cta-btn", title: "Browse services to use this code" do %>
+                <span>Book Now</span>
+                <i class="ti ti-arrow-right"></i>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <!-- Empty State -->
+    <div class="bc-offers-empty">
+      <div class="bc-empty-icon"><i class="ti ti-ticket-off"></i></div>
+      <h3>No Active Promo Codes Right Now</h3>
+      <p>We are preparing exciting festive offers and salon discounts. Check back soon!</p>
+      <%= link_to "Explore All Services", public_categories_path, class: "bc-btn-pink" %>
+    </div>
+  <% end %>
+</section>
+
+<!-- Seasonal Offer Banner -->
+<section style="background:#fff; border-top:1px solid rgba(0,0,0,.06); border-bottom:1px solid rgba(0,0,0,.06); padding:4rem 2rem;">
+  <div style="max-width:1100px; margin:0 auto;">
+    <div class="bc-section-header">
+      <span class="pretitle">Curated Packages</span>
+      <h2>Festival &amp; Seasonal Glam Deals</h2>
+      <p>Complete head-to-toe beauty packages bundled at exclusive seasonal rates.</p>
+    </div>
+    <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:1.5rem;">
+      <div class="bc-season-card" style="background: linear-gradient(135deg,#db2777,#9d174d);">
+        <span class="bc-season-label">BRIDAL EXCLUSIVE</span>
+        <h3>Wedding Season Glam Pack</h3>
+        <p>Complete pre-bridal: facial, waxing, hair spa, manicure &amp; pedicure bundle. Save up to ₹2,500.</p>
+        <div class="bc-season-price">₹4,999 <span style="font-size:.85rem;opacity:.7;text-decoration:line-through;">₹7,499</span></div>
+        <%= link_to public_categories_path, class: "bc-btn-white bc-season-btn" do %>
+          <i class="ti ti-calendar-plus"></i> Book Package
+        <% end %>
+      </div>
+      <div class="bc-season-card" style="background: linear-gradient(135deg,#7c3aed,#5b21b6);">
+        <span class="bc-season-label">FESTIVE SPECIAL</span>
+        <h3>Festive Glow Combo</h3>
+        <p>Korean glass facial + nail extensions + full body chocolate waxing — radiate confidence.</p>
+        <div class="bc-season-price">₹2,499 <span style="font-size:.85rem;opacity:.7;text-decoration:line-through;">₹3,799</span></div>
+        <%= link_to public_categories_path, class: "bc-btn-white bc-season-btn" do %>
+          <i class="ti ti-calendar-plus"></i> Book Package
+        <% end %>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Gold Membership Banner -->
+<div style="max-width:1200px; margin: 4rem auto; padding: 0 2rem;">
+  <div class="bc-gold-banner">
+    <div class="bc-gold-left">
+      <span class="bc-gold-label"><%= site_name.upcase %> GOLD CLUB</span>
+      <h3>Get Unlimited 15% Extra Off on Every Booking</h3>
+      <p>Join for just ₹499/year. Free hygienic kit delivery, zero cancellation fees, priority weekend bookings.</p>
+      <ul class="bc-gold-perks">
+        <li><i class="ti ti-check"></i> 15% off every service, every time</li>
+        <li><i class="ti ti-check"></i> Free disposable hygiene kit per booking</li>
+        <li><i class="ti ti-check"></i> Priority slot booking (weekends included)</li>
+        <li><i class="ti ti-check"></i> Zero cancellation charges</li>
+      </ul>
+    </div>
+    <div class="bc-gold-right">
+      <div class="bc-gold-price">₹499<span>/year</span></div>
+      <%= link_to public_categories_path, class: "bc-btn-white bc-btn-lg" do %>
+        <i class="ti ti-crown"></i> Join Gold Club
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<%= render "shared/public_footer" %>
+
+<style>
+  /* Hero Badge & Count */
+  .bc-offers-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #db2777;
+    background: #fdf2f8;
+    border: 1px solid #fbcfe8;
+    padding: 4px 12px;
+    border-radius: 50px;
+    margin-bottom: 0.75rem;
+  }
+  .bc-offers-count-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.08);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-size: 0.84rem;
+    color: #4b5563;
+    margin-top: 1rem;
+  }
+  .bc-live-dot {
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+    animation: bc-pulse 2s infinite;
+  }
+  @keyframes bc-pulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+  }
+
+  /* Filter Bar */
+  .bc-offers-filter-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  .bc-offer-filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    color: #4b5563;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 8px 18px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.16s ease;
+  }
+  .bc-offer-filter-btn:hover {
+    border-color: #db2777;
+    color: #db2777;
+    transform: translateY(-1px);
+  }
+  .bc-offer-filter-btn.active {
+    background: #db2777;
+    border-color: #db2777;
+    color: #ffffff;
+    box-shadow: 0 3px 12px rgba(219, 39, 119, 0.3);
+  }
+
+  /* Enhanced Coupon Card */
+  .bc-coupon-card {
+    background: #ffffff;
+    border-radius: 20px;
+    border: 2px dashed rgba(219, 39, 119, 0.28);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+    position: relative;
+  }
+  .bc-coupon-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 40px rgba(219, 39, 119, 0.12);
+    border-color: #db2777;
+  }
+  .bc-coupon-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .bc-coupon-expiry {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .bc-coupon-discount {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #111827;
+    letter-spacing: -0.02em;
+    margin: 0.1rem 0;
+  }
+  .bc-coupon-card h3 {
+    font-size: 0.96rem;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.4;
+    margin: 0;
+  }
+  .bc-coupon-terms-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin: 0.3rem 0;
+  }
+  .bc-term-pill {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #64748b;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 3px 8px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .bc-coupon-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border-top: 1px solid #f3f4f6;
+    padding-top: 1rem;
+    margin-top: auto;
+  }
+  .bc-coupon-code {
+    background: #fdf2f8;
+    border: 1px dashed rgba(219, 39, 119, 0.4);
+    color: #db2777;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.88rem;
+    font-weight: 800;
+    padding: 6px 12px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .bc-coupon-code:hover {
+    background: #fce7f3;
+    border-color: #db2777;
+    transform: scale(1.02);
+  }
+  .bc-copy-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    background: rgba(219, 39, 119, 0.12);
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: 2px;
+  }
+  .bc-coupon-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #db2777;
+    color: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 800;
+    padding: 7px 14px;
+    border-radius: 50px;
+    border: none;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(219, 39, 119, 0.25);
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+  .bc-coupon-cta-btn:hover {
+    background: #be185d;
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(219, 39, 119, 0.35);
+  }
+
+  /* Empty State */
+  .bc-offers-empty {
+    text-align: center;
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid #e5e7eb;
+    padding: 3rem 1.5rem;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  .bc-empty-icon {
+    font-size: 2.5rem;
+    color: #9ca3af;
+    margin-bottom: 0.75rem;
+  }
+  .bc-offers-empty h3 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #111827;
+    margin-bottom: 0.5rem;
+  }
+  .bc-offers-empty p {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-bottom: 1.5rem;
+  }
+</style>
+
+<script>
+  function copyPromoCode(code) {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(code).then(function() {
+        if (window.showNotification) {
+          window.showNotification("Copied promo code '" + code + "'! Apply it at checkout.", "success", 4000);
+        } else {
+          alert("Copied promo code: " + code);
+        }
+      }).catch(function() {
+        fallbackCopy(code);
+      });
+    } else {
+      fallbackCopy(code);
+    }
+  }
+
+  function fallbackCopy(code) {
+    var ta = document.createElement("textarea");
+    ta.value = code;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand("copy");
+      if (window.showNotification) {
+        window.showNotification("Copied promo code '" + code + "'! Apply it at checkout.", "success", 4000);
+      } else {
+        alert("Copied promo code: " + code);
+      }
+    } catch(e) {}
+    document.body.removeChild(ta);
+  }
+
+  function filterOffers(type, btn) {
+    document.querySelectorAll('.bc-offer-filter-btn').forEach(function(b) {
+      b.classList.remove('active');
+    });
+    btn.classList.add('active');
+
+    var cards = document.querySelectorAll('.bc-coupon-card');
+    cards.forEach(function(card) {
+      var cardType = card.getAttribute('data-discount-type');
+      if (type === 'all' || cardType === type) {
+        card.style.display = 'flex';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+</script>

@@ -1,0 +1,433 @@
+<% content_for :page_title, "Settings" %>
+
+<%= form_with url: admin_settings_path, method: :patch, id: "settings-form", local: true do |f| %>
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">System & Preferences</div>
+      <h2 class="page-title fs-1 fw-bold">Platform Settings</h2>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <button type="submit" class="btn btn-primary shadow-sm">
+        <i class="ti ti-device-floppy me-1 fs-3"></i> Save All Settings
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-3">
+    <div class="card shadow-sm">
+      <div class="list-group list-group-flush" data-bs-toggle="tabs">
+        <a href="#tab-general" class="list-group-item list-group-item-action active d-flex align-items-center" data-bs-toggle="tab">
+          <i class="ti ti-adjustments-horizontal me-2 fs-3"></i> General Platform
+        </a>
+        <a href="#tab-consent" class="list-group-item list-group-item-action d-flex align-items-center" data-bs-toggle="tab">
+          <i class="ti ti-file-certificate me-2 fs-3 text-indigo"></i> Service Consent Form
+        </a>
+        <a href="#tab-products" class="list-group-item list-group-item-action d-flex align-items-center" data-bs-toggle="tab">
+          <i class="ti ti-package me-2 fs-3 text-azure"></i> Product Sourcing & Fees
+        </a>
+        <a href="#tab-worker-tiers" class="list-group-item list-group-item-action d-flex align-items-center" data-bs-toggle="tab">
+          <i class="ti ti-award me-2 fs-3 text-warning"></i> Worker Tiers & Multipliers
+        </a>
+        <a href="#tab-profile" class="list-group-item list-group-item-action d-flex align-items-center" data-bs-toggle="tab">
+          <i class="ti ti-user me-2 fs-3"></i> Admin Account
+        </a>
+        <a href="#tab-notifications" class="list-group-item list-group-item-action d-flex align-items-center" data-bs-toggle="tab">
+          <i class="ti ti-bell me-2 fs-3"></i> Automated Alerts
+        </a>
+        <a href="#tab-security" class="list-group-item list-group-item-action d-flex align-items-center" data-bs-toggle="tab">
+          <i class="ti ti-shield-lock me-2 fs-3"></i> Security & Sessions
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-9">
+    <div class="tab-content">
+      <!-- General Settings Tab -->
+      <div class="tab-pane active show" id="tab-general">
+        <div class="card shadow-sm mb-4">
+          <div class="card-header border-bottom">
+            <h3 class="card-title fw-bold">General Platform Settings</h3>
+          </div>
+          <div class="card-body">
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label required">Platform / Site Name</label>
+                <input type="text" name="site_name" class="form-control" value="<%= Setting.site_name %>" required maxlength="100" placeholder="e.g. BeautyNest">
+                <div class="form-text text-secondary mt-1 small">
+                  Renames the platform across the admin portal, sidebar branding, page titles, and customer interfaces.
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Support Email</label>
+                <input type="email" name="support_email" class="form-control" value="<%= Setting.get("support_email", "support@#{site_name.parameterize}.in") %>">
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Support Helpline</label>
+                <input type="tel" name="support_helpline" class="form-control" value="<%= Setting.get("support_helpline", "+91 1800 123 4567") %>">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Default Currency</label>
+                <select class="form-select">
+                  <option selected>INR (&#8377;)</option>
+                  <option>USD ($)</option>
+                  <option>EUR (&euro;)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Operating Time Zone</label>
+                <select class="form-select">
+                  <option selected>Asia/Kolkata (IST +5:30)</option>
+                  <option>UTC (Coordinated Universal Time)</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Default Locale</label>
+                <select class="form-select">
+                  <option selected>English (India)</option>
+                  <option>Hindi</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Platform Tagline & Meta Description</label>
+              <textarea name="platform_tagline" class="form-control" rows="2"><%= Setting.get("platform_tagline", "#{Setting.site_name} bridges certified at-home beauty and wellness professionals to customer doorsteps.") %></textarea>
+            </div>
+
+            <div class="mt-4 pt-3 border-top d-flex justify-content-end">
+              <button type="submit" class="btn btn-primary">
+                <i class="ti ti-device-floppy me-1 fs-3"></i> Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Consent Form Tab -->
+      <div class="tab-pane" id="tab-consent">
+        <input type="hidden" name="consent_settings_submitted" value="1" id="consent-sentinel" disabled>
+        <div class="card shadow-sm mb-4">
+          <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="card-title fw-bold mb-0">Service Consent Form Configuration</h3>
+              <div class="text-secondary small">Mandatory legal and hygiene agreement presented to customers during booking</div>
+            </div>
+            <span class="badge bg-indigo-lt fs-4 px-3 py-1">
+              <i class="ti ti-shield-check me-1"></i> Customer Safeguard
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center py-3 px-3 mb-4 rounded-3 border bg-surface-secondary">
+              <div>
+                <div class="fw-bold text-reset fs-3">Require Consent Agreement to Complete Booking</div>
+                <div class="text-secondary small">
+                  When enabled, customers must explicitly accept (agree: <code>true</code>) before completing a reservation.
+                </div>
+              </div>
+              <label class="form-check form-switch form-switch-lg mb-0">
+                <input class="form-check-input" type="checkbox" name="consent_form_required" value="1" <%= "checked" if Setting.consent_form_required? %>>
+              </label>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-8">
+                <label class="form-label required">Consent Form Title</label>
+                <input type="text" name="consent_form_title" class="form-control" value="<%= Setting.consent_form_title %>" required maxlength="150" placeholder="e.g. Customer Service & Hygiene Consent Form">
+                <div class="form-text text-secondary small">Displayed at top of the modal/sheet during booking.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label required">Policy Version</label>
+                <input type="text" name="consent_form_version" class="form-control" value="<%= Setting.consent_form_version %>" required maxlength="20" placeholder="e.g. v1.0">
+                <div class="form-text text-secondary small">Snapshotted with each signed booking consent.</div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label required">Consent Terms & Hygiene Requirements</label>
+              <textarea name="consent_form_content" class="form-control font-monospace" rows="8" required style="font-size: 0.85rem;"><%= Setting.consent_form_content %></textarea>
+              <div class="form-text text-secondary small">
+                Detail health disclosures, premise requirements, product liability disclaimers, and cancellation policies.
+              </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-top d-flex justify-content-end">
+              <button type="submit" class="btn btn-primary">
+                <i class="ti ti-device-floppy me-1 fs-3"></i> Save Consent Policy
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product Sourcing Tab -->
+      <div class="tab-pane" id="tab-products">
+        <input type="hidden" name="product_settings_submitted" value="1" id="product-sentinel" disabled>
+        <div class="card shadow-sm mb-4">
+          <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="card-title fw-bold mb-0">Product Sourcing & Platform Fee</h3>
+              <div class="text-secondary small">Configure customer options to provide own products or use platform salon kits</div>
+            </div>
+            <span class="badge bg-azure-lt fs-4 px-3 py-1">
+              <i class="ti ti-package me-1"></i> Product Kit
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center py-3 px-3 mb-4 rounded-3 border bg-surface-secondary">
+              <div>
+                <div class="fw-bold text-reset fs-3">Allow Customers to Choose Product Source</div>
+                <div class="text-secondary small">
+                  Give customers the option: "Bring My Own Products" vs "Use Platform's Products".
+                </div>
+              </div>
+              <label class="form-check form-switch form-switch-lg mb-0">
+                <input class="form-check-input" type="checkbox" name="product_choice_enabled" value="1" <%= "checked" if Setting.product_choice_enabled? %>>
+              </label>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label required">Platform Product Surcharge Fee (&#8377;)</label>
+                <div class="input-group">
+                  <span class="input-group-text">&#8377;</span>
+                  <input type="number" step="0.01" min="0" name="platform_product_fee" class="form-control" value="<%= '%.2f' % Setting.platform_product_fee %>" required>
+                </div>
+                <div class="form-text text-secondary small">
+                  Added to package price when customer selects platform-provided cosmetics & kits.
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Customer's Own Products Fee</label>
+                <input type="text" class="form-control bg-light" value="&#8377; 0.00 (Waived)" readonly disabled>
+                <div class="form-text text-secondary small">
+                  Customer brings their own products. No platform kit fee is charged.
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Platform Kit Description (Customer-facing)</label>
+              <textarea name="platform_product_fee_note" class="form-control" rows="3"><%= Setting.platform_product_fee_note %></textarea>
+              <div class="form-text text-secondary small">
+                Explanation shown to customer explaining why the platform kit provides superior hygiene and results.
+              </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-top d-flex justify-content-end">
+              <button type="submit" class="btn btn-primary">
+                <i class="ti ti-device-floppy me-1 fs-3"></i> Save Product Settings
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Worker Tiers Tab -->
+      <div class="tab-pane" id="tab-worker-tiers">
+        <div class="card shadow-sm mb-4">
+          <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="card-title fw-bold mb-0">Worker Tiers & Pricing Multipliers</h3>
+              <div class="text-secondary small">Define pricing multipliers for Bronze, Silver, and Gold categories</div>
+            </div>
+            <span class="badge bg-warning-lt fs-4 px-3 py-1">
+              <i class="ti ti-stars me-1"></i> Dynamic Tier Pricing
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="alert alert-info border-0 shadow-xs mb-4">
+              <div class="d-flex">
+                <i class="ti ti-info-circle fs-2 me-2"></i>
+                <div>
+                  <strong>How Worker Tier Pricing Works:</strong> When a customer books a worker assigned to a tier, the service base price is multiplied by that tier's multiplier (e.g., a &#8377;1,000 service with a Gold specialist at 1.50x becomes &#8377;1,500). Specific service overrides can also be configured under individual services.
+                </div>
+              </div>
+            </div>
+
+            <div class="row g-3">
+              <% @worker_tiers.each do |tier| %>
+                <% badge_color = case tier.slug
+                                 when "gold"   then "warning"
+                                 when "silver" then "secondary"
+                                 else "orange"
+                                 end %>
+                <div class="col-md-4">
+                  <div class="card border p-3 h-100 shadow-xs">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <span class="badge bg-<%= badge_color %>-lt fw-bold fs-3 px-3 py-1 text-uppercase">
+                        <i class="ti ti-award me-1"></i> <%= tier.name %>
+                      </span>
+                      <span class="badge bg-surface-secondary text-secondary small">Rank <%= tier.position %></span>
+                    </div>
+
+                    <div class="text-secondary small mb-3">
+                      <% case tier.slug
+                         when "gold" %>
+                        Master specialists with 5+ years experience, top client reviews, and elite technique.
+                      <% when "silver" %>
+                        Senior professionals with 2-5 years experience and verified ratings.
+                      <% else %>
+                        Standard certified specialists delivering quality beauty services at base pricing.
+                      <% end %>
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label fw-bold small text-secondary">Price Multiplier</label>
+                      <div class="input-group">
+                        <input type="number" step="0.05" min="0.5" max="5.0"
+                               name="worker_tier_multipliers[<%= tier.id %>]"
+                               class="form-control fw-bold"
+                               value="<%= '%.2f' % tier.price_multiplier %>" required>
+                        <span class="input-group-text">x</span>
+                      </div>
+                      <div class="form-text text-secondary small mt-1">
+                        &#8377;1,000 service &rarr; &#8377;<%= number_with_delimiter((1000 * tier.price_multiplier).round) %>
+                      </div>
+                    </div>
+
+                    <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center small text-secondary">
+                      <span>Assigned Workers:</span>
+                      <span class="fw-bold text-reset"><%= tier.worker_profiles.count %> active</span>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+
+            <div class="mt-4 pt-3 border-top d-flex justify-content-end">
+              <button type="submit" class="btn btn-primary">
+                <i class="ti ti-device-floppy me-1 fs-3"></i> Save Tier Multipliers
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin Profile Tab -->
+      <div class="tab-pane" id="tab-profile">
+        <div class="card shadow-sm mb-4">
+          <div class="card-header border-bottom">
+            <h3 class="card-title fw-bold">Administrator Profile</h3>
+          </div>
+          <div class="card-body">
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label">First Name</label>
+                <input type="text" class="form-control" value="Super">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Last Name</label>
+                <input type="text" class="form-control" value="Admin">
+              </div>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Email Address</label>
+                <input type="email" class="form-control" value="<%= current_user&.email || "admin@#{site_name.parameterize}.test" %>">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Phone Number</label>
+                <input type="tel" class="form-control" value="+91 98765 43210">
+              </div>
+            </div>
+            <button type="button" class="btn btn-outline-secondary">
+              <i class="ti ti-lock me-1 fs-3"></i> Change Account Password
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notifications Tab -->
+      <div class="tab-pane" id="tab-notifications">
+        <div class="card shadow-sm mb-4">
+          <div class="card-header border-bottom">
+            <h3 class="card-title fw-bold">Automated Operational Alerts</h3>
+          </div>
+          <div class="card-body">
+            <% [
+              ["New incoming service booking", true],
+              ["Customer booking cancellation", true],
+              ["Worker registration application pending review", true],
+              ["Payment capture settlement", true],
+              ["Customer refund request submitted", true],
+              ["Flagged negative review moderation notice", true],
+              ["Daily executive KPI summary report", false]
+            ].each do |label, checked| %>
+              <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                <span class="text-reset fw-medium"><%= label %></span>
+                <label class="form-check form-switch mb-0">
+                  <input class="form-check-input" type="checkbox" <%= "checked" if checked %>>
+                </label>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security Tab -->
+      <div class="tab-pane" id="tab-security">
+        <div class="card shadow-sm mb-4">
+          <div class="card-header border-bottom">
+            <h3 class="card-title fw-bold">Security Controls</h3>
+          </div>
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
+              <div>
+                <div class="fw-bold text-reset">Two-Factor Authentication (2FA)</div>
+                <div class="text-secondary small">Require an OTP code alongside password on login</div>
+              </div>
+              <label class="form-check form-switch mb-0">
+                <input class="form-check-input" type="checkbox" checked>
+              </label>
+            </div>
+            <div class="d-flex justify-content-between align-items-center py-3">
+              <div>
+                <div class="fw-bold text-reset">Session Inactivity Timeout</div>
+                <div class="text-secondary small">Automatically expire idle sessions after 60 minutes</div>
+              </div>
+              <span class="badge bg-success-lt">Enforced</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<% end %>
+
+<script>
+  // Enable only the active tab's sentinel input before form submit.
+  // This prevents cross-tab param clobbering (e.g. consent_form_required
+  // being set to false when saving from the General tab).
+  (function() {
+    var consentSentinel = document.getElementById('consent-sentinel');
+    var productSentinel = document.getElementById('product-sentinel');
+
+    // Re-evaluate sentinels whenever a tab becomes active
+    function syncSentinels() {
+      if (consentSentinel) consentSentinel.disabled = !document.querySelector('#tab-consent.active');
+      if (productSentinel) productSentinel.disabled = !document.querySelector('#tab-products.active');
+    }
+
+    // Tabler uses Bootstrap tabs — listen for show.bs.tab
+    document.querySelectorAll('[data-bs-toggle="tab"]').forEach(function(el) {
+      el.addEventListener('shown.bs.tab', syncSentinels);
+    });
+
+    // Also guard on form submit in case tab API isn't used
+    var form = document.getElementById('settings-form');
+    if (form) form.addEventListener('submit', syncSentinels);
+
+    syncSentinels(); // run once on load
+  })();
+</script>

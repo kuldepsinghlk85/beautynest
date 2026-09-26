@@ -1,0 +1,132 @@
+<% content_for :page_title, "Create New Booking" %>
+
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">Dispatch Management</div>
+      <h2 class="page-title fs-1 fw-bold">Create New Booking</h2>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <%= link_to admin_bookings_path, class: "btn btn-outline-secondary" do %>
+        <i class="ti ti-arrow-left me-1 fs-3"></i> Back to Bookings
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-header border-bottom">
+        <h3 class="card-title fw-bold">Schedule Appointment</h3>
+      </div>
+      <%= form_with url: admin_bookings_path, method: :post, local: true do |f| %>
+        <div class="card-body">
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label" for="booking_customer_id">Select Customer <span class="text-danger">*</span></label>
+              <select name="booking[customer_id]" id="booking_customer_id" class="form-select" required>
+                <option value="">Choose customer...</option>
+                <% @customers.each do |c| %>
+                  <option value="<%= c.id %>"><%= c.name %> (<%= c.phone %> — <%= c.city %>)</option>
+                <% end %>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-1" for="booking_service_id">Select Service <span class="text-danger">*</span></label>
+              <select name="booking[service_id]" id="booking_service_id" class="form-select" required onchange="updateServicePreview(this)">
+                <option value="">Choose service...</option>
+                <% @services.each do |s| %>
+                  <% s_price = s.effective_price.to_i %>
+                  <% s_duration = s.duration_minutes %>
+                  <% cat_name = s.category&.name || "General" %>
+                  <option value="<%= s.id %>" data-price="<%= s_price %>" data-duration="<%= s_duration %>" data-category="<%= cat_name %>">
+                    <%= s.name %> — &#8377;<%= number_with_delimiter(s_price) %> (<%= s_duration %> min)
+                  </option>
+                <% end %>
+              </select>
+              <div id="service_preview_card" class="mt-2 p-2 px-3 rounded-2 border bg-light-subtle d-none">
+                <div class="d-flex align-items-center justify-content-between text-secondary small">
+                  <div>
+                    <i class="ti ti-category text-purple me-1"></i> <span id="preview_service_category" class="fw-medium text-dark">Category</span>
+                  </div>
+                  <div class="d-flex align-items-center gap-3">
+                    <span><i class="ti ti-clock text-muted me-1"></i><strong id="preview_service_duration">0</strong> min</span>
+                    <span class="fs-4 fw-bold text-success">&#8377;<span id="preview_service_price">0</span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label" for="booking_worker_id">Assign Specialist / Worker</label>
+              <select name="booking[worker_id]" id="booking_worker_id" class="form-select">
+                <option value="">-- Auto-Assign or Unassigned --</option>
+                <% @workers.each do |w| %>
+                  <option value="<%= w.id %>"><%= w.name %> (<%= w.speciality %> — <%= w.rating %>&#9733;)</option>
+                <% end %>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="booking_payment_status">Payment Status</label>
+              <select name="booking[payment_status]" id="booking_payment_status" class="form-select">
+                <option value="pending">Pending Payment</option>
+                <option value="paid" selected>Paid (Prepaid / UPI)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label" for="booking_date">Appointment Date <span class="text-danger">*</span></label>
+              <input type="date" name="booking[date]" id="booking_date" class="form-control" value="<%= Date.tomorrow.strftime('%Y-%m-%d') %>" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="booking_time">Time Slot <span class="text-danger">*</span></label>
+              <select name="booking[time]" id="booking_time" class="form-select" required>
+                <% ["09:00 AM", "10:30 AM", "12:00 PM", "02:00 PM", "03:30 PM", "05:00 PM", "06:30 PM"].each do |slot| %>
+                  <option value="<%= slot %>"><%= slot %></option>
+                <% end %>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="booking_notes">Customer Instructions & Address Notes</label>
+            <textarea name="booking[notes]" id="booking_notes" class="form-control" rows="3" placeholder="Special equipment, parking details, gate code, allergy warnings..."></textarea>
+          </div>
+        </div>
+
+        <div class="card-footer border-top d-flex justify-content-between align-items-center bg-transparent">
+          <%= link_to "Cancel", admin_bookings_path, class: "btn btn-link link-secondary" %>
+          <button type="submit" class="btn btn-primary">
+            <i class="ti ti-calendar-plus me-1 fs-3"></i> Confirm & Schedule Booking
+          </button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  function updateServicePreview(select) {
+    var card = document.getElementById('service_preview_card');
+    if (!card) return;
+    var opt = select.options[select.selectedIndex];
+    if (opt && opt.value) {
+      document.getElementById('preview_service_price').textContent = Number(opt.getAttribute('data-price') || 0).toLocaleString('en-IN');
+      document.getElementById('preview_service_duration').textContent = opt.getAttribute('data-duration') || '0';
+      document.getElementById('preview_service_category').textContent = opt.getAttribute('data-category') || 'General';
+      card.classList.remove('d-none');
+    } else {
+      card.classList.add('d-none');
+    }
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    var sel = document.getElementById('booking_service_id');
+    if (sel && sel.value) updateServicePreview(sel);
+  });
+</script>
+

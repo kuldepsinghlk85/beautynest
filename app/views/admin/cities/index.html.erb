@@ -1,0 +1,158 @@
+<% content_for :page_title, "Cities" %>
+
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">Operations</div>
+      <h2 class="page-title fs-1 fw-bold">Serviceable Cities</h2>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <% if policy(City).create? %>
+        <%= link_to new_admin_city_path, class: "btn btn-primary" do %>
+          <i class="ti ti-plus me-1 fs-3"></i> New City
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- KPI Cards -->
+<div class="row row-cards mb-4">
+  <div class="col-sm-6 col-lg-4">
+    <div class="card card-sm shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-md rounded-3 bg-azure-lt text-azure me-3"><i class="ti ti-building fs-1"></i></span>
+          <div>
+            <div class="text-secondary small fw-medium">Total Cities</div>
+            <div class="fs-2 fw-bold"><%= @cities.size %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-4">
+    <div class="card card-sm shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-md rounded-3 bg-green-lt text-green me-3"><i class="ti ti-check fs-1"></i></span>
+          <div>
+            <div class="text-secondary small fw-medium">Active Cities</div>
+            <div class="fs-2 fw-bold text-success"><%= @cities.count { |c| c.status == "active" } %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-4">
+    <div class="card card-sm shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-md rounded-3 bg-purple-lt text-purple me-3"><i class="ti ti-currency-rupee fs-1"></i></span>
+          <div>
+            <div class="text-secondary small fw-medium">City Price Overrides</div>
+            <div class="fs-2 fw-bold text-purple"><%= @cities.sum { |c| c.service_city_prices.size } %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Table Card -->
+<div class="card shadow-sm">
+  <div class="card-header border-bottom py-3">
+    <%= form_with url: admin_cities_path, method: :get, class: "w-100" do %>
+      <div class="row g-2 align-items-center">
+        <div class="col-md-5">
+          <div class="input-icon">
+            <span class="input-icon-addon"><i class="ti ti-search text-secondary fs-3"></i></span>
+            <input class="form-control" type="text" name="search" value="<%= params[:search] %>"
+                   placeholder="Search cities by name or state..." autocomplete="off">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" name="status">
+            <option value="">All Statuses</option>
+            <option value="active" <%= "selected" if params[:status] == "active" %>>Active</option>
+            <option value="inactive" <%= "selected" if params[:status] == "inactive" %>>Inactive</option>
+          </select>
+        </div>
+        <div class="col-auto">
+          <button type="submit" class="btn btn-outline-secondary">Filter</button>
+          <%= link_to "Reset", admin_cities_path, class: "btn btn-link text-secondary" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @cities.empty? %>
+    <div class="card-body text-center py-5">
+      <div class="avatar avatar-xl rounded-circle bg-light-subtle text-secondary mx-auto mb-3">
+        <i class="ti ti-building fs-1"></i>
+      </div>
+      <h3 class="fw-bold mb-1">No cities found</h3>
+      <p class="text-secondary mb-3">Add serviceable cities to enable city-specific pricing and worker allocations.</p>
+      <% if policy(City).create? %>
+        <%= link_to new_admin_city_path, class: "btn btn-primary" do %>
+          <i class="ti ti-plus me-1"></i> New City
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="table-responsive">
+      <table class="table table-vcenter card-table table-hover">
+        <thead>
+          <tr>
+            <th>City Name</th>
+            <th>State</th>
+            <th>Slug</th>
+            <th>Pricing Overrides</th>
+            <th>Status</th>
+            <th class="w-1 text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @cities.each do |city| %>
+            <tr>
+              <td>
+                <div class="fw-bold text-reset">
+                  <%= link_to city.name, admin_city_path(city), class: "text-reset text-decoration-none" %>
+                </div>
+              </td>
+              <td><%= city.state.presence || "—" %></td>
+              <td><span class="font-monospace text-secondary small"><%= city.slug %></span></td>
+              <td>
+                <span class="badge bg-purple-lt">
+                  <%= city.service_city_prices.size %> overrides
+                </span>
+              </td>
+              <td><%= active_status_badge(city.status) %></td>
+              <td class="text-end">
+                <div class="btn-list flex-nowrap justify-content-end">
+                  <%= link_to admin_city_path(city), class: "btn btn-sm btn-icon btn-ghost-secondary", title: "View" do %>
+                    <i class="ti ti-eye fs-3"></i>
+                  <% end %>
+                  <% if policy(city).update? %>
+                    <%= link_to edit_admin_city_path(city), class: "btn btn-sm btn-icon btn-ghost-primary", title: "Edit" do %>
+                      <i class="ti ti-pencil fs-3"></i>
+                    <% end %>
+                  <% end %>
+                  <% if policy(city).destroy? %>
+                    <%= button_to admin_city_path(city), method: :delete,
+                          class: "btn btn-sm btn-icon btn-ghost-danger",
+                          title: "Delete",
+                          data: { turbo_confirm: "Are you sure you want to delete city '#{city.name}'?" } do %>
+                      <i class="ti ti-trash fs-3"></i>
+                    <% end %>
+                  <% end %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+  <%= render_pagination %>
+</div>

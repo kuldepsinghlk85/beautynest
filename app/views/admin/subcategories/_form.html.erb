@@ -1,0 +1,78 @@
+<%= form_with model: [:admin, subcategory], class: "card shadow-sm" do |f| %>
+  <div class="card-header border-bottom">
+    <h3 class="card-title fw-bold mb-0"><%= subcategory.persisted? ? "Edit Subcategory" : "New Subcategory" %></h3>
+  </div>
+
+  <% if subcategory.errors.any? %>
+    <div class="card-body border-bottom">
+      <div class="alert alert-danger">
+        <ul class="mb-0">
+          <% subcategory.errors.full_messages.each do |msg| %>
+            <li><%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="card-body">
+    <div class="row g-4">
+      <!-- Name -->
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Subcategory Name <span class="text-danger">*</span></label>
+        <%= f.text_field :name, class: "form-control", placeholder: "e.g. Hair Care, Skin & Facials" %>
+      </div>
+
+      <!-- Parent Category -->
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Parent Category <span class="text-danger">*</span></label>
+        <%= f.collection_select :category_id,
+              @categories || Category.active.ordered,
+              :id, :name,
+              { prompt: "Select a Category" },
+              { class: "form-select", required: true } %>
+        <div class="form-hint">Subcategories must nest under a parent category.</div>
+      </div>
+
+      <!-- Description -->
+      <div class="col-12">
+        <label class="form-label fw-semibold">Description</label>
+        <%= f.text_area :description, class: "form-control", rows: 3,
+              placeholder: "Describe the scope of services under this subcategory..." %>
+      </div>
+
+      <!-- Position -->
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Display Position</label>
+        <%= f.number_field :position, class: "form-control", min: 0 %>
+        <div class="form-hint">Lower numbers display first.</div>
+      </div>
+
+      <!-- Status -->
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Status <span class="text-danger">*</span></label>
+        <%= f.select :status,
+              [["Active", "active"], ["Inactive", "inactive"]],
+              {},
+              { class: "form-select" } %>
+      </div>
+
+      <!-- Featured -->
+      <div class="col-md-4 d-flex align-items-center pt-3">
+        <div class="form-check form-switch mt-2">
+          <%= f.check_box :featured, class: "form-check-input", id: "subcategory_featured" %>
+          <label class="form-check-label fw-semibold" for="subcategory_featured">
+            Featured Subcategory
+          </label>
+          <div class="form-hint">Highlight on mobile explore feeds.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-footer border-top bg-light-subtle d-flex justify-content-between align-items-center">
+    <%= link_to "Cancel", admin_subcategories_path, class: "btn btn-outline-secondary" %>
+    <%= f.submit (subcategory.persisted? ? "Update Subcategory" : "Create Subcategory"),
+          class: "btn btn-primary px-4 fw-semibold" %>
+  </div>
+<% end %>

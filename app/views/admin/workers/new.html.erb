@@ -1,0 +1,262 @@
+<% content_for :page_title, "Add / Invite Worker" %>
+
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">Workforce Registration</div>
+      <h2 class="page-title fs-1 fw-bold">Add / Invite Worker</h2>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <%= link_to admin_workers_path, class: "btn btn-outline-secondary" do %>
+        <i class="ti ti-arrow-left me-1 fs-3"></i> Back to Workers
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-lg-9">
+    <%= form_with model: [:admin, @worker], scope: :worker, url: admin_workers_path, method: :post, class: "card shadow-sm border" do |f| %>
+      <div class="card-header border-bottom py-3">
+        <h3 class="card-title fw-bold mb-0">
+          <i class="ti ti-user-plus text-primary me-2"></i> Professional Details
+        </h3>
+      </div>
+
+      <% if @worker.errors.any? %>
+        <div class="card-body border-bottom bg-danger-lt py-3">
+          <div class="d-flex align-items-start">
+            <i class="ti ti-alert-triangle text-danger fs-2 me-2 mt-1"></i>
+            <div>
+              <div class="fw-bold text-danger mb-1">Please correct the following errors:</div>
+              <ul class="mb-0 ps-3 text-danger small">
+                <% @worker.errors.full_messages.each do |msg| %>
+                  <li><%= msg %></li>
+                <% end %>
+              </ul>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <div class="card-body">
+
+        <!-- Section: Identity -->
+        <div class="mb-1 pb-2 border-bottom">
+          <span class="text-secondary small fw-semibold text-uppercase" style="letter-spacing: .06em;">Identity & Contact</span>
+        </div>
+
+        <!-- Name & Speciality -->
+        <div class="row g-3 mb-3 mt-1">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold" for="worker_name">Full Name <span class="text-danger">*</span></label>
+            <%= f.text_field :name, class: "form-control", id: "worker_name", placeholder: "e.g. Radhika Sen", required: true %>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold" for="worker_speciality">Primary Speciality <span class="text-danger">*</span></label>
+            <select name="worker[speciality]" id="worker_speciality" class="form-select" required>
+              <option value="">Select skill...</option>
+              <% ["Hair Styling", "Skincare & Facial", "Nail Art", "Massage Therapy", "Bridal Makeup", "Hair Coloring", "Waxing & Threading"].each do |spec| %>
+                <option value="<%= spec %>" <%= "selected" if params.dig(:worker, :speciality) == spec %>><%= spec %></option>
+              <% end %>
+            </select>
+          </div>
+        </div>
+
+        <!-- Email & Phone -->
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold" for="worker_email">Email Address <span class="text-danger">*</span></label>
+            <%= f.email_field :email, class: "form-control", id: "worker_email", placeholder: "e.g. radhika.sen@#{site_name.parameterize}.test", required: true %>
+            <div class="form-hint">Used for worker mobile app sign-in.</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold" for="worker_phone">Phone Number <span class="text-danger">*</span></label>
+            <%= f.telephone_field :phone, class: "form-control", id: "worker_phone", placeholder: "e.g. +91 98765 00000", required: true %>
+            <div class="form-hint">Unique 10-digit mobile number with country code.</div>
+          </div>
+        </div>
+
+        <!-- City & Experience -->
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold" for="worker_city">Serving / Operating City <span class="text-danger">*</span></label>
+            <select name="worker[city]" id="worker_city" class="form-select" required>
+              <option value="">Select serving city...</option>
+              <% if @cities.present? && @cities.any? %>
+                <% @cities.each do |city| %>
+                  <option value="<%= city.name %>" <%= "selected" if (params.dig(:worker, :city) || "Mumbai") == city.name %>><%= city.name %><%= " (#{city.state})" if city.state.present? %></option>
+                <% end %>
+              <% else %>
+                <% ["Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai", "Pune", "Jaipur", "Kolkata", "Coimbatore"].each do |city| %>
+                  <option value="<%= city %>" <%= "selected" if (params.dig(:worker, :city) || "Mumbai") == city %>><%= city %></option>
+                <% end %>
+              <% end %>
+            </select>
+            <div class="form-hint">Geographic area where this service professional operates.</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold" for="worker_experience_years">Years of Experience</label>
+            <input type="number" name="worker[experience_years]" id="worker_experience_years" class="form-control" min="0" max="40" value="<%= params.dig(:worker, :experience_years) || 2 %>">
+            <div class="form-hint">Industry practice duration.</div>
+          </div>
+        </div>
+
+        <!-- Worker Tier -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold" for="worker_worker_tier_id">Worker Tier & Pricing Category <span class="text-danger">*</span></label>
+            <select name="worker[worker_tier_id]" id="worker_worker_tier_id" class="form-select" required>
+              <% tiers = (@worker_tiers.presence || WorkerTier.active.ordered).to_a %>
+              <% selected_tier_id = params.dig(:worker, :worker_tier_id) || tiers.find { |t| t.slug == "bronze" }&.id || tiers.first&.id %>
+              <% tiers.each do |tier| %>
+                <option value="<%= tier.id %>" <%= "selected" if selected_tier_id.to_s == tier.id.to_s %>>
+                  <%= tier.name %> (<%= '%.2f' % tier.price_multiplier %>x multiplier)
+                </option>
+              <% end %>
+            </select>
+            <div class="form-hint">Assign Bronze, Silver, or Gold tier to adjust service package pricing.</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold" for="worker_is_available">Duty Status</label>
+            <select name="worker[is_available]" id="worker_is_available" class="form-select">
+              <option value="1" <%= "selected" if params.dig(:worker, :is_available) != "0" %>>🟢 Available for Bookings</option>
+              <option value="0" <%= "selected" if params.dig(:worker, :is_available) == "0" %>>🔴 Off Duty / On Leave</option>
+            </select>
+            <div class="form-hint">Master toggle determining live booking eligibility.</div>
+          </div>
+        </div>
+
+        <!-- Section: Skills -->
+        <div class="mb-1 pb-2 border-bottom">
+          <span class="text-secondary small fw-semibold text-uppercase" style="letter-spacing: .06em;">Service Specializations & Certified Skills</span>
+        </div>
+
+        <div class="mb-4 mt-2">
+          <% selected_skills = params.dig(:worker, :skills) || [] %>
+          <div class="row g-2">
+            <% WorkerProfile::SKILL_OPTIONS.each do |skill| %>
+              <% checked = selected_skills.include?(skill) %>
+              <div class="col-md-4">
+                <label class="d-flex align-items-center gap-2 border rounded p-2 cursor-pointer <%= checked ? 'bg-primary-lt border-primary' : 'bg-surface' %>" style="transition: all .14s ease;">
+                  <input type="checkbox" name="worker[skills][]" value="<%= skill %>" class="form-check-input mb-0 flex-shrink-0" <%= "checked" if checked %>>
+                  <span class="small fw-semibold text-reset"><%= skill %></span>
+                </label>
+              </div>
+            <% end %>
+          </div>
+          <div class="form-hint mt-2"><i class="ti ti-sparkles me-1"></i>Select all certified skills this worker offers. These appear as tags on their profile.</div>
+        </div>
+
+        <!-- Section: KYC & Payout -->
+        <div class="mb-1 pb-2 border-bottom">
+          <span class="text-secondary small fw-semibold text-uppercase" style="letter-spacing: .06em;">KYC Verification & Payout</span>
+        </div>
+
+        <div class="row g-3 mb-4 mt-1">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold" for="worker_aadhaar_number">Aadhaar Number (12-digit) <span class="text-danger">*</span></label>
+            <%= f.text_field :aadhaar_number, class: "form-control", id: "worker_aadhaar_number",
+                  placeholder: "e.g. 543210987654",
+                  required: true,
+                  pattern: "\\d{12}",
+                  maxlength: 12,
+                  inputmode: "numeric",
+                  title: "Aadhaar number must be exactly 12 digits" %>
+            <div class="form-hint"><i class="ti ti-id-badge me-1"></i>12 numeric digits — for KYC identity verification.</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold" for="worker_upi_id">Payout UPI ID</label>
+            <input type="text" name="worker[upi_id]" id="worker_upi_id" class="form-control"
+                   placeholder="e.g. beautician@okhdfcbank"
+                   value="<%= params.dig(:worker, :upi_id) %>">
+            <div class="form-hint">Worker's UPI handle for earnings payout.</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold" for="worker_kyc_status">Initial KYC Status <span class="text-danger">*</span></label>
+            <select name="worker[kyc_status]" id="worker_kyc_status" class="form-select" required>
+              <% selected_kyc = params.dig(:worker, :kyc_status) || "pending" %>
+              <option value="approved" <%= "selected" if selected_kyc == "approved" %>>✓ APPROVED (Verified)</option>
+              <option value="pending"  <%= "selected" if selected_kyc == "pending"  %>>⏳ PENDING (Under Review)</option>
+              <option value="rejected" <%= "selected" if selected_kyc == "rejected" %>>✗ REJECTED</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Section: Schedule -->
+        <div class="mb-1 pb-2 border-bottom">
+          <span class="text-secondary small fw-semibold text-uppercase" style="letter-spacing: .06em;">Schedule & Availability</span>
+        </div>
+
+        <!-- Available Days -->
+        <div class="mb-3 mt-2">
+          <label class="form-label fw-semibold">Available Working Days <span class="text-danger">*</span></label>
+          <div class="d-flex flex-wrap gap-2 pt-1">
+            <% selected_days = params.dig(:worker, :available_days) || WorkerProfile::DEFAULT_DAYS %>
+            <% WorkerProfile::DAYS_OF_WEEK.each do |day| %>
+              <% checked = selected_days.include?(day) %>
+              <label class="form-check form-check-inline border rounded px-3 py-2 bg-surface cursor-pointer mb-0">
+                <input class="form-check-input me-2" type="checkbox" name="worker[available_days][]" value="<%= day %>" <%= "checked" if checked %>>
+                <span class="badge bg-secondary-lt text-secondary me-1" style="font-size: 0.7rem;"><%= WorkerProfile::DAY_CODES[day] %></span>
+                <span class="form-check-label fw-semibold text-reset"><%= day %></span>
+              </label>
+            <% end %>
+          </div>
+          <div class="form-hint mt-2">
+            <i class="ti ti-calendar me-1"></i> Check the days this worker is active.
+          </div>
+        </div>
+
+        <!-- Time slot (fixed full day) -->
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Time Slot Availability</label>
+          <div class="card card-sm bg-surface-secondary border p-3">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <div class="fw-bold text-reset">
+                  <i class="ti ti-clock text-primary me-1"></i> Full Day (Throughout the Day)
+                </div>
+                <div class="text-secondary small mt-1">Available for bookings across all hours on scheduled days.</div>
+              </div>
+              <span class="badge bg-purple-lt">Fixed Full-Day</span>
+            </div>
+          </div>
+          <input type="hidden" name="worker[time_slot]" value="Full Day (Throughout the Day)">
+        </div>
+
+        <!-- Section: Account -->
+        <div class="mb-1 pb-2 border-bottom">
+          <span class="text-secondary small fw-semibold text-uppercase" style="letter-spacing: .06em;">Account Credentials</span>
+        </div>
+
+        <div class="row g-3 mb-3 mt-1">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold" for="worker_password">Set Password <span class="text-muted fw-normal">(Optional)</span></label>
+            <%= f.password_field :password, class: "form-control", id: "worker_password", placeholder: "Leave blank to auto-generate" %>
+            <div class="form-hint text-primary">
+              <i class="ti ti-sparkles me-1"></i> If blank, a secure invite password will be generated automatically.
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold" for="worker_status">Account Status</label>
+            <%= f.select :status, [["Active & Verified", "active"], ["Inactive / Suspended", "inactive"]], {}, class: "form-select", id: "worker_status" %>
+          </div>
+        </div>
+
+        <!-- Bio -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold" for="worker_bio">Bio & Professional Summary</label>
+          <textarea name="worker[bio]" id="worker_bio" class="form-control" rows="3" placeholder="Certified aesthetician with specialized background in salon-grade treatments..."><%= params.dig(:worker, :bio) %></textarea>
+        </div>
+
+      </div>
+
+      <div class="card-footer border-top d-flex justify-content-between align-items-center bg-transparent py-3">
+        <%= link_to "Cancel", admin_workers_path, class: "btn btn-link link-secondary" %>
+        <button type="submit" class="btn btn-primary shadow-sm">
+          <i class="ti ti-user-check me-1 fs-3"></i> Save & Onboard Worker
+        </button>
+      </div>
+    <% end %>
+  </div>
+</div>

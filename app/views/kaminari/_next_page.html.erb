@@ -1,0 +1,8 @@
+<% if current_page.last? %>
+  <span class="bc-page-btn bc-page-btn--arrow bc-page-btn--disabled" aria-disabled="true">›</span>
+<% else %>
+  <%= link_to "›", url, rel: 'next', remote: remote,
+        class: "bc-page-btn bc-page-btn--arrow",
+        aria: { label: "Next page" },
+        data: { turbo_action: "advance" } %>
+<% end %>

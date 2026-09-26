@@ -1,0 +1,275 @@
+<%= form_with model: [:admin, service], multipart: true, class: "card shadow-sm" do |f| %>
+  <div class="card-header border-bottom">
+    <h3 class="card-title fw-bold mb-0"><%= service.persisted? ? "Edit Service" : "New Service" %></h3>
+  </div>
+
+  <% if service.errors.any? %>
+    <div class="card-body border-bottom">
+      <div class="alert alert-danger">
+        <ul class="mb-0">
+          <% service.errors.full_messages.each do |msg| %>
+            <li><%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="card-body">
+    <div class="row g-4">
+      <!-- Name -->
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Name <span class="text-danger">*</span></label>
+        <%= f.text_field :name, class: "form-control", placeholder: "e.g. Bridal Makeup" %>
+      </div>
+
+      <!-- Category -->
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
+        <% selected_cat_id = service.category_id || @category&.id %>
+        <select class="form-select" id="service_category_select" name="service[category_id]">
+          <option value="">— Select Category —</option>
+          <% (@categories || Category.active.ordered).each do |cat| %>
+            <option value="<%= cat.id %>" <%= "selected" if selected_cat_id == cat.id %>><%= cat.name %></option>
+          <% end %>
+        </select>
+        <div class="form-hint">Filter subcategories by parent category.</div>
+      </div>
+
+      <!-- Subcategory -->
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Subcategory <span class="text-danger">*</span></label>
+        <% selected_sub_id = service.respond_to?(:subcategory_id) ? service.subcategory_id : service.try(:subcategory)&.id %>
+        <select class="form-select" name="service[subcategory_id]" id="service_subcategory_select" required>
+          <option value="">— Select Subcategory —</option>
+          <% (@subcategories || Subcategory.active.ordered).each do |sub| %>
+            <option value="<%= sub.id %>"
+                    data-category-id="<%= sub.category_id %>"
+                    <%= "selected" if selected_sub_id == sub.id %>>
+              <%= sub.name %>
+            </option>
+          <% end %>
+        </select>
+        <div class="form-hint">Service directly attaches to this subcategory.</div>
+      </div>
+
+      <!-- Tag -->
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Tag <span class="text-danger">*</span></label>
+        <%= f.select :tag,
+              [["Facial", "facial"], ["Korean Glow", "korean-glow"], ["Mani-Pedi", "mani-padi"]],
+              { prompt: "Select a tag" },
+              { class: "form-select", required: true } %>
+        <div class="form-hint">Required tag (Facial, Korean Glow, Mani-Pedi).</div>
+      </div>
+
+      <!-- Description -->
+      <div class="col-12">
+        <label class="form-label fw-semibold">Short Description</label>
+        <%= f.text_area :description, class: "form-control", rows: 2,
+              placeholder: "Short summary of what this service includes..." %>
+      </div>
+
+      <!-- About -->
+      <div class="col-12">
+        <label class="form-label fw-semibold">About Service</label>
+        <%= f.text_area :about, class: "form-control", rows: 3,
+              placeholder: "Complete detailed description of what makes this service unique..." %>
+        <div class="form-hint">Detailed background information shown on the mobile app service page.</div>
+      </div>
+
+      <!-- Benefits -->
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Key Benefits (One per line)</label>
+        <%= f.text_area :benefits_text, class: "form-control", rows: 4,
+              placeholder: "Deep skin hydration&#10;Instant radiant glow&#10;Single-use hygienic kit&#10;Stress relief acupressure" %>
+        <div class="form-hint">Enter each benefit on a new line. Mobile app displays these as bullet points.</div>
+      </div>
+
+      <!-- Process -->
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Step-by-step Process (One per line)</label>
+        <%= f.text_area :process_text, class: "form-control", rows: 4,
+              placeholder: "1. Consultation & Skin Analysis&#10;2. Gentle exfoliation & steam&#10;3. Deep massage with essential oils&#10;4. Hydrating mask & SPF" %>
+        <div class="form-hint">Enter each step on a new line. Mobile app displays these as sequential steps.</div>
+      </div>
+
+      <!-- Pricing -->
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Base Price (₹) <span class="text-danger">*</span></label>
+        <%= f.number_field :base_price, class: "form-control", min: 0, step: "0.01",
+              placeholder: "e.g. 1499.00" %>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Discount Price (₹)</label>
+        <%= f.number_field :discount_price, class: "form-control", min: 0, step: "0.01",
+              placeholder: "Leave blank if no sale" %>
+        <div class="form-hint">Must be less than base price.</div>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Duration (minutes) <span class="text-danger">*</span></label>
+        <%= f.number_field :duration_minutes, class: "form-control", min: 1,
+              placeholder: "e.g. 90" %>
+      </div>
+
+      <!-- Service Image (Cloudinary Storage) -->
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Service Image (Cloudinary Storage)</label>
+
+        <% existing_img = service.image_url.presence || (service.image.attached? && (service.image.url rescue nil) || (rails_blob_path(service.image, only_path: true) rescue nil)) %>
+        <div class="p-3 mb-2 rounded border bg-light-subtle text-center position-relative" id="service-preview-box" style="min-height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+          <% if existing_img.present? %>
+            <img id="service-preview-img"
+                 src="<%= existing_img %>"
+                 alt="<%= service.name %>"
+                 class="rounded border shadow-sm mb-2"
+                 style="max-width: 200px; max-height: 150px; object-fit: cover; display: block;" />
+            <div id="service-preview-badge" class="mb-2">
+              <span class="badge bg-green-lt text-success"><i class="ti ti-check me-1"></i> Current image</span>
+            </div>
+            <div class="form-check form-check-inline text-start mt-1">
+              <%= f.check_box :remove_image, class: "form-check-input", id: "service_remove_image" %>
+              <label for="service_remove_image" class="form-check-label text-danger small fw-semibold">
+                <i class="ti ti-trash me-1"></i> Remove image (delete from Cloudinary on save)
+              </label>
+            </div>
+          <% else %>
+            <img id="service-preview-img"
+                 src="#"
+                 alt="Preview"
+                 class="rounded border shadow-sm mb-2"
+                 style="max-width: 200px; max-height: 150px; object-fit: cover; display: none;" />
+            <div id="service-preview-badge">
+              <span class="badge bg-secondary-lt text-secondary"><i class="ti ti-photo me-1"></i> No image attached</span>
+            </div>
+          <% end %>
+          <div id="service-file-info" class="text-secondary small mt-1 font-monospace" style="display: none;"></div>
+        </div>
+
+        <div class="mb-1">
+          <label class="form-label small text-secondary fw-semibold mb-1" for="service-image-input">Choose Image from Computer</label>
+          <%= f.file_field :image, class: "form-control", id: "service-image-input", accept: "image/jpeg,image/png,image/webp,image/gif" %>
+          <div class="form-hint mt-1">Accepts JPEG, PNG, WebP, GIF (max 5 MB). Automatically uploaded to Cloudinary and replaces old image on save.</div>
+        </div>
+      </div>
+
+      <!-- Position, Featured, Status -->
+      <div class="col-md-2">
+        <label class="form-label fw-semibold">Position</label>
+        <%= f.number_field :position, class: "form-control", min: 0 %>
+      </div>
+      <div class="col-md-4 d-flex flex-column justify-content-end pb-1">
+        <div class="mb-3">
+          <label class="form-check form-switch">
+            <%= f.check_box :featured, class: "form-check-input", role: "switch" %>
+            <span class="form-check-label fw-semibold">Featured on Home Screen</span>
+          </label>
+        </div>
+        <div>
+          <label class="form-label fw-semibold">Status</label>
+          <%= f.select :status, [["Active", "active"], ["Inactive", "inactive"]], {}, class: "form-select" %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-footer d-flex gap-2">
+    <%= f.submit service.persisted? ? "Save Changes" : "Create Service", class: "btn btn-primary" %>
+    <%= link_to "Cancel", admin_services_path, class: "btn btn-outline-secondary" %>
+  </div>
+<% end %>
+
+<script>
+  (function initServicePreview() {
+    function setup() {
+      var fileInput = document.getElementById("service-image-input");
+      var removeCheckbox = document.getElementById("service_remove_image");
+      var img = document.getElementById("service-preview-img");
+      var badge = document.getElementById("service-preview-badge");
+      var info = document.getElementById("service-file-info");
+
+      if (fileInput && !fileInput.dataset.previewAttached) {
+        fileInput.dataset.previewAttached = "true";
+        fileInput.addEventListener("change", function() {
+          var file = this.files && this.files[0];
+          if (file) {
+            if (removeCheckbox) removeCheckbox.checked = false;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+              if (img) {
+                img.src = e.target.result;
+                img.style.display = "block";
+                img.style.opacity = "1";
+              }
+              if (badge) {
+                badge.innerHTML = '<span class="badge bg-azure-lt text-azure"><i class="ti ti-upload me-1"></i> New image selected (replaces old file on save)</span>';
+              }
+              if (info) {
+                info.textContent = file.name + " (" + (file.size / 1024).toFixed(1) + " KB)";
+                info.style.display = "block";
+              }
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      }
+
+      if (removeCheckbox && !removeCheckbox.dataset.previewAttached) {
+        removeCheckbox.dataset.previewAttached = "true";
+        removeCheckbox.addEventListener("change", function() {
+          if (this.checked) {
+            if (img) img.style.opacity = "0.25";
+            if (badge) badge.innerHTML = '<span class="badge bg-danger-lt text-danger"><i class="ti ti-trash me-1"></i> Marked for deletion on save</span>';
+          } else {
+            if (img) img.style.opacity = "1";
+            if (badge) badge.innerHTML = '<span class="badge bg-green-lt text-success"><i class="ti ti-check me-1"></i> Image retained</span>';
+          }
+        });
+      }
+      // Dynamic Category -> Subcategory Filtering
+      var catSelect = document.getElementById("service_category_select");
+      var subSelect = document.getElementById("service_subcategory_select");
+      if (catSelect && subSelect) {
+        function filterSubcategories() {
+          var selectedCatId = catSelect.value;
+          var options = subSelect.querySelectorAll("option[data-category-id]");
+          var hasMatch = false;
+
+          options.forEach(function(opt) {
+            var optCatId = opt.getAttribute("data-category-id");
+            if (!selectedCatId || optCatId === selectedCatId) {
+              opt.style.display = "";
+              opt.disabled = false;
+              if (opt.selected) hasMatch = true;
+            } else {
+              opt.style.display = "none";
+              opt.disabled = true;
+              if (opt.selected) opt.selected = false;
+            }
+          });
+
+          if (!hasMatch && selectedCatId && !subSelect.value) {
+            // Leave at empty prompt
+          }
+        }
+
+        if (!catSelect.dataset.depAttached) {
+          catSelect.dataset.depAttached = "true";
+          catSelect.addEventListener("change", function() {
+            subSelect.value = "";
+            filterSubcategories();
+          });
+        }
+        filterSubcategories();
+      }
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", setup);
+    } else {
+      setup();
+    }
+    document.addEventListener("turbo:load", setup);
+  })();
+</script>
+

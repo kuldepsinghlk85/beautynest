@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" width="400" height="250">
+  <defs>
+    <linearGradient id="catBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fdf2f8"/>
+      <stop offset="100%" stop-color="#fce7f3"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="250" fill="url(#catBg)"/>
+  <!-- Sparkles & Lotus Silhouette -->
+  <g transform="translate(160, 85)" fill="#db2777" opacity="0.8">
+    <path d="M40 0 C30 25 10 40 0 50 C20 50 35 40 40 20 C45 40 60 50 80 50 C70 40 50 25 40 0 Z"/>
+    <circle cx="40" cy="55" r="5" fill="#f43f5e"/>
+  </g>
+</svg>

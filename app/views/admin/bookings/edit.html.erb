@@ -1,0 +1,94 @@
+<% content_for :page_title, "Edit Booking #{@booking[:id]}" %>
+
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">Dispatch Management</div>
+      <h2 class="page-title fs-1 fw-bold">Manage Booking: <%= @booking[:id] %></h2>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <%= link_to admin_booking_path(@booking[:id]), class: "btn btn-outline-secondary" do %>
+        <i class="ti ti-arrow-left me-1 fs-3"></i> Back to Details
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+        <h3 class="card-title fw-bold mb-0">Booking Dispatch & Scheduling</h3>
+        <div><%= booking_status_badge(@booking[:status]) %></div>
+      </div>
+      <%= form_with url: admin_booking_path(@booking[:id]), method: :patch, local: true do |f| %>
+        <div class="card-body">
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Customer Name</label>
+              <input type="text" class="form-control" value="<%= @booking[:customer] %>" readonly disabled>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Selected Service</label>
+              <input type="text" class="form-control" value="<%= @booking[:service] %>" readonly disabled>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label" for="booking_worker_id">Assigned Worker / Specialist</label>
+              <select name="booking[worker_id]" id="booking_worker_id" class="form-select">
+                <option value="">-- Unassigned --</option>
+                <% @workers.each do |w| %>
+                  <option value="<%= w[:id] %>" <%= "selected" if @booking[:worker_id] == w[:id] %>>
+                    <%= w[:name] %> (<%= w[:speciality] %> - <%= w[:rating] %>&#9733;)
+                  </option>
+                <% end %>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="booking_status">Booking Status</label>
+              <select name="booking[status]" id="booking_status" class="form-select">
+                <option value="pending" <%= "selected" if @booking[:status] == "pending" %>>Pending Confirmation</option>
+                <option value="confirmed" <%= "selected" if @booking[:status] == "confirmed" %>>Confirmed</option>
+                <option value="in_progress" <%= "selected" if @booking[:status] == "in_progress" %>>In Progress</option>
+                <option value="completed" <%= "selected" if @booking[:status] == "completed" %>>Completed</option>
+                <option value="cancelled" <%= "selected" if @booking[:status] == "cancelled" %>>Cancelled</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <label class="form-label" for="booking_date">Scheduled Date</label>
+              <input type="date" name="booking[date]" id="booking_date" class="form-control" value="<%= @booking[:date] %>">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="booking_time">Scheduled Time</label>
+              <select name="booking[time]" id="booking_time" class="form-select">
+                <% ["09:00 AM", "10:30 AM", "12:00 PM", "02:00 PM", "03:30 PM", "05:00 PM", "06:30 PM"].each do |slot| %>
+                  <option value="<%= slot %>" <%= "selected" if @booking[:time] == slot %>><%= slot %></option>
+                <% end %>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="booking_payment_status">Payment Status</label>
+              <select name="booking[payment_status]" id="booking_payment_status" class="form-select">
+                <option value="paid" <%= "selected" if @booking[:payment_status] == "paid" %>>Paid</option>
+                <option value="pending" <%= "selected" if @booking[:payment_status] == "pending" %>>Pending</option>
+                <option value="refunded" <%= "selected" if @booking[:payment_status] == "refunded" %>>Refunded</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-footer border-top d-flex justify-content-between align-items-center bg-transparent">
+          <%= link_to "Cancel", admin_booking_path(@booking[:id]), class: "btn btn-link link-secondary" %>
+          <button type="submit" class="btn btn-primary">
+            <i class="ti ti-check me-1 fs-3"></i> Update Booking
+          </button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,117 @@
+<div class="card-body p-4 p-md-5">
+  <div class="text-center mb-4">
+    <div class="avatar avatar-lg rounded-circle mx-auto mb-3"
+         style="background: linear-gradient(135deg, rgba(219, 39, 119, 0.15), rgba(190, 24, 93, 0.1)); border: 1px solid rgba(219, 39, 119, 0.3);">
+      <i class="ti ti-lock fs-1" style="color: #db2777;"></i>
+    </div>
+    <h2 class="h2 text-center mb-1 fw-bold">Welcome Back</h2>
+    <p class="text-secondary small">Sign in to <%= site_name %></p>
+  </div>
+
+  <% if flash[:notice] %>
+    <div class="alert alert-success alert-dismissible v6-alert-box mb-3" role="alert">
+      <div class="d-flex">
+        <div><i class="ti ti-check fs-2 me-2"></i></div>
+        <div><%= flash[:notice] %></div>
+      </div>
+      <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+    </div>
+  <% end %>
+
+  <% if flash[:alert] %>
+    <div class="alert alert-danger alert-dismissible v6-alert-box mb-4" role="alert">
+      <div class="d-flex">
+        <div><i class="ti ti-alert-circle fs-2 me-2"></i></div>
+        <div><%= flash[:alert] %></div>
+      </div>
+      <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+    </div>
+  <% end %>
+
+  <% if admin_logged_in? %>
+    <div class="alert alert-info py-2 px-3 small rounded-3 mb-4 d-flex align-items-center justify-content-between border-0 shadow-sm" style="background: rgba(14, 165, 233, 0.1); color: #0284c7;">
+      <div class="d-flex align-items-center gap-2">
+        <i class="ti ti-shield-check fs-2 text-info"></i>
+        <span><strong>Admin Session Active</strong>: Sign in below as a customer to operate the storefront independently.</span>
+      </div>
+      <%= link_to "Admin Panel", admin_dashboard_path, class: "btn btn-sm btn-outline-info ms-2 text-nowrap rounded-pill py-1" %>
+    </div>
+  <% end %>
+
+  <%= form_with url: login_path, method: :post do |f| %>
+    <% if params[:role].present? %>
+      <input type="hidden" name="role" value="<%= params[:role] %>">
+    <% end %>
+    <div class="mb-3">
+      <label class="form-label mb-1" for="email">
+        Email address <span class="text-danger">*</span>
+      </label>
+      <div class="auth-input-wrap">
+        <span class="auth-icon-left">
+          <i class="ti ti-mail"></i>
+        </span>
+        <input type="email" name="email" id="email" class="form-control no-right-icon"
+               placeholder="name@example.com" autocomplete="email" required autofocus>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label mb-1" for="password">
+        Password <span class="text-danger">*</span>
+      </label>
+      <div class="auth-input-wrap">
+        <span class="auth-icon-left">
+          <i class="ti ti-lock"></i>
+        </span>
+        <input type="password" name="password" id="password" class="form-control"
+               placeholder="Enter your password" autocomplete="current-password" required>
+        <button type="button" class="auth-icon-right-btn" title="Toggle password visibility" onclick="togglePassword(event, this)">
+          <i class="ti ti-eye fs-3"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="mb-4">
+      <label class="auth-checkbox-wrap">
+        <input type="checkbox" class="form-check-input" name="remember_me" value="1" checked>
+        <span class="text-secondary small">Keep me signed in</span>
+      </label>
+    </div>
+
+    <div class="form-footer mb-3">
+      <button type="submit" class="auth-btn-submit">
+        <i class="ti ti-login fs-2"></i> Sign In
+      </button>
+    </div>
+
+    <div class="text-center my-3">
+      <span class="text-muted small">— OR —</span>
+    </div>
+
+    <div class="mb-3">
+      <%= link_to switch_customer_demo_path(return_to: params[:return_to]), class: "btn btn-outline-pink btn-sm w-100 rounded-pill py-2 d-flex align-items-center justify-content-center gap-2", style: "border: 1.5px solid rgba(219,39,119,0.35); color: #db2777; background: rgba(219,39,119,0.03); text-decoration: none; font-weight: 600;" do %>
+        <i class="ti ti-user-check fs-2"></i>
+        <span>1-Click Test: Sign In as Demo Customer</span>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="text-center text-secondary small mt-4 pt-3 border-top auth-card-footer">
+    Don't have an account? <%= link_to "Sign Up", signup_path, class: "link-primary fw-medium" %>
+  </div>
+</div>
+
+<script>
+  function togglePassword(e, el) {
+    e.preventDefault();
+    const input = document.getElementById('password');
+    const icon = el.querySelector('i');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.className = 'ti ti-eye-off fs-3';
+    } else {
+      input.type = 'password';
+      icon.className = 'ti ti-eye fs-3';
+    }
+  }
+</script>

@@ -1,0 +1,160 @@
+<% content_for :page_title, "Notification Details" %>
+
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title fs-1 fw-bold"><%= @notification.display_subject %></h2>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <div class="btn-list">
+        <%= link_to admin_notifications_path, class: "btn btn-outline-secondary" do %>
+          <i class="ti ti-arrow-left me-1 fs-3"></i> Back to Notifications
+        <% end %>
+        <% if current_user&.admin? %>
+          <%= link_to edit_admin_notification_path(@notification.id), class: "btn btn-primary" do %>
+            <i class="ti ti-edit me-1 fs-3"></i> Edit / Resend
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% booking = @notification.related_booking %>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card shadow-sm mb-4">
+      <div class="card-header border-bottom d-flex justify-content-between align-items-center py-3">
+        <h3 class="card-title fw-bold mb-0">Notification Details</h3>
+        <div class="d-flex align-items-center gap-2">
+          <% if booking.present? %>
+            <% if (current_user&.worker? && booking.status.to_s.in?(%w[cancelled rejected])) || booking.status == "rejected" %>
+              <span class="badge bg-danger-lt">
+                <span class="status-dot status-danger me-1"></span>Rejected
+              </span>
+            <% else %>
+              <%= booking_status_badge(booking.status) %>
+            <% end %>
+          <% else %>
+            <%= notification_status_badge(@notification.status) %>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <div class="bg-surface-secondary border p-4 rounded-3 text-reset fs-3 mb-4">
+          <%= @notification.display_body %>
+        </div>
+
+        <% if booking.present? %>
+          <div class="card card-sm bg-surface-secondary border p-3 mb-4">
+            <div class="fw-bold text-reset mb-3 pb-2 border-bottom d-flex align-items-center justify-content-between">
+              <span><i class="ti ti-calendar-event me-2 text-primary"></i>Booking Information</span>
+              <span class="badge bg-primary-lt font-monospace px-2 py-1">Booking ID: #<%= booking.id.to_s.first(8) %></span>
+            </div>
+            <div class="row g-3">
+              <div class="col-sm-6">
+                <div class="text-secondary small">Customer</div>
+                <div class="fw-semibold text-reset mt-1"><%= booking.customer_name %></div>
+              </div>
+              <div class="col-sm-6">
+                <div class="text-secondary small">Scheduled Slot</div>
+                <div class="fw-semibold text-reset mt-1">
+                  <i class="ti ti-calendar me-1"></i><%= booking.display_date %> at <%= booking.display_time %>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="text-secondary small">Service</div>
+                <div class="fw-semibold text-reset mt-1"><%= booking.display_service %></div>
+              </div>
+              <div class="col-sm-6">
+                <div class="text-secondary small">Total Amount</div>
+                <div class="fw-bold text-reset mt-1"><%= booking.display_amount %></div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <div class="row g-3">
+          <div class="col-sm-4">
+            <div class="card card-sm bg-surface-secondary border p-3">
+              <div class="text-secondary small">Recipient</div>
+              <div class="fw-semibold text-reset mt-1"><%= @notification.user&.name || @notification.recipient_type %></div>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="card card-sm bg-surface-secondary border p-3">
+              <div class="text-secondary small">Dispatched At</div>
+              <div class="fw-semibold text-reset mt-1">
+                <i class="ti ti-calendar me-1"></i><%= @notification.sent_at&.strftime("%d %b %Y, %I:%M %p") || @notification.created_at.strftime("%d %b %Y, %I:%M %p") %>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="card card-sm bg-surface-secondary border p-3">
+              <div class="text-secondary small">Read Status</div>
+              <div class="mt-1">
+                <% if @notification.read? %>
+                  <span class="badge bg-success-lt">Read at <%= @notification.read_at.strftime("%d %b, %I:%M %p") %></span>
+                <% else %>
+                  <span class="badge bg-warning-lt">Unread</span>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card shadow-sm mb-4">
+      <div class="card-header border-bottom py-3">
+        <h3 class="card-title fw-bold mb-0">Actions</h3>
+      </div>
+      <div class="card-body d-flex flex-column gap-2">
+        <% if current_user&.worker? %>
+          <% if booking.present? && booking.worker_id.to_s == current_user.id.to_s %>
+            <% if booking.status == "pending" %>
+              <%= button_to accept_admin_booking_path(booking.id), method: :patch, class: "btn btn-success w-100 py-2", data: { turbo_confirm: "Are you sure you want to accept this booking?", confirm_title: "Accept Booking", confirm_btn: "Accept Booking", confirm_theme: "success" } do %>
+                <i class="ti ti-check me-1 fs-3"></i> Accept Booking
+              <% end %>
+              <%= button_to reject_admin_booking_path(booking.id), method: :patch, class: "btn btn-outline-danger w-100 py-2", data: { turbo_confirm: "Are you sure you want to reject this booking?", confirm_title: "Reject Booking", confirm_btn: "Reject Booking" } do %>
+                <i class="ti ti-x me-1 fs-3"></i> Reject Booking
+              <% end %>
+            <% elsif booking.status == "confirmed" %>
+              <div class="alert alert-success py-2 px-3 small text-center mb-1">
+                <i class="ti ti-check me-1"></i> Confirmed & Accepted
+              </div>
+            <% elsif booking.status.to_s.in?(%w[cancelled rejected]) %>
+              <div class="alert alert-danger py-2 px-3 small text-center mb-1">
+                <i class="ti ti-x me-1"></i> Rejected
+              </div>
+            <% end %>
+            <%= link_to admin_booking_path(booking.id), class: "btn btn-outline-secondary w-100" do %>
+              <i class="ti ti-calendar me-1 fs-3"></i> View Booking
+            <% end %>
+            <hr class="my-1">
+          <% end %>
+
+          <%= link_to admin_notifications_path, class: "btn btn-ghost-secondary w-100" do %>
+            <i class="ti ti-arrow-left me-1 fs-3"></i> All Notifications
+          <% end %>
+        <% else %>
+          <% if booking.present? %>
+            <%= link_to admin_booking_path(booking.id), class: "btn btn-primary w-100" do %>
+              <i class="ti ti-calendar me-1 fs-3"></i> View Booking
+            <% end %>
+          <% end %>
+          <%= link_to edit_admin_notification_path(@notification.id), class: "btn btn-outline-primary w-100" do %>
+            <i class="ti ti-send me-1 fs-3"></i> Edit & Resend
+          <% end %>
+          <%= link_to admin_notifications_path, class: "btn btn-outline-secondary w-100" do %>
+            <i class="ti ti-arrow-left me-1 fs-3"></i> Back to Notifications
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

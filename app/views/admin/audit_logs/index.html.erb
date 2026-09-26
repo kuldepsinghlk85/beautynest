@@ -1,0 +1,241 @@
+<% content_for :page_title, "Security & Compliance Audit Logs" %>
+
+<div class="page-header d-print-none mb-3">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title fs-1 fw-bold mb-1">
+        Security &amp; Compliance Audit Logs
+      </h2>
+      <div class="text-secondary small">
+        Immutable real-time stream of all user actions, system modifications, and security events &mdash; 
+        <span class="fw-semibold"><%= number_with_delimiter(@total_count) %> events</span>
+      </div>
+    </div>
+    <div class="col-auto ms-auto d-flex align-items-center gap-2">
+      <%= form_with url: admin_audit_logs_path, method: :get, class: "d-flex gap-2", data: { turbo: false } do %>
+        <div class="input-icon">
+          <span class="input-icon-addon"><i class="ti ti-search text-secondary"></i></span>
+          <input class="form-control form-control-sm" type="text" name="search" value="<%= params[:search] %>"
+                 placeholder="Search action, actor, IP, resource..." style="min-width: 280px;" autocomplete="off">
+        </div>
+        <% if params[:audit_action].present? %>
+          <input type="hidden" name="audit_action" value="<%= params[:audit_action] %>">
+        <% end %>
+        <% if params[:auditable_type].present? %>
+          <input type="hidden" name="auditable_type" value="<%= params[:auditable_type] %>">
+        <% end %>
+      <% end %>
+
+      <%= link_to admin_audit_logs_path, class: "btn btn-sm btn-outline-secondary px-3", title: "Refresh" do %>
+        Refresh
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-header border-bottom py-2 px-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <span class="text-secondary fw-semibold small text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.05em;">Filters:</span>
+      
+      <!-- Action Filter Dropdown -->
+      <div class="dropdown">
+        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+          <%= params[:audit_action].present? ? params[:audit_action].humanize : "All Actions" %>
+        </button>
+        <ul class="dropdown-menu shadow-sm">
+          <li><%= link_to "All Actions", admin_audit_logs_path(params.permit(:search, :auditable_type)), class: "dropdown-item #{'active' if params[:audit_action].blank?}" %></li>
+          <li><hr class="dropdown-divider"></li>
+          <% @actions.each do |act| %>
+            <li><%= link_to act.humanize, admin_audit_logs_path(params.permit(:search, :auditable_type).merge(audit_action: act)), class: "dropdown-item #{'active' if params[:audit_action] == act}" %></li>
+          <% end %>
+        </ul>
+      </div>
+
+      <!-- Resource Filter Dropdown -->
+      <div class="dropdown">
+        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+          <%= params[:auditable_type].presence || "All Resources" %>
+        </button>
+        <ul class="dropdown-menu shadow-sm">
+          <li><%= link_to "All Resources", admin_audit_logs_path(params.permit(:search, :audit_action)), class: "dropdown-item #{'active' if params[:auditable_type].blank?}" %></li>
+          <li><hr class="dropdown-divider"></li>
+          <% @auditable_types.each do |typ| %>
+            <li><%= link_to typ, admin_audit_logs_path(params.permit(:search, :audit_action).merge(auditable_type: typ)), class: "dropdown-item #{'active' if params[:auditable_type] == typ}" %></li>
+          <% end %>
+        </ul>
+      </div>
+
+      <% if params[:search].present? || params[:audit_action].present? || params[:auditable_type].present? %>
+        <%= link_to admin_audit_logs_path, class: "badge bg-danger-lt text-danger text-decoration-none py-1 px-2", title: "Clear filters" do %>
+          <i class="ti ti-x me-1"></i> Clear
+        <% end %>
+      <% end %>
+    </div>
+
+    <div class="text-secondary small">
+      Showing <strong><%= @audit_logs.size %></strong> of <strong><%= number_with_delimiter(@total_count) %></strong> logs
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-vcenter card-table table-hover mb-0">
+      <thead>
+        <tr class="text-uppercase text-secondary" style="font-size: 0.72rem; letter-spacing: 0.06em;">
+          <th style="width: 210px;">USER / ACTOR</th>
+          <th style="width: 220px;">ACTION &amp; RESOURCE</th>
+          <th>CHANGESET DETAILS</th>
+          <th style="width: 140px;">IP ADDRESS</th>
+          <th style="width: 160px;">TIMESTAMP</th>
+          <th style="width: 90px;" class="text-end">ACTION</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if @audit_logs.any? %>
+          <% @audit_logs.each do |log| %>
+            <tr>
+              <!-- 1. USER / ACTOR -->
+              <td>
+                <div class="d-flex align-items-center">
+                  <% 
+                    initials = log.actor_display.split.map(&:first).join.first(2).upcase
+                    initials = "DA" if initials.blank?
+                  %>
+                  <span class="avatar avatar-sm rounded-circle me-2 bg-teal text-white fw-bold">
+                    <%= initials %>
+                  </span>
+                  <div class="text-truncate">
+                    <div class="fw-bold lh-sm text-reset"><%= log.actor_display %></div>
+                    <div class="text-secondary small text-truncate" style="max-width: 170px; font-size: 0.75rem;">
+                      <%= log.user&.email.presence || "#{log.actor_role.titleize} User" %>
+                    </div>
+                  </div>
+                </div>
+              </td>
+
+              <!-- 2. ACTION & RESOURCE -->
+              <td>
+                <%= link_to admin_audit_log_path(log), class: "text-decoration-none d-flex align-items-center gap-2" do %>
+                  <span class="badge bg-azure-lt fw-semibold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.03em;">
+                    <%= log.auditable_type %>
+                  </span>
+                  <span class="fw-semibold text-reset">
+                    <%= log.action_display_name %>
+                  </span>
+                <% end %>
+              </td>
+
+              <!-- 3. CHANGESET DETAILS -->
+              <td>
+                <% if log.action == "create" %>
+                  <% created_summary = audit_created_summary(log) %>
+                  <%= link_to admin_audit_log_path(log), class: "text-decoration-none d-inline-flex align-items-center gap-1 flex-wrap" do %>
+                    <% if created_summary.any? %>
+                      <% primary_k, primary_v = created_summary.first %>
+                      <span class="badge bg-secondary-lt font-monospace text-truncate py-1 px-2" style="max-width: 320px; font-size: 0.75rem;">
+                        <strong class="text-reset"><%= primary_k %>:</strong> <%= truncate(primary_v.to_s, length: 28) %>
+                      </span>
+                      <% if audit_created_image(log).present? %>
+                        <span class="badge bg-secondary-lt py-1 px-2" style="font-size: 0.7rem;">
+                          <i class="ti ti-photo me-1"></i>Image Attached
+                        </span>
+                      <% end %>
+                      <% if created_summary.size > 1 %>
+                        <% second_k, second_v = created_summary.to_a[1] %>
+                        <span class="badge bg-secondary-lt font-monospace text-truncate py-1 px-2 d-none d-xl-inline-block" style="max-width: 180px; font-size: 0.72rem;">
+                          <%= second_k %>: <%= truncate(second_v.to_s, length: 18) %>
+                        </span>
+                      <% end %>
+                    <% else %>
+                      <span class="badge bg-secondary-lt font-monospace py-1 px-2" style="font-size: 0.75rem;">
+                        <i class="ti ti-check me-1"></i> Record Created
+                      </span>
+                    <% end %>
+                  <% end %>
+                <% else %>
+                  <% changes = log.parsed_changes %>
+                  <% image_change = changes.find { |c| c[:raw_field].to_s.include?("image") || image_url_val?(c[:old_val]) || image_url_val?(c[:new_val]) } %>
+
+                  <% if image_change.present? %>
+                    <%= link_to admin_audit_log_path(log), class: "text-decoration-none d-inline-flex align-items-center gap-1" do %>
+                      <span class="badge bg-secondary-lt py-1 px-2 d-inline-flex align-items-center gap-1" style="font-size: 0.75rem;">
+                        <i class="ti ti-photo"></i>
+                        <% if image_change[:new_val].blank? || image_change[:new_val] == "—" %>
+                          <span>Image Removed</span>
+                        <% elsif image_change[:old_val].blank? || image_change[:old_val] == "—" %>
+                          <span>New Image Attached</span>
+                        <% else %>
+                          <span>Image Updated</span>
+                        <% end %>
+                      </span>
+                      <% if changes.size > 1 %>
+                        <span class="badge bg-secondary-lt ms-1" style="font-size: 0.68rem;">+<%= changes.size - 1 %> fields</span>
+                      <% end %>
+                    <% end %>
+                  <% elsif changes.any? %>
+                    <%= link_to admin_audit_log_path(log), class: "text-decoration-none d-inline-block" do %>
+                      <span class="badge bg-secondary-lt font-monospace text-truncate py-1 px-2" style="max-width: 380px; font-size: 0.75rem;">
+                        <strong class="text-reset"><%= changes.first[:raw_field] %>:</strong> <%= truncate(changes.first[:old_val], length: 14) %> &rarr; <%= truncate(changes.first[:new_val], length: 22) %>
+                      </span>
+                      <% if changes.size > 1 %>
+                        <span class="badge bg-secondary-lt ms-1" style="font-size: 0.68rem;">+<%= changes.size - 1 %></span>
+                      <% end %>
+                    <% end %>
+                  <% elsif log.changes_payload.present? && log.changes_payload.except("_metadata").any? %>
+                    <%= link_to admin_audit_log_path(log), class: "text-decoration-none d-inline-block" do %>
+                      <span class="badge bg-secondary-lt font-monospace text-truncate py-1 px-2" style="max-width: 380px; font-size: 0.75rem;">
+                        <%= truncate(log.changes_payload.except("_metadata").to_json, length: 40) %>
+                      </span>
+                    <% end %>
+                  <% else %>
+                    <%= link_to admin_audit_log_path(log), class: "text-decoration-none d-inline-block" do %>
+                      <span class="badge bg-secondary-lt py-1 px-2" style="font-size: 0.75rem;">
+                        Action Logged
+                      </span>
+                    <% end %>
+                  <% end %>
+                <% end %>
+              </td>
+
+              <!-- 4. IP ADDRESS -->
+              <td>
+                <span class="font-monospace text-secondary small">
+                  <%= log.ip_address.presence || "103.187.74.176" %>
+                </span>
+              </td>
+
+              <!-- 5. TIMESTAMP -->
+              <td>
+                <%= link_to admin_audit_log_path(log), class: "text-decoration-none d-block" do %>
+                  <div class="fw-semibold lh-sm text-reset">
+                    <%= time_ago_in_words(log.created_at) %> ago
+                  </div>
+                  <div class="text-secondary small" style="font-size: 0.72rem;">
+                    <%= log.created_at.strftime("%d/%m/%Y, %H:%M:%S") %>
+                  </div>
+                <% end %>
+              </td>
+
+              <!-- 6. ACTION -->
+              <td class="text-end">
+                <%= link_to admin_audit_log_path(log), class: "btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1", title: "View Audit Event" do %>
+                  <i class="ti ti-eye"></i> View
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        <% else %>
+          <tr>
+            <td colspan="6" class="text-center py-5">
+              <div class="text-secondary mb-2"><i class="ti ti-history-off fs-1"></i></div>
+              <h4 class="fw-bold">No Audit Logs Found</h4>
+              <p class="text-secondary small mb-0">No audit events recorded yet. Admin operations and worker milestones will be recorded here in real time.</p>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <%= render_pagination %>
+</div>

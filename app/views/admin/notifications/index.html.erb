@@ -1,0 +1,120 @@
+<% content_for :page_title, "Notifications" %>
+
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title fs-1 fw-bold">Notifications</h2>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <% if current_user&.admin? %>
+        <div class="btn-list">
+          <% if params[:view] == "broadcasts" %>
+            <%= link_to admin_notifications_path, class: "btn btn-outline-secondary" do %>
+              <i class="ti ti-bell me-1 fs-3"></i> My Admin Alerts
+            <% end %>
+          <% else %>
+            <%= link_to admin_notifications_path(view: "broadcasts"), class: "btn btn-outline-secondary" do %>
+              <i class="ti ti-list me-1 fs-3"></i> All System Broadcasts
+            <% end %>
+          <% end %>
+          <%= link_to new_admin_notification_path, class: "btn btn-primary" do %>
+            <i class="ti ti-send me-1 fs-3"></i> Broadcast Notification
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-header border-bottom py-3">
+    <div class="row g-2 align-items-center w-100">
+      <div class="col">
+        <span class="text-secondary small fw-semibold">
+          <%= params[:view] == "broadcasts" ? "All Platform Broadcasts" : (current_user&.worker? ? "Assigned Job Notifications" : "Admin Inbox & System Alerts") %>
+        </span>
+      </div>
+      <div class="col-auto ms-auto text-secondary small">
+        <span class="fw-bold text-reset"><%= @notifications.count %></span> notifications
+      </div>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-vcenter card-table table-hover">
+      <thead>
+        <tr>
+          <th>Subject</th>
+          <th>Booking Status</th>
+          <% if current_user&.admin? && params[:view] == "broadcasts" %>
+            <th>Recipient</th>
+          <% end %>
+          <th>Message Preview</th>
+          <th>Sent At</th>
+          <th>Status</th>
+          <th class="text-end pe-3">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @notifications.each do |n| %>
+          <tr class="<%= n.read? ? '' : 'table-active fw-semibold' %>">
+            <td class="text-reset">
+              <%= link_to n.display_subject, admin_notification_path(n.id), class: "text-reset fw-bold text-decoration-none" %>
+            </td>
+            <td>
+              <% if (bk = n.related_booking) %>
+                <% if (current_user&.worker? && bk.status.to_s.in?(%w[cancelled rejected])) || bk.status == "rejected" %>
+                  <span class="badge bg-danger-lt">
+                    <span class="status-dot status-danger me-1"></span>Rejected
+                  </span>
+                <% else %>
+                  <%= booking_status_badge(bk.status) %>
+                <% end %>
+              <% else %>
+                <span class="badge bg-secondary-lt text-secondary">General</span>
+              <% end %>
+            </td>
+            <% if current_user&.admin? && params[:view] == "broadcasts" %>
+              <td class="text-secondary small">
+                <span class="badge bg-secondary-lt text-reset"><%= n.user&.name || n.recipient_type %></span>
+              </td>
+            <% end %>
+            <td class="text-secondary small" style="max-width: 500px;">
+              <div style="line-height: 1.4;"><%= n.display_body %></div>
+            </td>
+            <td class="text-secondary small"><%= n.sent_at&.strftime("%d %b %Y, %I:%M %p") || n.created_at.strftime("%d %b %Y, %I:%M %p") %></td>
+            <td>
+              <% if n.read? %>
+                <span class="badge bg-secondary-lt text-secondary">
+                  <i class="ti ti-check me-1"></i> Viewed
+                </span>
+              <% else %>
+                <span class="badge bg-success-lt text-success fw-bold">
+                  <span class="green-blink-dot me-1" style="width: 6px; height: 6px;"></span> New
+                </span>
+              <% end %>
+            </td>
+            <td class="text-end pe-3">
+              <div class="btn-list justify-content-end">
+                <%= link_to admin_notification_path(n.id), class: "btn btn-icon btn-ghost-secondary btn-sm", title: "View" do %>
+                  <i class="ti ti-eye fs-3"></i>
+                <% end %>
+                <%= button_to admin_notification_path(n.id), method: :delete,
+                      data: { turbo_confirm: "Delete this notification?" },
+                      class: "btn btn-icon btn-ghost-danger btn-sm", title: "Delete" do %>
+                  <i class="ti ti-trash fs-3"></i>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+        <% if @notifications.empty? %>
+          <tr>
+            <td colspan="<%= (current_user&.admin? && params[:view] == 'broadcasts') ? 7 : 6 %>" class="text-center text-secondary py-5">No notifications yet.</td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <%= render_pagination %>
+</div>

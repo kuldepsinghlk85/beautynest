@@ -1,0 +1,97 @@
+<% content_for :page_title, "Payments" %>
+
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">Financial Operations</div>
+      <h2 class="page-title fs-1 fw-bold">Payments & Transactions</h2>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <%= link_to admin_payments_path(request.query_parameters.merge(format: :csv)), class: "btn btn-outline-secondary", data: { turbo: false } do %>
+        <i class="ti ti-download me-1 fs-3"></i> Export Ledger
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-header border-bottom py-3">
+    <div class="row g-2 align-items-center">
+      <div class="col-12 col-md-4 col-lg-4">
+        <div class="input-icon">
+          <span class="input-icon-addon">
+            <i class="ti ti-search text-secondary fs-3"></i>
+          </span>
+          <input class="form-control" type="text" placeholder="Search by payment ID, booking, customer...">
+        </div>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2">
+        <select class="form-select">
+          <option>All Statuses</option>
+          <option>Completed</option>
+          <option>Pending</option>
+          <option>Refunded</option>
+          <option>Failed</option>
+        </select>
+      </div>
+      <div class="col-6 col-md-3 col-lg-3">
+        <select class="form-select">
+          <option>All Payment Methods</option>
+          <option>UPI / QR</option>
+          <option>Credit Card</option>
+          <option>Debit Card</option>
+          <option>Net Banking</option>
+        </select>
+      </div>
+      <div class="col-12 col-md-2 col-lg-auto ms-lg-auto text-secondary small text-nowrap">
+        <span class="fw-bold text-reset"><%= @payments.length %></span> transactions
+      </div>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-vcenter card-table table-hover table-striped-columns">
+      <thead>
+        <tr>
+          <th>Transaction ID</th>
+          <th>Booking Ref</th>
+          <th>Customer</th>
+          <th>Amount</th>
+          <th>Method</th>
+          <th>Processed At</th>
+          <th>Status</th>
+          <th class="text-end pe-3">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @payments.each do |p| %>
+          <tr>
+            <td class="font-monospace text-secondary fs-5"><%= p[:id] %></td>
+            <td class="font-monospace fs-5">
+              <%= link_to p[:booking_id], admin_booking_path(p[:booking_id]), class: "link-primary" %>
+            </td>
+            <td>
+              <span class="fw-semibold text-reset"><%= p[:customer] %></span>
+            </td>
+            <td class="fw-bold text-reset fs-4"><%= p[:amount] %></td>
+            <td>
+              <span class="badge bg-secondary-lt fw-medium">
+                <i class="ti ti-credit-card me-1"></i><%= p[:method] %>
+              </span>
+            </td>
+            <td class="text-secondary small"><%= p[:date] %></td>
+            <td><%= payment_status_badge(p[:status]) %></td>
+            <td class="text-end pe-3">
+              <div class="btn-list justify-content-end">
+                <%= link_to admin_payment_path(p[:id]), class: "btn btn-icon btn-ghost-secondary btn-sm", title: "View Transaction" do %>
+                  <i class="ti ti-eye fs-3"></i>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <%= render_pagination %>
+</div>

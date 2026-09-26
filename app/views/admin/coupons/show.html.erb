@@ -1,0 +1,183 @@
+<% content_for :page_title, "Coupon #{@coupon.code}" %>
+
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">Promotions › Discounts</div>
+      <h2 class="page-title fs-1 fw-bold">Coupon: <span class="font-monospace text-primary"><%= @coupon.code %></span></h2>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <div class="btn-list">
+        <%= link_to admin_coupons_path, class: "btn btn-outline-secondary" do %>
+          <i class="ti ti-arrow-left me-1 fs-3"></i> Back to Coupons
+        <% end %>
+        <%= link_to edit_admin_coupon_path(@coupon), class: "btn btn-outline-primary" do %>
+          <i class="ti ti-pencil me-1 fs-3"></i> Edit
+        <% end %>
+        <%= button_to toggle_status_admin_coupon_path(@coupon), method: :patch,
+              class: "btn #{@coupon.active? ? 'btn-outline-warning' : 'btn-outline-success'}" do %>
+          <i class="ti <%= @coupon.active? ? 'ti-power' : 'ti-check' %> me-1 fs-3"></i>
+          <%= @coupon.active? ? "Deactivate" : "Activate" %>
+        <% end %>
+        <%= button_to admin_coupon_path(@coupon), method: :delete,
+              data: { turbo_confirm: "Are you sure you want to delete this coupon?" },
+              class: "btn btn-outline-danger" do %>
+          <i class="ti ti-trash me-1 fs-3"></i> Delete
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Left Column: Details -->
+  <div class="col-lg-8">
+    <div class="card shadow-sm mb-4 border">
+      <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+        <h3 class="card-title fw-bold mb-0">Coupon Overview</h3>
+        <div>
+          <% if @coupon.active? %>
+            <span class="badge bg-green-lt text-success fs-3 px-3 py-1 fw-bold">Active</span>
+          <% elsif @coupon.expired? %>
+            <span class="badge bg-danger-lt text-danger fs-3 px-3 py-1 fw-bold">Expired</span>
+          <% else %>
+            <span class="badge bg-secondary-lt text-secondary fs-3 px-3 py-1 fw-bold"><%= @coupon.status.titleize %></span>
+          <% end %>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="d-flex align-items-center mb-4 p-3 bg-surface-secondary rounded-3 border">
+          <span class="badge bg-primary-lt font-monospace fs-1 px-3 py-2 me-3 rounded-3 border">
+            <i class="ti ti-tag me-1"></i><%= @coupon.code %>
+          </span>
+          <div>
+            <h3 class="fw-bold mb-1"><%= @coupon.display_discount %></h3>
+            <div class="text-secondary small">
+              <%= @coupon.display_type %> &bull; Min spend: <%= @coupon.display_min_order %>
+            </div>
+          </div>
+        </div>
+
+        <% if @coupon.description.present? %>
+          <div class="mb-4">
+            <label class="form-label text-secondary small text-uppercase fw-bold">Campaign Description</label>
+            <p class="fs-3 mb-0"><%= @coupon.description %></p>
+          </div>
+        <% end %>
+
+        <div class="row g-3">
+          <div class="col-sm-6">
+            <div class="card card-sm bg-surface-secondary border p-3">
+              <div class="text-secondary small">Discount Type</div>
+              <div class="fw-semibold text-reset mt-1"><%= @coupon.display_type %></div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="card card-sm bg-surface-secondary border p-3">
+              <div class="text-secondary small">Discount Value</div>
+              <div class="fw-bold fs-3 text-success mt-1"><%= @coupon.display_discount %></div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="card card-sm bg-surface-secondary border p-3">
+              <div class="text-secondary small">Minimum Order Spend</div>
+              <div class="fw-semibold text-reset mt-1"><%= @coupon.display_min_order %></div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="card card-sm bg-surface-secondary border p-3">
+              <div class="text-secondary small">Maximum Cap</div>
+              <div class="fw-semibold text-reset mt-1"><%= @coupon.display_max_discount %></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Redemptions Table -->
+    <div class="card shadow-sm border">
+      <div class="card-header border-bottom">
+        <h3 class="card-title fw-bold mb-0">Recent Redemptions</h3>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-vcenter card-table table-hover">
+          <thead>
+            <tr>
+              <th>Booking</th>
+              <th>Customer</th>
+              <th>Order Total</th>
+              <th>Discount Applied</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if @bookings.any? %>
+              <% @bookings.each do |b| %>
+                <tr>
+                  <td>
+                    <%= link_to "##{b.id.to_s[0..7]}", admin_booking_path(b), class: "fw-bold text-reset font-monospace" %>
+                  </td>
+                  <td><%= b.customer&.name || "Customer" %></td>
+                  <td><%= b.display_amount %></td>
+                  <td><span class="text-success fw-bold">-₹<%= b.discount_amount.to_i %></span></td>
+                  <td class="text-secondary small"><%= b.created_at.strftime("%d %b %Y, %I:%M %p") %></td>
+                </tr>
+              <% end %>
+            <% else %>
+              <tr>
+                <td colspan="5" class="text-center py-4 text-secondary">
+                  No redemptions recorded for this coupon yet.
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Column: Usage & Validity Stats -->
+  <div class="col-lg-4">
+    <div class="card shadow-sm mb-4 border">
+      <div class="card-header border-bottom">
+        <h3 class="card-title fw-bold mb-0">Usage & Limits</h3>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          <div class="d-flex justify-content-between text-secondary small mb-1">
+            <span>Redeemed</span>
+            <span class="fw-bold text-reset"><%= @coupon.display_usage %></span>
+          </div>
+          <% if @coupon.usage_limit.present? && @coupon.usage_limit > 0 %>
+            <% pct = [((@coupon.usage_count.to_f / @coupon.usage_limit) * 100).to_i, 100].min %>
+            <div class="progress progress-sm">
+              <div class="progress-bar <%= pct >= 90 ? 'bg-danger' : 'bg-primary' %>" style="width: <%= pct %>%"></div>
+            </div>
+            <div class="text-secondary small mt-1 text-end"><%= pct %>% redeemed</div>
+          <% end %>
+        </div>
+
+        <ul class="list-unstyled mb-0">
+          <li class="d-flex justify-content-between py-2 border-bottom">
+            <span class="text-secondary">Valid From</span>
+            <span class="fw-semibold"><%= @coupon.display_valid_from %></span>
+          </li>
+          <li class="d-flex justify-content-between py-2 border-bottom">
+            <span class="text-secondary">Valid Until</span>
+            <span class="fw-semibold"><%= @coupon.display_valid_until %></span>
+          </li>
+          <li class="d-flex justify-content-between py-2 border-bottom">
+            <span class="text-secondary">Created At</span>
+            <span class="fw-semibold"><%= @coupon.created_at.strftime("%d %b %Y") %></span>
+          </li>
+          <li class="d-flex justify-content-between py-2">
+            <span class="text-secondary">Redeemable Now?</span>
+            <span class="badge <%= @coupon.redeemable? ? 'bg-green-lt text-success' : 'bg-danger-lt text-danger' %>">
+              <%= @coupon.redeemable? ? "Yes" : "No" %>
+            </span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

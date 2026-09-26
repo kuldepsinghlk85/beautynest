@@ -1,0 +1,69 @@
+<% content_for :page_title, "Edit Notification ##{@notification[:id]}" %>
+
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">Broadcast System</div>
+      <h2 class="page-title fs-1 fw-bold">Edit Notification #<%= @notification[:id] %></h2>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <%= link_to admin_notification_path(@notification[:id]), class: "btn btn-outline-secondary" do %>
+        <i class="ti ti-arrow-left me-1 fs-3"></i> Back to Details
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+        <h3 class="card-title fw-bold mb-0">Message Configuration</h3>
+        <div><%= notification_status_badge(@notification[:status]) %></div>
+      </div>
+      <%= form_with url: admin_notification_path(@notification[:id]), method: :patch, local: true do |f| %>
+        <div class="card-body">
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label" for="notif_type">Notification Channel</label>
+              <select name="notification[type]" id="notif_type" class="form-select">
+                <option value="push" <%= "selected" if @notification[:type] == "push" %>>Push Notification</option>
+                <option value="email" <%= "selected" if @notification[:type] == "email" %>>Email Broadcast</option>
+                <option value="sms" <%= "selected" if @notification[:type] == "sms" %>>SMS Text Message</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="notif_status">Delivery Status</label>
+              <select name="notification[status]" id="notif_status" class="form-select">
+                <option value="sent" <%= "selected" if @notification[:status] == "sent" %>>Sent</option>
+                <option value="pending" <%= "selected" if @notification[:status] == "pending" %>>Pending Scheduled Delivery</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="notif_recipient">Recipient Group / User</label>
+            <input type="text" name="notification[recipient]" id="notif_recipient" class="form-control" value="<%= @notification[:recipient] %>" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="notif_subject">Subject / Title</label>
+            <input type="text" name="notification[subject]" id="notif_subject" class="form-control" value="<%= @notification[:subject] %>" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="notif_body">Message Body</label>
+            <textarea name="notification[body]" id="notif_body" class="form-control" rows="4" required><%= @notification[:body] %></textarea>
+          </div>
+        </div>
+
+        <div class="card-footer border-top d-flex justify-content-between align-items-center bg-transparent">
+          <%= link_to "Cancel", admin_notification_path(@notification[:id]), class: "btn btn-link link-secondary" %>
+          <button type="submit" class="btn btn-primary">
+            <i class="ti ti-check me-1 fs-3"></i> Save Changes
+          </button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

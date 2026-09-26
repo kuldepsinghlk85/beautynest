@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= site_name %></title>
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+
+  <script>
+    (function(){
+      var theme = localStorage.getItem('bc-theme') || 'light';
+      document.documentElement.setAttribute('data-bs-theme', theme);
+      document.documentElement.setAttribute('data-theme', theme);
+      if (theme === 'dark') {
+        document.documentElement.classList.add('theme-dark');
+      } else {
+        document.documentElement.classList.remove('theme-dark');
+      }
+    })();
+  </script>
+
+  <!-- Tabler Core CSS & Tabler Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/css/tabler.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+  <%= javascript_importmap_tags %>
+
+  <script>
+    function isDark() {
+      var attr = document.documentElement.getAttribute("data-bs-theme") || document.documentElement.getAttribute("data-theme");
+      if (attr === "dark") return true;
+      if (attr === "light") return false;
+      return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    }
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute("data-bs-theme", theme);
+      document.documentElement.setAttribute("data-theme", theme);
+      if (document.body) {
+        document.body.setAttribute("data-bs-theme", theme);
+        document.body.setAttribute("data-theme", theme);
+        if (theme === "dark") {
+          document.body.classList.add("theme-dark");
+        } else {
+          document.body.classList.remove("theme-dark");
+        }
+      }
+      localStorage.setItem("bc-theme", theme);
+      var sun = document.getElementById("login-sun");
+      var moon = document.getElementById("login-moon");
+      if (sun && moon) {
+        sun.style.display = theme === "dark" ? "none" : "inline-block";
+        moon.style.display = theme === "dark" ? "inline-block" : "none";
+      }
+    }
+
+    function toggleTheme() {
+      var next = isDark() ? "light" : "dark";
+      applyTheme(next);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var theme = localStorage.getItem('bc-theme') || (isDark() ? "dark" : "light");
+      applyTheme(theme);
+    });
+  </script>
+
+  <style>
+    :root {
+      --tblr-primary: #db2777;
+      --tblr-primary-rgb: 219, 39, 119;
+    }
+    body.auth-bg {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    [data-bs-theme="dark"] body.auth-bg,
+    [data-theme="dark"] body.auth-bg,
+    body.auth-bg.theme-dark {
+      background-color: #0b0f19;
+      background-image: 
+        radial-gradient(circle at 15% 25%, rgba(219, 39, 119, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 85% 75%, rgba(190, 24, 93, 0.10) 0%, transparent 50%);
+      color: #f8fafc;
+    }
+    [data-bs-theme="light"] body.auth-bg,
+    [data-theme="light"] body.auth-bg {
+      background-color: #faf9ff;
+      background-image: 
+        radial-gradient(circle at 15% 25%, rgba(219, 39, 119, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 85% 75%, rgba(190, 24, 93, 0.06) 0%, transparent 50%);
+      color: #111827;
+    }
+    .page-center {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .login-top-bar {
+      position: absolute;
+      top: 1.25rem;
+      left: 1.5rem;
+      right: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+    .glass-card {
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border-radius: 18px !important;
+      transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    /* Dark Mode Glass Card */
+    [data-bs-theme="dark"] .glass-card,
+    [data-theme="dark"] .glass-card,
+    .theme-dark .glass-card {
+      background-color: rgba(17, 24, 39, 0.88) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5) !important;
+      color: #f8fafc !important;
+    }
+    [data-bs-theme="dark"] .glass-card h2,
+    [data-bs-theme="dark"] .glass-card .h2,
+    [data-theme="dark"] .glass-card h2,
+    [data-theme="dark"] .glass-card .h2,
+    .theme-dark .glass-card h2,
+    .theme-dark .glass-card .h2 {
+      color: #f8fafc !important;
+    }
+    [data-bs-theme="dark"] .glass-card .form-label,
+    [data-theme="dark"] .glass-card .form-label,
+    .theme-dark .glass-card .form-label {
+      color: #f1f5f9 !important;
+    }
+    [data-bs-theme="dark"] .glass-card .text-secondary,
+    [data-theme="dark"] .glass-card .text-secondary,
+    .theme-dark .glass-card .text-secondary {
+      color: #94a3b8 !important;
+    }
+    [data-bs-theme="dark"] .glass-card .form-control,
+    [data-theme="dark"] .glass-card .form-control,
+    .theme-dark .glass-card .form-control {
+      background-color: #111827 !important;
+      color: #f8fafc !important;
+      border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    }
+    [data-bs-theme="dark"] .glass-card .form-control::placeholder,
+    [data-theme="dark"] .glass-card .form-control::placeholder,
+    .theme-dark .glass-card .form-control::placeholder {
+      color: #64748b !important;
+    }
+    [data-bs-theme="dark"] .glass-card .auth-icon-left,
+    [data-theme="dark"] .glass-card .auth-icon-right-btn,
+    .theme-dark .glass-card .auth-icon-left,
+    .theme-dark .glass-card .auth-icon-right-btn {
+      color: #94a3b8 !important;
+    }
+    [data-bs-theme="dark"] .glass-card .auth-card-footer,
+    [data-theme="dark"] .glass-card .auth-card-footer,
+    .theme-dark .glass-card .auth-card-footer {
+      border-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    /* Light Mode Glass Card */
+    [data-bs-theme="light"] .glass-card,
+    [data-theme="light"] .glass-card {
+      background-color: rgba(255, 255, 255, 0.94) !important;
+      border: 1px solid rgba(0, 0, 0, 0.08) !important;
+      box-shadow: 0 20px 45px -10px rgba(219, 39, 119, 0.12), 0 8px 24px rgba(0, 0, 0, 0.05) !important;
+      color: #111827 !important;
+    }
+    [data-bs-theme="light"] .glass-card h2,
+    [data-bs-theme="light"] .glass-card .h2,
+    [data-theme="light"] .glass-card h2,
+    [data-theme="light"] .glass-card .h2 {
+      color: #111827 !important;
+    }
+    [data-bs-theme="light"] .glass-card .form-label,
+    [data-theme="light"] .glass-card .form-label {
+      color: #1f2937 !important;
+    }
+    [data-bs-theme="light"] .glass-card .text-secondary,
+    [data-theme="light"] .glass-card .text-secondary {
+      color: #4b5563 !important;
+    }
+    [data-bs-theme="light"] .glass-card .form-control,
+    [data-theme="light"] .glass-card .form-control {
+      background-color: #ffffff !important;
+      color: #111827 !important;
+      border: 1px solid rgba(0, 0, 0, 0.15) !important;
+    }
+    [data-bs-theme="light"] .glass-card .form-control::placeholder,
+    [data-theme="light"] .glass-card .form-control::placeholder {
+      color: #9ca3af !important;
+    }
+    [data-bs-theme="light"] .glass-card .auth-icon-left,
+    [data-bs-theme="light"] .glass-card .auth-icon-right-btn {
+      color: #64748b !important;
+    }
+    [data-bs-theme="light"] .glass-card .auth-card-footer,
+    [data-theme="light"] .glass-card .auth-card-footer {
+      border-color: rgba(0, 0, 0, 0.08) !important;
+    }
+
+    /* Unified Auth Input & Button Alignment */
+    .auth-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+    .auth-input-wrap .form-control {
+      height: 48px !important;
+      border-radius: 10px !important;
+      font-size: 0.95rem;
+      padding-left: 2.75rem !important;
+      padding-right: 2.75rem !important;
+      width: 100%;
+    }
+    .auth-input-wrap .form-control.no-right-icon {
+      padding-right: 1rem !important;
+    }
+    .auth-input-wrap .form-control.no-left-icon {
+      padding-left: 1rem !important;
+    }
+    .auth-icon-left {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+    }
+    .auth-icon-right-btn {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      z-index: 5;
+      background: transparent;
+      border: none;
+      padding: 0;
+      transition: color 0.15s ease, background-color 0.15s ease;
+    }
+    .auth-icon-right-btn:hover {
+      color: #db2777 !important;
+      background: rgba(219, 39, 119, 0.12);
+    }
+    .auth-btn-submit {
+      height: 48px !important;
+      border-radius: 10px !important;
+      font-size: 1rem !important;
+      font-weight: 600 !important;
+      background: linear-gradient(135deg, #db2777, #be185d) !important;
+      border: none !important;
+      color: #ffffff !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 8px !important;
+      width: 100% !important;
+      box-shadow: 0 4px 14px rgba(219, 39, 119, 0.35) !important;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .auth-btn-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(219, 39, 119, 0.5) !important;
+    }
+    .auth-checkbox-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+      margin-bottom: 0;
+    }
+    .auth-checkbox-wrap .form-check-input {
+      width: 18px;
+      height: 18px;
+      margin-top: 0;
+      cursor: pointer;
+      accent-color: #db2777;
+    }
+  </style>
+</head>
+<body class="auth-bg d-flex flex-column">
+  <script>
+    (function(){
+      var theme = localStorage.getItem('bc-theme') || 'light';
+      document.body.setAttribute('data-bs-theme', theme);
+      document.body.setAttribute('data-theme', theme);
+      if (theme === 'dark') {
+        document.body.classList.add('theme-dark');
+      } else {
+        document.body.classList.remove('theme-dark');
+      }
+    })();
+  </script>
+
+  <!-- Top bar -->
+  <div class="login-top-bar">
+    <a href="/" class="d-flex align-items-center text-decoration-none">
+      <span class="avatar avatar-sm bg-primary text-white me-2 rounded-2 shadow-sm"
+            style="background: linear-gradient(135deg, #db2777, #be185d) !important;">
+        <i class="ti ti-sparkles fs-3"></i>
+      </span>
+      <span class="fs-2 fw-bold" style="color: #db2777;"><%= site_name %></span>
+    </a>
+    <div class="d-flex align-items-center gap-2">
+      <button type="button" class="btn btn-icon btn-outline-secondary rounded-circle shadow-sm" onclick="toggleTheme()" title="Toggle Theme">
+        <i class="ti ti-sun fs-2" id="login-sun" style="display:none;"></i>
+        <i class="ti ti-moon fs-2" id="login-moon"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="page page-center">
+    <div class="container container-tight py-4">
+      <div class="card card-md glass-card shadow-lg">
+        <%= yield %>
+      </div>
+      <div class="text-center text-secondary mt-3 fs-5">
+        &copy; <%= Time.current.year %> <%= site_name %>. All rights reserved.
+      </div>
+    </div>
+  </div>
+</body>
+</html>

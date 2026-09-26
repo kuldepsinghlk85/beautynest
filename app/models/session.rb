@@ -1,0 +1,32 @@
+# frozen_string_literal: true
+
+require "digest"
+
+class Session < ApplicationRecord
+  belongs_to :user
+
+  validates :token_digest, presence: true, uniqueness: true
+  validates :expires_at, presence: true
+
+  scope :active, -> { where(revoked_at: nil).where("expires_at > ?", Time.current) }
+
+  def self.digest(raw_token)
+    Digest::SHA256.hexdigest(raw_token.to_s)
+  end
+
+  def active?
+    revoked_at.nil? && expires_at > Time.current
+  end
+
+  def expired?
+    expires_at <= Time.current
+  end
+
+  def revoked?
+    revoked_at.present?
+  end
+
+  def revoke!
+    update!(revoked_at: Time.current)
+  end
+end

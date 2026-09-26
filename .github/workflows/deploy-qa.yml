@@ -1,0 +1,38 @@
+# Deploy to Production — automatically triggers on push to qa branch, or via manual dispatch.
+# Builds from qa branch then deploys.
+
+name: Deploy to BeautyNest (QA)
+
+on:
+  push:
+    branches:
+      - qa
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  packages: read
+  actions: read
+
+jobs:
+  build:
+    name: 🔨 Build & Push Image (qa)
+    uses: ./.github/workflows/build.yml
+    with:
+      git_branch: qa
+      push_image: true
+    secrets: inherit
+
+  deploy:
+    name: 🚀 Deploy BeautyNest
+    needs: build
+    uses: ./.github/workflows/deploy-tenant.yml
+    with:
+      environment: qa
+      image_tag: ${{ needs.build.outputs.image_tag }}
+      stack_name: beauty-connect-qa
+      deploy_path: /srv/apps/beauty-connect-qa
+      app_port: "3001"
+      app_log_path: /opt/beauty-connect/qa/log
+      workflow_run_id: ${{ github.run_id }}
+    secrets: inherit

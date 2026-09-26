@@ -1,0 +1,293 @@
+<% content_for :page_title, "Bookings" %>
+
+<div class="page-header d-print-none mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <div class="page-pretitle text-secondary">Operations</div>
+      <h2 class="page-title fs-1 fw-bold">Service Bookings</h2>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <div class="btn-list">
+        <div class="dropdown d-inline-block">
+          <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="ti ti-download me-1 fs-3"></i> Export
+          </button>
+          <div class="dropdown-menu dropdown-menu-end shadow-md py-1" style="min-width: 230px;">
+            <div class="dropdown-header text-uppercase small fw-bold px-3 py-1 text-secondary" style="font-size: 0.68rem; letter-spacing: 0.05em;">
+              Data Exports
+            </div>
+            <%= link_to admin_bookings_path(request.query_parameters.merge(format: :csv)), class: "dropdown-item py-2", data: { turbo: false } do %>
+              <i class="ti ti-file-spreadsheet me-2 fs-3 text-success"></i> Export Bookings (CSV)
+            <% end %>
+            <%= link_to admin_workers_path(format: :csv), class: "dropdown-item py-2", data: { turbo: false } do %>
+              <i class="ti ti-users me-2 fs-3 text-primary"></i> Export Beauticians (CSV)
+            <% end %>
+            <%= link_to admin_customers_path(format: :csv), class: "dropdown-item py-2", data: { turbo: false } do %>
+              <i class="ti ti-user-check me-2 fs-3 text-azure"></i> Export Customers (CSV)
+            <% end %>
+            <%= link_to admin_payments_path(format: :csv), class: "dropdown-item py-2", data: { turbo: false } do %>
+              <i class="ti ti-receipt-2 me-2 fs-3 text-warning"></i> Export Payments (CSV)
+            <% end %>
+            <div class="dropdown-divider my-1"></div>
+            <%= link_to admin_backup_export_path(format: :json), class: "dropdown-item py-2 text-primary fw-semibold", data: { turbo: false } do %>
+              <i class="ti ti-database-export me-2 fs-3 text-purple"></i> Full Database Backup (JSON)
+            <% end %>
+            <% if current_user&.admin? %>
+              <a href="#" class="dropdown-item py-2 text-indigo fw-semibold" data-bs-toggle="modal" data-bs-target="#importBackupModal">
+                <i class="ti ti-database-import me-2 fs-3 text-indigo"></i> Restore / Import Backup (JSON)
+              </a>
+            <% end %>
+          </div>
+        </div>
+        <% if current_user&.admin? %>
+          <%= link_to new_admin_booking_path, class: "btn btn-primary" do %>
+            <i class="ti ti-plus me-1 fs-3"></i> New Booking
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <%= turbo_frame_tag "bookings_list" do %>
+    <% current_status = params[:booking_status].presence || (params[:status].presence unless params[:status] == "all") %>
+    <% has_filters = params[:q].present? || (current_status.present? && current_status != "all") || (params[:worker_id].present? && params[:worker_id] != "all") || (params[:payment_status].present? && params[:payment_status] != "all") || params[:timeframe].present? %>
+
+    <!-- ═══════════════ STATUS TABS (SEGMENTED CONTROL) ═══════════════ -->
+    <div class="card-header border-bottom py-2 d-flex flex-wrap align-items-center justify-content-between gap-2">
+      <div class="apple-segmented-switch flex-wrap">
+        <%= link_to admin_bookings_path(request.query_parameters.except("booking_status", "status", "page")),
+                    class: "seg-item #{'active' if current_status.blank? || current_status == 'all'}",
+                    data: { turbo_frame: "bookings_list", turbo_action: "advance" } do %>
+          <i class="ti ti-layout-grid fs-3"></i>
+          <span>All</span>
+          <span class="seg-badge"><%= @total_count || @bookings.total_count %></span>
+        <% end %>
+
+        <% [
+             ["pending", "Pending", "ti-clock", "warning"],
+             ["confirmed", "Confirmed", "ti-calendar-check", "azure"],
+             ["in_progress", "In Progress", "ti-loader", "purple"],
+             ["completed", "Completed", "ti-check", "success"],
+             ["cancelled", "Cancelled", "ti-x", "danger"]
+           ].each do |st_key, st_label, st_icon, st_theme| %>
+          <% count = @status_counts ? (@status_counts[st_key] || 0) : 0 %>
+          <%= link_to admin_bookings_path(request.query_parameters.merge(booking_status: st_key, reschedule_filter: nil, page: nil)),
+                      class: "seg-item #{'active' if current_status == st_key && params[:reschedule_filter] != 'pending'}",
+                      data: { turbo_frame: "bookings_list", turbo_action: "advance" } do %>
+            <i class="ti <%= st_icon %> fs-3"></i>
+            <span><%= st_label %></span>
+            <span class="seg-badge <%= st_theme %>"><%= count %></span>
+          <% end %>
+        <% end %>
+
+        <% if @pending_reschedule_count.to_i > 0 %>
+          <%= link_to admin_bookings_path(request.query_parameters.merge(reschedule_filter: "pending", booking_status: nil, page: nil)),
+                      class: "seg-item #{'active' if params[:reschedule_filter] == 'pending'}",
+                      data: { turbo_frame: "bookings_list", turbo_action: "advance" } do %>
+            <i class="ti ti-alert-triangle fs-3 text-warning"></i>
+            <span>Cannot Reach</span>
+            <span class="seg-badge bg-warning text-dark fw-bold"><%= @pending_reschedule_count %></span>
+          <% end %>
+        <% end %>
+      </div>
+
+      <div class="text-secondary small ms-auto d-none d-md-block">
+        Showing <span class="fw-bold text-reset"><%= @bookings.length %></span> of <span class="fw-bold text-reset"><%= @total_count || @bookings.total_count %></span> bookings
+      </div>
+    </div>
+
+    <!-- ═══════════════ MULTI-FIELD FILTER CONTROLS ═══════════════ -->
+    <div class="card-body border-bottom py-3" style="background-color: var(--surface-2);">
+      <%= form_with url: admin_bookings_path, method: :get, data: { controller: "search", turbo_frame: "bookings_list", turbo_action: "advance" }, class: "w-100" do %>
+        <% if current_status.present? && current_status != "all" %>
+          <input type="hidden" name="booking_status" value="<%= current_status %>">
+        <% end %>
+
+        <div class="row g-2 align-items-center">
+          <!-- Search input -->
+          <div class="col-12 col-md-4 col-xl-3">
+            <div class="input-icon">
+              <span class="input-icon-addon">
+                <i class="ti ti-search text-secondary fs-3"></i>
+              </span>
+              <input class="form-control form-control-sm"
+                     type="text"
+                     name="q"
+                     value="<%= params[:q] %>"
+                     placeholder="Search by ID, customer, worker..."
+                     data-action="input->search#debounce"
+                     autocomplete="off">
+            </div>
+          </div>
+
+          <!-- Beautician / Worker filter -->
+          <div class="col-6 col-md-3 col-xl-2">
+            <select class="form-select form-select-sm" name="worker_id" data-action="change->search#submit">
+              <option value="">All Beauticians</option>
+              <% (@workers || []).each do |w| %>
+                <option value="<%= w.id %>" <%= "selected" if params[:worker_id].to_s == w.id.to_s %>><%= w.name %></option>
+              <% end %>
+            </select>
+          </div>
+
+          <!-- Payment Status filter -->
+          <div class="col-6 col-md-3 col-xl-2">
+            <select class="form-select form-select-sm" name="payment_status" data-action="change->search#submit">
+              <option value="">All Payments</option>
+              <option value="completed" <%= "selected" if params[:payment_status] == "completed" %>>Paid / Completed</option>
+              <option value="pending" <%= "selected" if params[:payment_status] == "pending" %>>Payment Pending</option>
+              <option value="refunded" <%= "selected" if params[:payment_status] == "refunded" %>>Refunded</option>
+            </select>
+          </div>
+
+          <!-- Timeframe filter -->
+          <div class="col-6 col-md-2 col-xl-2">
+            <select class="form-select form-select-sm" name="timeframe" data-action="change->search#submit">
+              <option value="">All Timeframes</option>
+              <option value="today" <%= "selected" if params[:timeframe] == "today" %>>Booked Today</option>
+              <option value="this_week" <%= "selected" if params[:timeframe] == "this_week" %>>Booked This Week</option>
+              <option value="this_month" <%= "selected" if params[:timeframe] == "this_month" %>>Booked This Month</option>
+            </select>
+          </div>
+
+          <!-- Clear Filters button -->
+          <div class="col-6 col-md-auto ms-auto d-flex align-items-center gap-2">
+            <% if has_filters %>
+              <%= link_to admin_bookings_path, class: "btn btn-ghost-danger btn-sm text-nowrap px-2 py-1", title: "Clear All Filters", data: { turbo_frame: "bookings_list", turbo_action: "advance" } do %>
+                <i class="ti ti-x me-1"></i> Clear Filters
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- ═══════════════ TABLE ═══════════════ -->
+    <div class="table-responsive">
+      <table class="table table-vcenter card-table table-hover table-condensed-admin mb-0">
+        <thead>
+          <tr>
+            <th>Booking ID</th>
+            <th>Booked On</th>
+            <th>Customer</th>
+            <th>Service</th>
+            <th>Assigned Worker</th>
+            <th>Scheduled Slot</th>
+            <th>Amount</th>
+            <th>Payment</th>
+            <th>Status</th>
+            <th class="text-end pe-2 col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if @bookings.any? %>
+            <% @bookings.each do |b| %>
+              <% booking_ident = b.try(:id) || b[:id] %>
+              <% is_assigned = current_user&.worker? && b.respond_to?(:worker_id) && b.worker_id.to_s == current_user.id.to_s %>
+              <% b_stat = (b.try(:booking_status) || b.try(:status) || b[:booking_status] || b[:status]).to_s.downcase %>
+              <% s_stat = (b.try(:service_status) || b[:service_status] || "pending").to_s.downcase %>
+              <% p_stat = (b.respond_to?(:payment_status) ? b.payment_status : b[:payment_status]).to_s.downcase %>
+              <tr>
+                <td class="font-monospace fw-bold text-nowrap" style="font-size: 0.78rem;">
+                  <%= link_to (b.respond_to?(:display_id) ? b.display_id : (b[:booking_number] || b[:id])), admin_booking_path(booking_ident), data: { turbo_frame: "_top" }, class: "text-primary text-decoration-none" %>
+                  <% if b.respond_to?(:has_pending_reschedule_request?) && b.has_pending_reschedule_request? %>
+                    <div class="mt-1">
+                      <span class="badge bg-warning-lt text-warning border border-warning px-1 py-0" style="font-size: 0.65rem;" title="Worker cannot reach / requested reschedule">
+                        <i class="ti ti-alert-triangle me-1"></i>Cannot Reach
+                      </span>
+                    </div>
+                  <% end %>
+                </td>
+                <td class="text-secondary text-nowrap" style="font-size: 0.76rem;">
+                  <div class="d-flex align-items-center gap-1">
+                    <% if b.created_at && b.created_at > 10.minutes.ago %>
+                      <span class="badge bg-green-lt text-green fw-bold py-0 px-1" style="font-size: 0.60rem;">NEW</span>
+                    <% end %>
+                    <span class="fw-semibold text-reset"><%= b[:booked_on] %></span>
+                  </div>
+                </td>
+                <td>
+                  <div class="fw-semibold text-reset text-truncate" style="max-width: 110px;" title="<%= b[:customer] %>"><%= b[:customer] %></div>
+                </td>
+                <td>
+                  <span class="badge bg-secondary-lt text-truncate" style="max-width: 115px;" title="<%= b[:service] %>"><%= b[:service] %></span>
+                </td>
+                <td class="text-secondary">
+                  <div class="text-truncate" style="max-width: 105px;" title="<%= b[:worker] %>"><%= b[:worker] %></div>
+                </td>
+                <td class="text-secondary text-nowrap" style="font-size: 0.76rem;">
+                  <div><i class="ti ti-calendar me-1"></i><%= b[:date] %></div>
+                  <div class="text-muted"><i class="ti ti-clock me-1"></i><%= b[:time] %></div>
+                </td>
+                <td class="fw-bold text-reset text-nowrap" style="font-size: 0.82rem;"><%= b[:amount] %></td>
+                <td class="text-nowrap"><%= payment_status_badge(b[:payment_status]) %></td>
+                <td class="text-nowrap">
+                  <div class="d-flex flex-column gap-1 align-items-start">
+                    <%= booking_status_badge(b.try(:booking_status) || b[:booking_status] || b[:status]) %>
+                    <% if s_stat.present? && s_stat != b_stat %>
+                      <%= service_status_badge(s_stat) %>
+                    <% end %>
+                  </div>
+                </td>
+                <td class="text-end pe-2 col-actions">
+                  <div class="btn-list justify-content-end align-items-center flex-nowrap gap-1">
+                    <%= link_to admin_booking_path(booking_ident), data: { turbo_frame: "_top" }, class: "btn btn-icon btn-ghost-secondary btn-sm", title: "View Booking" do %>
+                      <i class="ti ti-eye fs-3"></i>
+                    <% end %>
+                    <% if current_user&.admin? %>
+                      <%= link_to edit_admin_booking_path(booking_ident), data: { turbo_frame: "_top" }, class: "btn btn-icon btn-ghost-primary btn-sm", title: "Edit Booking" do %>
+                        <i class="ti ti-pencil fs-3"></i>
+                      <% end %>
+                    <% end %>
+
+                    <% if (is_assigned && b_stat == "pending") || ((is_assigned || current_user&.admin?) && !%w[cancelled rejected].include?(b_stat) && (s_stat != "completed" || p_stat != "completed")) %>
+                      <div class="dropdown d-inline-block">
+                        <button type="button" class="btn btn-icon btn-ghost-secondary btn-sm" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false" title="More Operations">
+                          <i class="ti ti-dots-vertical fs-3"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end shadow-lg border py-1" style="min-width: 180px;">
+                          <% if is_assigned && b_stat == "pending" %>
+                            <%= button_to accept_admin_booking_path(booking_ident), method: :patch, form: { data: { turbo_frame: "_top" } }, class: "dropdown-item py-2 text-success", data: { turbo_confirm: "Are you sure you want to accept this booking?", confirm_title: "Accept Booking", confirm_btn: "Accept Booking", confirm_theme: "success" } do %>
+                              <i class="ti ti-check me-2 fs-3 text-success"></i> Accept Booking
+                            <% end %>
+                            <%= button_to reject_admin_booking_path(booking_ident), method: :patch, form: { data: { turbo_frame: "_top" } }, class: "dropdown-item py-2 text-danger", data: { turbo_confirm: "Are you sure you want to reject this booking?", confirm_title: "Reject Booking", confirm_btn: "Reject Booking" } do %>
+                              <i class="ti ti-x me-2 fs-3 text-danger"></i> Reject Booking
+                            <% end %>
+                          <% end %>
+
+                          <% if s_stat != "completed" %>
+                            <%= button_to complete_service_admin_booking_path(booking_ident), method: :patch, form: { data: { turbo_frame: "_top" } }, class: "dropdown-item py-2", data: { turbo_confirm: "Mark service as completed for this booking?" } do %>
+                              <i class="ti ti-circle-check me-2 fs-3 text-success"></i> Complete Service
+                            <% end %>
+                          <% end %>
+
+                          <% if p_stat != "completed" %>
+                            <%= button_to complete_payment_admin_booking_path(booking_ident), method: :patch, form: { data: { turbo_frame: "_top" } }, class: "dropdown-item py-2", data: { turbo_confirm: "Confirm collection of #{b[:amount]} for this booking?" } do %>
+                              <i class="ti ti-cash me-2 fs-3 text-primary"></i> Collect Payment
+                            <% end %>
+                          <% end %>
+                        </div>
+                      </div>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          <% else %>
+            <tr>
+              <td colspan="10" class="text-center py-5 text-secondary">
+                <i class="ti ti-calendar-off fs-1 d-block mb-2 text-muted"></i>
+                No bookings found matching your criteria.
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    <%= render_pagination %>
+  <% end %>
+</div>
+
+<%= render "admin/shared/import_backup_modal" if current_user&.admin? %>

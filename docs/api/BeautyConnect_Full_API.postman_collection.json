@@ -1,0 +1,4624 @@
+{
+  "info": {
+    "_postman_id": "b901fc4d-176b-4e12-b91c-7f51d182b899",
+    "name": "BeautyNest Full API Suite (v1.0)",
+    "description": "Comprehensive Postman collection for BeautyNest — encompassing Customer REST API, Worker/Beautician REST API, and Admin Control Panel endpoints with dynamic JWT & session token management.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3009",
+      "type": "string"
+    },
+    {
+      "key": "customerToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "workerToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sampleCustomerId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sampleWorkerId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sampleCategoryId",
+      "value": "salon-for-women",
+      "type": "string"
+    },
+    {
+      "key": "sampleServiceId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sampleBookingId",
+      "value": "140aef5d-25c9-4e2f-8614-96920b733089",
+      "type": "string"
+    },
+    {
+      "key": "sampleCouponId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "samplePaymentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sampleReviewId",
+      "value": "37bd03f0-8b4c-4ba1-959f-d96882c1fb5c",
+      "type": "string"
+    },
+    {
+      "key": "sampleNotificationId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "sampleSubcategoryId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sampleCityId",
+      "value": "mumbai",
+      "type": "string"
+    },
+    {
+      "key": "sampleOverrideId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sampleBookingDate",
+      "value": "2026-09-11",
+      "type": "string"
+    },
+    {
+      "key": "sampleTimeSlot",
+      "value": "10:30 AM",
+      "type": "string"
+    },
+    {
+      "key": "sampleTherapistId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sampleCouponCode",
+      "value": "WELCOME20",
+      "type": "string"
+    },
+    {
+      "key": "sampleWorkerTierId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sampleProductSource",
+      "value": "platform",
+      "type": "string"
+    },
+    {
+      "key": "sampleConsentAccepted",
+      "value": "true",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Customer API",
+      "description": "Endpoints consumed by the BeautyNest Customer Mobile App. Enhanced booking flow: Login → Pick City → Pick Date (next 7 days) → Pick Time Slot → Review Consent & Product Kit Choice → Address → Confirm Booking (COD or online).",
+      "item": [
+        {
+          "name": "Auth",
+          "item": [
+            {
+              "name": "Register Customer",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/register",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "register"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Ananya Sharma\",\n  \"email\": \"ananya.cust@example.com\",\n  \"phone\": \"+919876543210\",\n  \"password\": \"CustomerPass123!\",\n  \"password_confirmation\": \"CustomerPass123!\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "    var data = pm.response.json();",
+                      "    var token = (data.data && data.data.token) || data.token;",
+                      "    if (token) pm.collectionVariables.set('customerToken', token);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Login Customer",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "login"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"customer@BeautyNest.internal\",\n  \"password\": \"Customer@123456\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    var data = pm.response.json();",
+                      "    var token = (data.data && data.data.token) || data.token;",
+                      "    if (token) { pm.collectionVariables.set('customerToken', token); console.log('Customer JWT set'); }",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Refresh Token",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/refresh",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "refresh"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"refresh_token\": \"{{customerToken}}\"\n}"
+                },
+                "description": "Refreshes the access token. Accepts refresh_token in body or Bearer token in Authorization header."
+              }
+            },
+            {
+              "name": "Logout Customer",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/logout",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "logout"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Profile",
+          "item": [
+            {
+              "name": "Get Profile",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "profile"
+                  ]
+                },
+                "description": "Returns current authenticated user: name, email, phone, role, avatar_url."
+              }
+            },
+            {
+              "name": "Update Profile (Name & Photo)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "name",
+                      "value": "Ananya Sharma",
+                      "type": "text"
+                    },
+                    {
+                      "key": "avatar",
+                      "type": "file",
+                      "description": "Profile image (JPG, PNG, WebP)"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "profile"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Password",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"old_password\": \"Customer@123456\",\n  \"new_password\": \"Customer@NewPass2026!\",\n  \"new_password_confirmation\": \"Customer@NewPass2026!\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/profile/password",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "profile",
+                    "password"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Categories & Services",
+          "description": "Browse the service catalog. Start with categories, drill into subcategories, then view services.",
+          "item": [
+            {
+              "name": "List All Categories",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/categories",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "categories"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    var list = pm.response.json().data || [];",
+                      "    if (list.length > 0) pm.collectionVariables.set('sampleCategoryId', list[0].id || list[0].slug);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "List Subcategories by Category",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/subcategories?category_id={{sampleCategoryId}}&city_id={{sampleCityId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "subcategories"
+                  ],
+                  "query": [
+                    {
+                      "key": "category_id",
+                      "value": "{{sampleCategoryId}}",
+                      "description": "Category ID or slug"
+                    },
+                    {
+                      "key": "city_id",
+                      "value": "{{sampleCityId}}",
+                      "description": "Optional — city for price overrides"
+                    }
+                  ]
+                },
+                "description": "Lists subcategories with their services for the chosen category."
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    var list = pm.response.json().data || [];",
+                      "    if (list.length > 0) {",
+                      "        pm.collectionVariables.set('sampleSubcategoryId', list[0].id || list[0].slug);",
+                      "        if (list[0].services && list[0].services.length > 0)",
+                      "            pm.collectionVariables.set('sampleServiceId', list[0].services[0].id);",
+                      "    }",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "List Services by Subcategory",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/services?subcategory_id={{sampleSubcategoryId}}&city_id={{sampleCityId}}&sort=price_asc",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "services"
+                  ],
+                  "query": [
+                    {
+                      "key": "subcategory_id",
+                      "value": "{{sampleSubcategoryId}}"
+                    },
+                    {
+                      "key": "city_id",
+                      "value": "{{sampleCityId}}",
+                      "description": "Optional — for city-specific pricing"
+                    },
+                    {
+                      "key": "sort",
+                      "value": "price_asc",
+                      "description": "price_asc | price_desc | duration_asc | newest"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    var list = pm.response.json().data || [];",
+                      "    if (list.length > 0) pm.collectionVariables.set('sampleServiceId', list[0].id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Service Details",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/services/{{sampleServiceId}}?city_id={{sampleCityId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "services",
+                    "{{sampleServiceId}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "city_id",
+                      "value": "{{sampleCityId}}",
+                      "description": "Optional — city for effective pricing"
+                    }
+                  ]
+                },
+                "description": "Returns full service details with effective price for the chosen city."
+              }
+            },
+            {
+              "name": "Search Services (Debounced)",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/services/search?q=fac&city_id={{sampleCityId}}&limit=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "services",
+                    "search"
+                  ],
+                  "query": [
+                    {
+                      "key": "q",
+                      "value": "fac",
+                      "description": "Search keyword for debouncing search-as-you-type (matches name, description, tags, category, subcategory)"
+                    },
+                    {
+                      "key": "city_id",
+                      "value": "{{sampleCityId}}",
+                      "description": "Optional: for city-specific pricing"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20",
+                      "description": "Max results (default: 20, max: 50)"
+                    }
+                  ]
+                },
+                "description": "Debounced live search endpoint for mobile & web search bars. Returns matching services ordered by relevance, with effective pricing, ratings, and category details. Publicly accessible without auth token."
+              }
+            },
+            {
+              "name": "Search Services (Standalone /search)",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/search?q=facial",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "search"
+                  ],
+                  "query": [
+                    {
+                      "key": "q",
+                      "value": "facial",
+                      "description": "Search term"
+                    }
+                  ]
+                },
+                "description": "Standalone alias for services search. Publicly accessible."
+              }
+            },
+            {
+              "name": "Search Suggestions (Popular / Trending)",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/services/search?popular=true&city_id={{sampleCityId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "services",
+                    "search"
+                  ],
+                  "query": [
+                    {
+                      "key": "popular",
+                      "value": "true",
+                      "description": "Returns trending / featured services when search bar is focused before typing"
+                    },
+                    {
+                      "key": "city_id",
+                      "value": "{{sampleCityId}}",
+                      "description": "Optional: for city-specific pricing"
+                    }
+                  ]
+                },
+                "description": "Returns popular services to display as search recommendations when user focuses the search input before typing."
+              }
+            }
+          ]
+        },
+        {
+          "name": "Booking Flow (Enhanced)",
+          "description": "The complete booking journey: Step 1 — choose city, Step 2 — pick date (next 7 days), Step 3 — pick time slot, Step 4 — get consent & product kit policy, Step 5 — choose/add address, Step 6 — confirm booking (with consent, product kit choice & GPS coordinates). Dynamic tiered pricing (Bronze 1.0x, Silver 1.25x, Gold 1.5x) is applied based on the assigned specialist.",
+          "item": [
+            {
+              "name": "Step 1: List Serviceable Cities",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cities",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cities"
+                  ]
+                },
+                "description": "Returns admin-configured cities where BeautyNest operates. Customer picks one city to begin booking."
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    var cities = pm.response.json().data || [];",
+                      "    if (cities.length > 0) { pm.collectionVariables.set('sampleCityId', cities[0].slug || cities[0].id); console.log('sampleCityId: ' + (cities[0].slug || cities[0].id)); }",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Step 2: Get Available Dates (Next 7 Days)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/booking_flow/dates?city_id={{sampleCityId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "booking_flow",
+                    "dates"
+                  ],
+                  "query": [
+                    {
+                      "key": "city_id",
+                      "value": "{{sampleCityId}}",
+                      "description": "City ID or slug from Step 1"
+                    }
+                  ]
+                },
+                "description": "Returns the next 7 days with availability status based on whether workers are scheduled in the chosen city. is_available: true means at least one specialist is on duty."
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    var dates = (pm.response.json().data && pm.response.json().data.dates) || [];",
+                      "    var avail = dates.find(function(d) { return d.is_available; }) || dates[0];",
+                      "    if (avail) { pm.collectionVariables.set('sampleBookingDate', avail.date); console.log('sampleBookingDate: ' + avail.date); }",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Step 3: Get Available Time Slots",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/booking_flow/time_slots?city_id={{sampleCityId}}&date={{sampleBookingDate}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "booking_flow",
+                    "time_slots"
+                  ],
+                  "query": [
+                    {
+                      "key": "city_id",
+                      "value": "{{sampleCityId}}",
+                      "description": "City ID or slug"
+                    },
+                    {
+                      "key": "date",
+                      "value": "{{sampleBookingDate}}",
+                      "description": "Date from Step 2 (YYYY-MM-DD)"
+                    }
+                  ]
+                },
+                "description": "Returns 8 standard time slots (09:00 AM – 07:30 PM) for the selected city & date. is_available: true means at least one worker is free at that time."
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    var slots = (pm.response.json().data && pm.response.json().data.time_slots) || [];",
+                      "    var avail = slots.find(function(s) { return s.is_available; }) || slots[0];",
+                      "    if (avail) { pm.collectionVariables.set('sampleTimeSlot', avail.slot); console.log('sampleTimeSlot: ' + avail.slot); }",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Step 4: Get Service Consent Form & Product Policy",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/booking_flow/consent_form",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "booking_flow",
+                    "consent_form"
+                  ]
+                },
+                "description": "Returns current service consent requirements, legal title, version, terms text, and product sourcing policy (own products vs platform sanitized kit + surcharge fee)."
+              }
+            },
+            {
+              "name": "Step 5a: List My Addresses",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/customers/addresses",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "customers",
+                    "addresses"
+                  ]
+                },
+                "description": "Returns saved addresses for the customer. Pick one to use for service delivery."
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    var list = pm.response.json().data || [];",
+                      "    if (list.length > 0) { pm.collectionVariables.set('sampleAddressId', list[0].id); console.log('sampleAddressId: ' + list[0].id); }",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Step 5b: Add New Address",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/customers/addresses",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "customers",
+                    "addresses"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"address\": {\n    \"label\": \"Home\",\n    \"line1\": \"204, Sunflower Residency\",\n    \"line2\": \"Gomti Nagar\",\n    \"city\": \"Lucknow\",\n    \"state\": \"Uttar Pradesh\",\n    \"pincode\": \"226010\",\n    \"is_default\": true\n  }\n}"
+                },
+                "description": "Add a new delivery address inline if no saved address exists or customer wants to add one."
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "    var addr = pm.response.json().data || {};",
+                      "    if (addr.id) { pm.collectionVariables.set('sampleAddressId', addr.id); console.log('New sampleAddressId: ' + addr.id); }",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Step 6: Confirm Booking (COD - Platform Kit)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/bookings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "bookings"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"booking\": {\n    \"service_id\": \"{{sampleServiceId}}\",\n    \"city_id\": \"{{sampleCityId}}\",\n    \"date\": \"{{sampleBookingDate}}\",\n    \"time_slot\": \"{{sampleTimeSlot}}\",\n    \"address_id\": \"{{sampleAddressId}}\",\n    \"coupon_code\": \"WELCOME20\",\n    \"payment_method\": \"cod\",\n    \"consent_accepted\": true,\n    \"product_source\": \"platform\",\n    \"customer_latitude\": 19.0760,\n    \"customer_longitude\": 72.8777,\n    \"notes\": \"Please ring the doorbell on arrival.\"\n  }\n}"
+                },
+                "description": "Confirms booking with platform-supplied sanitized beauty kit. Validates consent ('consent_accepted: true'), applies the admin platform product kit fee (₹150), scales service price by worker tier multiplier (Bronze 1.00x, Silver 1.25x, Gold 1.50x), snapshots GPS coordinates, auto-assigns available specialist, and creates COD payment."
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "    var b = pm.response.json().data || {};",
+                      "    if (b.id) { pm.collectionVariables.set('sampleBookingId', b.id); console.log('sampleBookingId: ' + b.id); }",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Step 6b: Confirm Booking (COD - Customer Brings Own Products)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/bookings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "bookings"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"booking\": {\n    \"service_id\": \"{{sampleServiceId}}\",\n    \"city_id\": \"{{sampleCityId}}\",\n    \"date\": \"{{sampleBookingDate}}\",\n    \"time_slot\": \"{{sampleTimeSlot}}\",\n    \"address_id\": \"{{sampleAddressId}}\",\n    \"payment_method\": \"cod\",\n    \"consent_accepted\": true,\n    \"product_source\": \"customer\",\n    \"customer_latitude\": 19.0760,\n    \"customer_longitude\": 72.8777,\n    \"notes\": \"Customer provides own beauty products; platform kit fee is waived.\"\n  }\n}"
+                },
+                "description": "Booking where customer provides their own products ('product_source: customer'). The platform product kit fee is waived (₹0.00). Consent acceptance is still verified and recorded."
+              }
+            }
+          ]
+        },
+        {
+          "name": "Addresses",
+          "description": "Manage saved delivery addresses.",
+          "item": [
+            {
+              "name": "List Saved Addresses",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/customers/addresses",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "customers",
+                    "addresses"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Add Address",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/customers/addresses",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "customers",
+                    "addresses"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"address\": {\n    \"label\": \"Home\",\n    \"line1\": \"204, Sunflower Residency\",\n    \"line2\": \"Gomti Nagar\",\n    \"city\": \"Lucknow\",\n    \"state\": \"Uttar Pradesh\",\n    \"pincode\": \"226010\",\n    \"is_default\": true\n  }\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "    var addr = pm.response.json().data || {};",
+                      "    if (addr.id) pm.collectionVariables.set('sampleAddressId', addr.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Update Address",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/customers/addresses/{{sampleAddressId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "customers",
+                    "addresses",
+                    "{{sampleAddressId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"address\": {\n    \"line1\": \"204, Sunflower Residency, Tower B\",\n    \"is_default\": true\n  }\n}"
+                }
+              }
+            },
+            {
+              "name": "Delete Address",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/customers/addresses/{{sampleAddressId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "customers",
+                    "addresses",
+                    "{{sampleAddressId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Coupons",
+          "description": "View available promotional coupons and validate coupon codes before checkout.",
+          "item": [
+            {
+              "name": "List Available Coupons",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/coupons",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "coupons"
+                  ]
+                },
+                "description": "Returns all active, non-expired promotional coupons available to customers."
+              }
+            },
+            {
+              "name": "List Coupons for Cart Subtotal",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/coupons?amount=1200",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "coupons"
+                  ],
+                  "query": [
+                    {
+                      "key": "amount",
+                      "value": "1200",
+                      "description": "Customer cart or booking subtotal"
+                    }
+                  ]
+                },
+                "description": "Returns available coupons with calculated discount amounts and is_applicable flags for the specified order amount."
+              }
+            },
+            {
+              "name": "Validate & Apply Coupon",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/coupons/validate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "coupons",
+                    "validate"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"WELCOME20\",\n  \"amount\": 1200\n}"
+                },
+                "description": "Validates whether a coupon code is valid, active, and applicable for the given amount, returning discount details."
+              }
+            },
+            {
+              "name": "Get Coupon Details",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/coupons/WELCOME20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "coupons",
+                    "WELCOME20"
+                  ]
+                },
+                "description": "Get detailed terms and discount values for a specific coupon code."
+              }
+            }
+          ]
+        },
+        {
+          "name": "My Bookings",
+          "description": "View and manage bookings after they have been confirmed.",
+          "item": [
+            {
+              "name": "List My Bookings",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/bookings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "bookings"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    var list = pm.response.json().data || [];",
+                      "    if (list.length > 0) pm.collectionVariables.set('sampleBookingId', list[0].id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Booking Details",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/bookings/{{sampleBookingId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "bookings",
+                    "{{sampleBookingId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Cancel Booking",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/bookings/{{sampleBookingId}}/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "bookings",
+                    "{{sampleBookingId}}",
+                    "cancel"
+                  ]
+                },
+                "description": "Cancels a booking that is still in pending or confirmed status."
+              }
+            }
+          ]
+        },
+        {
+          "name": "Notifications",
+          "item": [
+            {
+              "name": "List Notifications",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/notifications",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "notifications"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Unread Count",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/notifications/unread_count",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "notifications",
+                    "unread_count"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Mark All as Read",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/notifications/read_all",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "notifications",
+                    "read_all"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reviews",
+          "description": "Customer reviews for completed bookings and completed services.",
+          "item": [
+            {
+              "name": "Submit Booking Review",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/booking/reviews",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "booking",
+                    "reviews"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"booking_id\": \"{{sampleBookingId}}\",\n  \"rating\": 5,\n  \"comment\": \"The beautician arrived on time, was very hygienic and professional!\"\n}"
+                },
+                "description": "Submits a review for a completed booking. Updates the assigned worker's rating and connects the primary booked service."
+              }
+            },
+            {
+              "name": "List Booking Reviews",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/booking/reviews",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "booking",
+                    "reviews"
+                  ]
+                },
+                "description": "Lists all reviews submitted by the authenticated customer for their bookings."
+              }
+            },
+            {
+              "name": "Submit Service Review",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/service/reviews",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "service",
+                    "reviews"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"service_id\": \"{{sampleServiceId}}\",\n  \"rating\": 5,\n  \"comment\": \"Incredible glow and soothing facial massage. Skin feels deeply hydrated!\"\n}"
+                },
+                "description": "Submits a review for a specific service. Requires that the authenticated customer has completed a booking for this service (service_status == 'completed')."
+              }
+            },
+            {
+              "name": "List Service Reviews",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/service/reviews?service_id={{sampleServiceId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "service",
+                    "reviews"
+                  ],
+                  "query": [
+                    {
+                      "key": "service_id",
+                      "value": "{{sampleServiceId}}",
+                      "description": "Filter reviews by Service UUID or slug (Publicly accessible)"
+                    }
+                  ]
+                },
+                "description": "Retrieves customer reviews for a service. Publicly accessible without authentication."
+              }
+            }
+          ]
+        },
+        {
+          "name": "Wishlist",
+          "description": "Customer wishlist and favorites management — add/remove services, toggle heart status, check status, and list all wishlisted services.",
+          "item": [
+            {
+              "name": "Get Wishlist",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/wishlist",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "wishlist"
+                  ]
+                },
+                "description": "Fetch all services saved to the authenticated customer's wishlist with full pricing, category, rating, and duration details."
+              }
+            },
+            {
+              "name": "Add to Wishlist",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/wishlist",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "wishlist"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"service_id\": \"{{sampleServiceId}}\"\n}"
+                },
+                "description": "Add a service to customer's wishlist. Accepts service_id (UUID or slug)."
+              }
+            },
+            {
+              "name": "Toggle Wishlist (Heart Icon)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/wishlist/toggle",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "wishlist",
+                    "toggle"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"service_id\": \"{{sampleServiceId}}\"\n}"
+                },
+                "description": "Toggle heart status for a service. If already wishlisted, removes it. If not, adds it."
+              }
+            },
+            {
+              "name": "Check Wishlist Status",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/wishlist/check?service_id={{sampleServiceId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "wishlist",
+                    "check"
+                  ],
+                  "query": [
+                    {
+                      "key": "service_id",
+                      "value": "{{sampleServiceId}}"
+                    }
+                  ]
+                },
+                "description": "Quickly check if a specific service is in customer's wishlist (returns in_wishlist boolean)."
+              }
+            },
+            {
+              "name": "Remove from Wishlist",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/wishlist/{{sampleServiceId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "wishlist",
+                    "{{sampleServiceId}}"
+                  ]
+                },
+                "description": "Remove an item from wishlist using either service_id (UUID or slug) or favorite item ID."
+              }
+            },
+            {
+              "name": "Clear Wishlist",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{customerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/wishlist",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "wishlist"
+                  ]
+                },
+                "description": "Clear all items from the customer's wishlist."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Worker API",
+      "description": "Endpoints consumed by BeautyNest Service Partners and Beauticians.",
+      "item": [
+        {
+          "name": "Auth",
+          "item": [
+            {
+              "name": "Worker Login",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/worker/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "worker",
+                    "auth",
+                    "login"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"worker@BeautyNest.internal\",\n  \"password\": \"Worker@123456\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    var data = pm.response.json();",
+                      "    if (data.data && data.data.token) {",
+                      "        pm.collectionVariables.set('workerToken', data.data.token);",
+                      "        console.log('Worker JWT set');",
+                      "    } else if (data.token) {",
+                      "        pm.collectionVariables.set('workerToken', data.token);",
+                      "    }",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Refresh Worker Token",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{workerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/worker/auth/refresh",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "worker",
+                    "auth",
+                    "refresh"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"refresh_token\": \"{{workerToken}}\"\n}"
+                },
+                "description": "Refreshes an access token for worker without requiring password re-entry. Returns identical response schema to worker login."
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    var data = pm.response.json();",
+                      "    var token = (data.data && data.data.token) || data.token;",
+                      "    if (token) {",
+                      "        pm.collectionVariables.set('workerToken', token);",
+                      "        console.log('Worker JWT refreshed successfully');",
+                      "    }",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Profile",
+          "item": [
+            {
+              "name": "Get Worker Profile & Stats",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{workerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/worker/profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "worker",
+                    "profile"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Profile & Availability",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{workerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/worker/profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "worker",
+                    "profile"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"profile\": {\n    \"name\": \"Sunita Verma\",\n    \"phone\": \"+919876543220\",\n    \"bio\": \"Certified aesthetician with 6+ years experience in bridal skincare and aromatherapy.\",\n    \"experience_years\": 6,\n    \"is_available\": true\n  }\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Bookings",
+          "item": [
+            {
+              "name": "List Assigned Bookings",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{workerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/worker/bookings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "worker",
+                    "bookings"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    var json = pm.response.json();",
+                      "    var list = json.data || json;",
+                      "    if (Array.isArray(list) && list.length > 0) {",
+                      "        pm.collectionVariables.set('sampleBookingId', list[0].id);",
+                      "    }",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Assigned Booking Details",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{workerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/worker/bookings/{{sampleBookingId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "worker",
+                    "bookings",
+                    "{{sampleBookingId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Accept Assigned Booking",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{workerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/worker/bookings/{{sampleBookingId}}/accept",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "worker",
+                    "bookings",
+                    "{{sampleBookingId}}",
+                    "accept"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Status (Start Job: in_progress)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{workerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/worker/bookings/{{sampleBookingId}}/update_status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "worker",
+                    "bookings",
+                    "{{sampleBookingId}}",
+                    "update_status"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"in_progress\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Update Status (Complete Job: completed)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{workerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/worker/bookings/{{sampleBookingId}}/update_status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "worker",
+                    "bookings",
+                    "{{sampleBookingId}}",
+                    "update_status"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"completed\"\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Earnings",
+          "item": [
+            {
+              "name": "Get Earnings Ledger",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{workerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/worker/earnings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "worker",
+                    "earnings"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Worker Logout",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{workerToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/worker/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "worker",
+                "auth",
+                "logout"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Admin Control Panel",
+      "description": "Browser-session management operations and control panel endpoints.",
+      "item": [
+        {
+          "name": "Auth",
+          "item": [
+            {
+              "name": "Admin Login Form",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "login"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Admin Login (Session)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "login"
+                  ]
+                },
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "email",
+                      "value": "admin@BeautyNest.internal",
+                      "type": "text"
+                    },
+                    {
+                      "key": "password",
+                      "value": "Admin@123456",
+                      "type": "text"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Admin Logout",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/logout",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "logout"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Dashboard",
+          "item": [
+            {
+              "name": "Get Dashboard Analytics",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/dashboard",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "dashboard"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Customers",
+          "item": [
+            {
+              "name": "List Customers",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/customers?q=&status=all&page=1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "customers"
+                  ],
+                  "query": [
+                    {
+                      "key": "q",
+                      "value": ""
+                    },
+                    {
+                      "key": "status",
+                      "value": "all"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Inspect Customer Details",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/customers/{{sampleCustomerId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "customers",
+                    "{{sampleCustomerId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Toggle Customer Status",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/customers/{{sampleCustomerId}}/toggle_status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "customers",
+                    "{{sampleCustomerId}}",
+                    "toggle_status"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Delete Customer",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/customers/{{sampleCustomerId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "customers",
+                    "{{sampleCustomerId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Workers",
+          "item": [
+            {
+              "name": "List Workers",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/workers?search=&status=all",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "workers"
+                  ],
+                  "query": [
+                    {
+                      "key": "search",
+                      "value": ""
+                    },
+                    {
+                      "key": "status",
+                      "value": "all"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Worker Form (New)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/workers/new",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "workers",
+                    "new"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Onboard Worker (Create)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/workers",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "workers"
+                  ]
+                },
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "worker[name]",
+                      "value": "Sunita Verma",
+                      "type": "text"
+                    },
+                    {
+                      "key": "worker[email]",
+                      "value": "sunita.test@BeautyNest.internal",
+                      "type": "text"
+                    },
+                    {
+                      "key": "worker[phone]",
+                      "value": "+919876543220",
+                      "type": "text"
+                    },
+                    {
+                      "key": "worker[password]",
+                      "value": "WorkerPass123",
+                      "type": "text"
+                    },
+                    {
+                      "key": "worker[status]",
+                      "value": "active",
+                      "type": "text"
+                    },
+                    {
+                      "key": "worker[bio]",
+                      "value": "Expert aesthetician with 5 years experience.",
+                      "type": "text"
+                    },
+                    {
+                      "key": "worker[speciality]",
+                      "value": "Facials & Waxing",
+                      "type": "text"
+                    },
+                    {
+                      "key": "worker[experience_years]",
+                      "value": "5",
+                      "type": "text"
+                    },
+                    {
+                      "key": "worker[city]",
+                      "value": "Bengaluru",
+                      "type": "text"
+                    },
+                    {
+                      "key": "worker[worker_tier_id]",
+                      "value": "{{sampleWorkerTierId}}",
+                      "type": "text",
+                      "description": "Tier ID for Bronze (1.00x), Silver (1.25x), or Gold (1.50x)"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Inspect Worker Details",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/workers/{{sampleWorkerId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "workers",
+                    "{{sampleWorkerId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Edit Worker Form",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/workers/{{sampleWorkerId}}/edit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "workers",
+                    "{{sampleWorkerId}}",
+                    "edit"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Worker",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/workers/{{sampleWorkerId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "workers",
+                    "{{sampleWorkerId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "worker[name]",
+                      "value": "Sunita Verma",
+                      "type": "text"
+                    },
+                    {
+                      "key": "worker[bio]",
+                      "value": "Updated aesthetician bio.",
+                      "type": "text"
+                    },
+                    {
+                      "key": "worker[experience_years]",
+                      "value": "6",
+                      "type": "text"
+                    },
+                    {
+                      "key": "worker[worker_tier_id]",
+                      "value": "{{sampleWorkerTierId}}",
+                      "type": "text",
+                      "description": "Tier ID for Bronze (1.00x), Silver (1.25x), or Gold (1.50x)"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Delete Worker",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/workers/{{sampleWorkerId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "workers",
+                    "{{sampleWorkerId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Categories",
+          "item": [
+            {
+              "name": "List Categories",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/categories?search=&status=all",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "categories"
+                  ],
+                  "query": [
+                    {
+                      "key": "search",
+                      "value": ""
+                    },
+                    {
+                      "key": "status",
+                      "value": "all"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Category Form (New)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/categories/new",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "categories",
+                    "new"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Category",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/categories",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "categories"
+                  ]
+                },
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "category[name]",
+                      "value": "Salon for Women",
+                      "type": "text"
+                    },
+                    {
+                      "key": "category[description]",
+                      "value": "Premium home beauty and grooming services.",
+                      "type": "text"
+                    },
+                    {
+                      "key": "category[position]",
+                      "value": "1",
+                      "type": "text"
+                    },
+                    {
+                      "key": "category[featured]",
+                      "value": "true",
+                      "type": "text"
+                    },
+                    {
+                      "key": "category[status]",
+                      "value": "active",
+                      "type": "text"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Inspect Category",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/categories/{{sampleCategoryId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "categories",
+                    "{{sampleCategoryId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Edit Category Form",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/categories/{{sampleCategoryId}}/edit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "categories",
+                    "{{sampleCategoryId}}",
+                    "edit"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Category",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/categories/{{sampleCategoryId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "categories",
+                    "{{sampleCategoryId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "category[name]",
+                      "value": "Salon for Women",
+                      "type": "text"
+                    },
+                    {
+                      "key": "category[description]",
+                      "value": "Updated category description.",
+                      "type": "text"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Delete Category",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/categories/{{sampleCategoryId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "categories",
+                    "{{sampleCategoryId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "List Category Services",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/categories/{{sampleCategoryId}}/services",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "categories",
+                    "{{sampleCategoryId}}",
+                    "services"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Service Under Category",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/categories/{{sampleCategoryId}}/services",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "categories",
+                    "{{sampleCategoryId}}",
+                    "services"
+                  ]
+                },
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "service[name]",
+                      "value": "Berry Radiance Facial",
+                      "type": "text"
+                    },
+                    {
+                      "key": "service[base_price]",
+                      "value": "799.0",
+                      "type": "text"
+                    },
+                    {
+                      "key": "service[discount_price]",
+                      "value": "599.0",
+                      "type": "text"
+                    },
+                    {
+                      "key": "service[duration_minutes]",
+                      "value": "45",
+                      "type": "text"
+                    },
+                    {
+                      "key": "service[status]",
+                      "value": "active",
+                      "type": "text"
+                    },
+                    {
+                      "key": "service[tag]",
+                      "value": "facial",
+                      "type": "text"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Subcategories",
+          "item": [
+            {
+              "name": "List Subcategories",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/subcategories?category_id=&search=&status=all",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "subcategories"
+                  ],
+                  "query": [
+                    {
+                      "key": "category_id",
+                      "value": ""
+                    },
+                    {
+                      "key": "search",
+                      "value": ""
+                    },
+                    {
+                      "key": "status",
+                      "value": "all"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Subcategory Form (New)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/subcategories/new?category_id={{sampleCategoryId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "subcategories",
+                    "new"
+                  ],
+                  "query": [
+                    {
+                      "key": "category_id",
+                      "value": "{{sampleCategoryId}}"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Subcategory",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "subcategory[name]",
+                      "value": "Facial & Cleanup Deluxe",
+                      "type": "text"
+                    },
+                    {
+                      "key": "subcategory[category_id]",
+                      "value": "{{sampleCategoryId}}",
+                      "type": "text"
+                    },
+                    {
+                      "key": "subcategory[description]",
+                      "value": "Specialized organic facial and deep cleanup treatments",
+                      "type": "text"
+                    },
+                    {
+                      "key": "subcategory[status]",
+                      "value": "active",
+                      "type": "text"
+                    },
+                    {
+                      "key": "subcategory[position]",
+                      "value": "1",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/admin/subcategories",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "subcategories"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Inspect Subcategory Details",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/subcategories/{{sampleSubcategoryId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "subcategories",
+                    "{{sampleSubcategoryId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Edit Subcategory Form",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/subcategories/{{sampleSubcategoryId}}/edit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "subcategories",
+                    "{{sampleSubcategoryId}}",
+                    "edit"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Subcategory",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "subcategory[name]",
+                      "value": "Facial & Cleanup Super Deluxe",
+                      "type": "text"
+                    },
+                    {
+                      "key": "subcategory[status]",
+                      "value": "active",
+                      "type": "text"
+                    },
+                    {
+                      "key": "subcategory[position]",
+                      "value": "2",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/admin/subcategories/{{sampleSubcategoryId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "subcategories",
+                    "{{sampleSubcategoryId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Delete Subcategory",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/subcategories/{{sampleSubcategoryId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "subcategories",
+                    "{{sampleSubcategoryId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Services",
+          "item": [
+            {
+              "name": "List Services",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/services?category_id=&subcategory_id=&search=&status=all&sort=price_asc",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "services"
+                  ],
+                  "query": [
+                    {
+                      "key": "category_id",
+                      "value": ""
+                    },
+                    {
+                      "key": "subcategory_id",
+                      "value": ""
+                    },
+                    {
+                      "key": "search",
+                      "value": ""
+                    },
+                    {
+                      "key": "status",
+                      "value": "all"
+                    },
+                    {
+                      "key": "sort",
+                      "value": "price_asc"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Service Form (New)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/services/new",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "services",
+                    "new"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Service",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/services",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "services"
+                  ]
+                },
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "service[subcategory_id]",
+                      "value": "{{sampleSubcategoryId}}",
+                      "type": "text"
+                    },
+                    {
+                      "key": "service[name]",
+                      "value": "Sara Fruit Glow Facial",
+                      "type": "text"
+                    },
+                    {
+                      "key": "service[base_price]",
+                      "value": "1299.0",
+                      "type": "text"
+                    },
+                    {
+                      "key": "service[discount_price]",
+                      "value": "999.0",
+                      "type": "text"
+                    },
+                    {
+                      "key": "service[duration_minutes]",
+                      "value": "60",
+                      "type": "text"
+                    },
+                    {
+                      "key": "service[status]",
+                      "value": "active",
+                      "type": "text"
+                    },
+                    {
+                      "key": "service[featured]",
+                      "value": "true",
+                      "type": "text"
+                    },
+                    {
+                      "key": "service[tag]",
+                      "value": "facial",
+                      "type": "text"
+                    },
+                    {
+                      "key": "service[category_id]",
+                      "value": "{{sampleCategoryId}}",
+                      "type": "text"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Inspect Service Details",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/services/{{sampleServiceId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "services",
+                    "{{sampleServiceId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Edit Service Form",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/services/{{sampleServiceId}}/edit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "services",
+                    "{{sampleServiceId}}",
+                    "edit"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Service",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/services/{{sampleServiceId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "services",
+                    "{{sampleServiceId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "service[name]",
+                      "value": "Sara Fruit Glow Facial",
+                      "type": "text"
+                    },
+                    {
+                      "key": "service[discount_price]",
+                      "value": "899.0",
+                      "type": "text"
+                    },
+                    {
+                      "key": "service[featured]",
+                      "value": "true",
+                      "type": "text"
+                    },
+                    {
+                      "key": "service[tag]",
+                      "value": "korean-glow",
+                      "type": "text"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Delete Service",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/services/{{sampleServiceId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "services",
+                    "{{sampleServiceId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cities",
+          "item": [
+            {
+              "name": "List Serviceable Cities",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/cities?search=&status=all",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "cities"
+                  ],
+                  "query": [
+                    {
+                      "key": "search",
+                      "value": ""
+                    },
+                    {
+                      "key": "status",
+                      "value": "all"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "City Form (New)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/cities/new",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "cities",
+                    "new"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create City with Overrides",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "city[name]",
+                      "value": "Bengaluru {{$timestamp}}",
+                      "type": "text"
+                    },
+                    {
+                      "key": "city[state]",
+                      "value": "Karnataka",
+                      "type": "text"
+                    },
+                    {
+                      "key": "city[status]",
+                      "value": "active",
+                      "type": "text"
+                    },
+                    {
+                      "key": "city[service_city_prices_attributes][0][service_id]",
+                      "value": "{{sampleServiceId}}",
+                      "type": "text"
+                    },
+                    {
+                      "key": "city[service_city_prices_attributes][0][base_price]",
+                      "value": "1299.0",
+                      "type": "text"
+                    },
+                    {
+                      "key": "city[service_city_prices_attributes][0][discount_price]",
+                      "value": "1099.0",
+                      "type": "text"
+                    },
+                    {
+                      "key": "city[service_city_prices_attributes][0][status]",
+                      "value": "active",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/admin/cities",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "cities"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Inspect City Details",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/cities/{{sampleCityId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "cities",
+                    "{{sampleCityId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Edit City Form",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/cities/{{sampleCityId}}/edit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "cities",
+                    "{{sampleCityId}}",
+                    "edit"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update City & Overrides",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "city[state]",
+                      "value": "Karnataka (Central)",
+                      "type": "text"
+                    },
+                    {
+                      "key": "city[status]",
+                      "value": "active",
+                      "type": "text"
+                    },
+                    {
+                      "key": "city[service_city_prices_attributes][0][id]",
+                      "value": "{{sampleOverrideId}}",
+                      "type": "text"
+                    },
+                    {
+                      "key": "city[service_city_prices_attributes][0][base_price]",
+                      "value": "1399.0",
+                      "type": "text"
+                    },
+                    {
+                      "key": "city[service_city_prices_attributes][0][discount_price]",
+                      "value": "1199.0",
+                      "type": "text"
+                    },
+                    {
+                      "key": "city[service_city_prices_attributes][0][status]",
+                      "value": "active",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/admin/cities/{{sampleCityId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "cities",
+                    "{{sampleCityId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Delete City",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/cities/{{sampleCityId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "cities",
+                    "{{sampleCityId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "City Price Overrides",
+          "item": [
+            {
+              "name": "List Price Overrides",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/service_city_prices",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "service_city_prices"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Price Override Form (New)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/service_city_prices/new?service_id={{sampleServiceId}}&city_id={{sampleCityId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "service_city_prices",
+                    "new"
+                  ],
+                  "query": [
+                    {
+                      "key": "service_id",
+                      "value": "{{sampleServiceId}}"
+                    },
+                    {
+                      "key": "city_id",
+                      "value": "{{sampleCityId}}"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Price Override",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "service_city_price[service_id]",
+                      "value": "{{sampleServiceId}}",
+                      "type": "text"
+                    },
+                    {
+                      "key": "service_city_price[city_id]",
+                      "value": "{{sampleCityId}}",
+                      "type": "text"
+                    },
+                    {
+                      "key": "service_city_price[base_price]",
+                      "value": "1450.0",
+                      "type": "text"
+                    },
+                    {
+                      "key": "service_city_price[discount_price]",
+                      "value": "1250.0",
+                      "type": "text"
+                    },
+                    {
+                      "key": "service_city_price[status]",
+                      "value": "active",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/admin/service_city_prices",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "service_city_prices"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Edit Price Override Form",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/service_city_prices/{{sampleOverrideId}}/edit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "service_city_prices",
+                    "{{sampleOverrideId}}",
+                    "edit"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Price Override",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "service_city_price[base_price]",
+                      "value": "1550.0",
+                      "type": "text"
+                    },
+                    {
+                      "key": "service_city_price[discount_price]",
+                      "value": "1350.0",
+                      "type": "text"
+                    },
+                    {
+                      "key": "service_city_price[status]",
+                      "value": "active",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/admin/service_city_prices/{{sampleOverrideId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "service_city_prices",
+                    "{{sampleOverrideId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Delete Price Override",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/service_city_prices/{{sampleOverrideId}}?return_to=/admin/cities/{{sampleCityId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "service_city_prices",
+                    "{{sampleOverrideId}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "return_to",
+                      "value": "/admin/cities/{{sampleCityId}}"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Bookings",
+          "item": [
+            {
+              "name": "List All Bookings",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/bookings?status=all&date=",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "bookings"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "all"
+                    },
+                    {
+                      "key": "date",
+                      "value": ""
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Booking Form (New)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/bookings/new",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "bookings",
+                    "new"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Manual Booking",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/bookings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "bookings"
+                  ]
+                },
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "booking[customer_id]",
+                      "value": "{{sampleCustomerId}}",
+                      "type": "text"
+                    },
+                    {
+                      "key": "booking[worker_id]",
+                      "value": "{{sampleWorkerId}}",
+                      "type": "text"
+                    },
+                    {
+                      "key": "booking[scheduled_at]",
+                      "value": "2026-09-15T10:30:00Z",
+                      "type": "text"
+                    },
+                    {
+                      "key": "booking[notes]",
+                      "value": "Admin assigned booking.",
+                      "type": "text"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Inspect Booking",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/bookings/{{sampleBookingId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "bookings",
+                    "{{sampleBookingId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Edit Booking Form",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/bookings/{{sampleBookingId}}/edit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "bookings",
+                    "{{sampleBookingId}}",
+                    "edit"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Booking / Dispatch Worker",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/bookings/{{sampleBookingId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "bookings",
+                    "{{sampleBookingId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "booking[worker_id]",
+                      "value": "{{sampleWorkerId}}",
+                      "type": "text"
+                    },
+                    {
+                      "key": "booking[status]",
+                      "value": "confirmed",
+                      "type": "text"
+                    },
+                    {
+                      "key": "booking[notes]",
+                      "value": "Professional dispatched.",
+                      "type": "text"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Payments",
+          "item": [
+            {
+              "name": "List Payments Ledger",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/payments?status=all&method=",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "payments"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "all"
+                    },
+                    {
+                      "key": "method",
+                      "value": ""
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Payment Form (New)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/payments/new",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "payments",
+                    "new"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Record Payment",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/payments",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "payments"
+                  ]
+                },
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "payment[booking_id]",
+                      "value": "{{sampleBookingId}}",
+                      "type": "text"
+                    },
+                    {
+                      "key": "payment[amount]",
+                      "value": "999.0",
+                      "type": "text"
+                    },
+                    {
+                      "key": "payment[method]",
+                      "value": "upi",
+                      "type": "text"
+                    },
+                    {
+                      "key": "payment[status]",
+                      "value": "completed",
+                      "type": "text"
+                    },
+                    {
+                      "key": "payment[transaction_ref]",
+                      "value": "UPI-TXN-129038",
+                      "type": "text"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Inspect Payment",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/payments/{{samplePaymentId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "payments",
+                    "{{samplePaymentId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Edit Payment Form",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/payments/{{samplePaymentId}}/edit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "payments",
+                    "{{samplePaymentId}}",
+                    "edit"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Payment Status",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/payments/{{samplePaymentId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "payments",
+                    "{{samplePaymentId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "payment[status]",
+                      "value": "completed",
+                      "type": "text"
+                    },
+                    {
+                      "key": "payment[transaction_ref]",
+                      "value": "UPI-TXN-998822",
+                      "type": "text"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Coupons",
+          "item": [
+            {
+              "name": "List Coupons",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/coupons?status=all&discount_type=all",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "coupons"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "all"
+                    },
+                    {
+                      "key": "discount_type",
+                      "value": "all"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Coupon Form (New)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/coupons/new",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "coupons",
+                    "new"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Coupon",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/coupons",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "coupons"
+                  ]
+                },
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "coupon[code]",
+                      "value": "FESTIVE20",
+                      "type": "text"
+                    },
+                    {
+                      "key": "coupon[description]",
+                      "value": "20% off up to ₹300",
+                      "type": "text"
+                    },
+                    {
+                      "key": "coupon[discount_type]",
+                      "value": "percentage",
+                      "type": "text"
+                    },
+                    {
+                      "key": "coupon[discount_value]",
+                      "value": "20.0",
+                      "type": "text"
+                    },
+                    {
+                      "key": "coupon[max_discount]",
+                      "value": "300.0",
+                      "type": "text"
+                    },
+                    {
+                      "key": "coupon[min_order_amount]",
+                      "value": "699.0",
+                      "type": "text"
+                    },
+                    {
+                      "key": "coupon[usage_limit]",
+                      "value": "200",
+                      "type": "text"
+                    },
+                    {
+                      "key": "coupon[status]",
+                      "value": "active",
+                      "type": "text"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Inspect Coupon",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/coupons/{{sampleCouponId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "coupons",
+                    "{{sampleCouponId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Edit Coupon Form",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/coupons/{{sampleCouponId}}/edit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "coupons",
+                    "{{sampleCouponId}}",
+                    "edit"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Coupon",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/coupons/{{sampleCouponId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "coupons",
+                    "{{sampleCouponId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "coupon[discount_value]",
+                      "value": "25.0",
+                      "type": "text"
+                    },
+                    {
+                      "key": "coupon[description]",
+                      "value": "25% off festive discount",
+                      "type": "text"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Toggle Coupon Status",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/coupons/{{sampleCouponId}}/toggle_status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "coupons",
+                    "{{sampleCouponId}}",
+                    "toggle_status"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Delete Coupon",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/coupons/{{sampleCouponId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "coupons",
+                    "{{sampleCouponId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reviews",
+          "item": [
+            {
+              "name": "List Reviews",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/reviews?rating=&worker_id=",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "reviews"
+                  ],
+                  "query": [
+                    {
+                      "key": "rating",
+                      "value": ""
+                    },
+                    {
+                      "key": "worker_id",
+                      "value": ""
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Inspect Review",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/reviews/{{sampleReviewId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "reviews",
+                    "{{sampleReviewId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Delete / Moderate Review",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/reviews/{{sampleReviewId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "reviews",
+                    "{{sampleReviewId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Notifications",
+          "item": [
+            {
+              "name": "List Notifications",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/notifications",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "notifications"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Notification Form (New)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/notifications/new",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "notifications",
+                    "new"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Dispatch Broadcast Notification",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/notifications",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "notifications"
+                  ]
+                },
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "notification[subject]",
+                      "value": "Monsoon Festive Discount Live",
+                      "type": "text"
+                    },
+                    {
+                      "key": "notification[message]",
+                      "value": "Enjoy 20% off on all grooming services this weekend.",
+                      "type": "text"
+                    },
+                    {
+                      "key": "notification[target_group]",
+                      "value": "all",
+                      "type": "text"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Inspect Notification",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/notifications/{{sampleNotificationId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "notifications",
+                    "{{sampleNotificationId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Edit Notification Form",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/notifications/{{sampleNotificationId}}/edit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "notifications",
+                    "{{sampleNotificationId}}",
+                    "edit"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Notification",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/notifications/{{sampleNotificationId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "notifications",
+                    "{{sampleNotificationId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "notification[subject]",
+                      "value": "Updated Announcement Title",
+                      "type": "text"
+                    },
+                    {
+                      "key": "notification[message]",
+                      "value": "Updated announcement message.",
+                      "type": "text"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Settings",
+          "item": [
+            {
+              "name": "Get Platform Settings",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/settings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "settings"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Edit Platform Settings Form",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/settings/edit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "settings",
+                    "edit"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Platform Settings",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/settings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "settings"
+                  ]
+                },
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "settings[platform_name]",
+                      "value": "BeautyNest",
+                      "type": "text"
+                    },
+                    {
+                      "key": "settings[support_email]",
+                      "value": "support@BeautyNest.internal",
+                      "type": "text"
+                    },
+                    {
+                      "key": "settings[support_phone]",
+                      "value": "+918000123456",
+                      "type": "text"
+                    },
+                    {
+                      "key": "settings[currency]",
+                      "value": "INR",
+                      "type": "text"
+                    },
+                    {
+                      "key": "consent_form_required",
+                      "value": "true",
+                      "type": "text",
+                      "description": "Require client consent acceptance before booking completion"
+                    },
+                    {
+                      "key": "consent_form_title",
+                      "value": "Home Beauty Service Client Consent Agreement",
+                      "type": "text"
+                    },
+                    {
+                      "key": "consent_form_version",
+                      "value": "v1.0",
+                      "type": "text"
+                    },
+                    {
+                      "key": "consent_form_content",
+                      "value": "By proceeding with this home service appointment, the client confirms that they have disclosed any allergies or sensitivities and agree to the platform safety protocols.",
+                      "type": "text"
+                    },
+                    {
+                      "key": "product_choice_enabled",
+                      "value": "true",
+                      "type": "text",
+                      "description": "Allow customer to choose between platform kit and bringing own products"
+                    },
+                    {
+                      "key": "platform_product_fee",
+                      "value": "150.00",
+                      "type": "text",
+                      "description": "Surcharge fee when customer chooses platform products"
+                    },
+                    {
+                      "key": "platform_product_fee_note",
+                      "value": "Includes sterilized tools, hygienic disposables, and salon-grade cosmetics.",
+                      "type": "text"
+                    },
+                    {
+                      "key": "worker_tier_multipliers[{{sampleBronzeTierId}}]",
+                      "value": "1.00",
+                      "type": "text",
+                      "description": "Bronze tier multiplier (base)"
+                    },
+                    {
+                      "key": "worker_tier_multipliers[{{sampleSilverTierId}}]",
+                      "value": "1.25",
+                      "type": "text",
+                      "description": "Silver tier multiplier (senior)"
+                    },
+                    {
+                      "key": "worker_tier_multipliers[{{sampleGoldTierId}}]",
+                      "value": "1.50",
+                      "type": "text",
+                      "description": "Gold tier multiplier (specialist)"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

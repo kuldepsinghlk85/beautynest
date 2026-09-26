@@ -1,0 +1,571 @@
+<% content_for :page_title, "My Profile — #{current_user.name}" %>
+
+<%= render "shared/public_nav", active: "profile" %>
+
+<div class="bc-cust-container">
+  <!-- Breadcrumb -->
+  <nav class="bc-breadcrumb" aria-label="breadcrumb">
+    <a href="/"><i class="ti ti-home"></i> Home</a>
+    <span class="bc-crumb-sep">/</span>
+    <span class="bc-crumb-active">My Profile</span>
+  </nav>
+
+  <!-- Flash Messages -->
+  <% if notice.present? %>
+    <div class="bc-alert bc-alert-success">
+      <i class="ti ti-circle-check fs-2"></i>
+      <div><%= notice %></div>
+    </div>
+  <% end %>
+  <% if alert.present? %>
+    <div class="bc-alert bc-alert-danger">
+      <i class="ti ti-alert-circle fs-2"></i>
+      <div><%= alert %></div>
+    </div>
+  <% end %>
+
+  <!-- Profile Hero Banner -->
+  <div class="bc-profile-hero-card">
+    <div class="bc-phero-left">
+      <div class="bc-phero-avatar-box">
+        <% if @user.avatar_url.present? %>
+          <%= image_tag @user.avatar_url, alt: @user.name, class: "bc-phero-avatar-img", onerror: "this.style.display='none';this.nextElementSibling.style.display='flex';" %>
+          <div class="bc-phero-avatar-fallback" style="display:none;"><%= @user.initials %></div>
+        <% else %>
+          <div class="bc-phero-avatar-fallback"><%= @user.initials %></div>
+        <% end %>
+        <span class="bc-phero-badge" title="Verified Customer">
+          <i class="ti ti-shield-check"></i>
+        </span>
+      </div>
+
+      <div class="bc-phero-meta">
+        <div class="bc-phero-name-row">
+          <h1><%= @user.name %></h1>
+          <span class="bc-tag-verified">
+            <i class="ti ti-circle-check-filled"></i> Verified Customer
+          </span>
+        </div>
+        <p class="bc-phero-sub">
+          <span><i class="ti ti-mail"></i> <%= @user.email %></span>
+          <span><i class="ti ti-phone"></i> <%= @user.phone %></span>
+          <span><i class="ti ti-calendar"></i> Member since <%= @user.joined %></span>
+          <% if @user.city.present? && @user.city != "—" %>
+            <span><i class="ti ti-map-pin"></i> <%= @user.city %></span>
+          <% end %>
+        </p>
+      </div>
+    </div>
+
+    <div class="bc-phero-stats">
+      <div class="bc-stat-item">
+        <div class="num"><%= @total_bookings_count %></div>
+        <div class="lbl">Total Bookings</div>
+      </div>
+      <div class="bc-stat-item highlight">
+        <div class="num"><%= @active_bookings_count %></div>
+        <div class="lbl">Active Appointments</div>
+      </div>
+      <div class="bc-stat-item">
+        <div class="num"><%= @completed_bookings_count %></div>
+        <div class="lbl">Completed</div>
+      </div>
+      <div class="bc-stat-item">
+        <div class="num"><%= @addresses.count %></div>
+        <div class="lbl">Addresses</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Navigation Tabs -->
+  <div class="bc-tabs-wrapper">
+    <div class="bc-pill-tabs" role="tablist">
+      <%= link_to customer_profile_path(tab: "profile"), class: "bc-ptab #{'active' if @active_tab == 'profile'}", role: "tab" do %>
+        <i class="ti ti-user-circle"></i> Personal Info
+      <% end %>
+      <%= link_to customer_profile_path(tab: "addresses"), class: "bc-ptab #{'active' if @active_tab == 'addresses'}", role: "tab" do %>
+        <i class="ti ti-map-pin"></i> Saved Addresses <span class="bc-tab-count"><%= @addresses.count %></span>
+      <% end %>
+      <%= link_to customer_profile_path(tab: "security"), class: "bc-ptab #{'active' if @active_tab == 'security'}", role: "tab" do %>
+        <i class="ti ti-lock"></i> Security & Password
+      <% end %>
+      <%= link_to customer_profile_path(tab: "offers"), class: "bc-ptab #{'active' if @active_tab == 'offers'}", role: "tab" do %>
+        <i class="ti ti-ticket"></i> Coupons & Perks
+      <% end %>
+      <%= link_to customer_bookings_path, class: "bc-ptab bc-ptab-cta" do %>
+        <i class="ti ti-calendar-event"></i> My Bookings <i class="ti ti-arrow-right"></i>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Tab Contents -->
+  <div class="bc-tab-content-area">
+
+    <%# ── TAB 1: PERSONAL INFO ── %>
+    <% if @active_tab == "profile" %>
+      <div class="bc-card">
+        <div class="bc-card-header">
+          <div>
+            <h2>Personal Information</h2>
+            <p>Update your personal contact details and avatar photo.</p>
+          </div>
+        </div>
+
+        <%= form_with model: @user, url: customer_profile_path, method: :patch, local: true, multipart: true, class: "bc-form-grid" do |f| %>
+          <div class="bc-field-group full-width bc-avatar-upload-group">
+            <label class="bc-label">Profile Photo</label>
+            <div class="bc-avatar-uploader-card">
+              <div class="bc-avatar-preview-wrapper">
+                <% if @user.avatar_url.present? %>
+                  <%= image_tag @user.avatar_url, alt: @user.name, class: "bc-avatar-preview-img", id: "customer-avatar-preview-img", onerror: "this.classList.add('d-none'); document.getElementById('customer-avatar-preview-fallback').classList.remove('d-none');" %>
+                  <div class="bc-avatar-preview-fallback d-none" id="customer-avatar-preview-fallback"><%= @user.initials %></div>
+                <% else %>
+                  <img src="#" alt="Preview" class="bc-avatar-preview-img d-none" id="customer-avatar-preview-img" />
+                  <div class="bc-avatar-preview-fallback" id="customer-avatar-preview-fallback"><%= @user.initials %></div>
+                <% end %>
+              </div>
+
+              <div class="bc-avatar-uploader-content">
+                <div class="bc-avatar-upload-actions">
+                  <label class="bc-btn-upload-avatar" for="customer_avatar_input">
+                    <i class="ti ti-camera"></i>
+                    <span>Choose Photo</span>
+                  </label>
+                  <%= f.file_field :avatar, class: "bc-avatar-hidden-file-input", id: "customer_avatar_input", accept: "image/jpeg,image/png,image/webp,image/gif", onchange: "handleCustomerAvatarChange(event)" %>
+                  <span class="bc-avatar-filename" id="customer-avatar-filename">No file chosen</span>
+                </div>
+
+                <div class="bc-avatar-upload-hints">
+                  <span class="bc-text-muted-sm"><i class="ti ti-photo me-1"></i> Supports JPG, PNG, WebP up to 5MB</span>
+                </div>
+
+                <% if @user.avatar_url.present? %>
+                  <div class="bc-remove-avatar-wrap">
+                    <label class="bc-remove-avatar-check">
+                      <%= f.check_box :remove_avatar, id: "customer_remove_avatar", onchange: "handleRemoveAvatarToggle(this)" %>
+                      <span><i class="ti ti-trash text-danger"></i> Remove current photo and revert to initials</span>
+                    </label>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+
+          <div class="bc-field-group">
+            <%= f.label :name, "Full Name", class: "bc-label" %>
+            <%= f.text_field :name, required: true, class: "bc-input", placeholder: "e.g. Kavita Sharma" %>
+            <span class="bc-field-hint">Your name will be visible to assigned beauticians.</span>
+          </div>
+
+          <div class="bc-field-group">
+            <%= f.label :email, "Email Address", class: "bc-label" %>
+            <%= f.email_field :email, required: true, class: "bc-input", placeholder: "e.g. kavita@example.com" %>
+            <span class="bc-field-hint">Booking receipts and appointment updates are sent here.</span>
+          </div>
+
+          <div class="bc-field-group">
+            <%= f.label :phone, "Mobile Number", class: "bc-label" %>
+            <%= f.text_field :phone, required: true, class: "bc-input", placeholder: "+91 98765 43210" %>
+            <span class="bc-field-hint">Beauticians will contact you on this number prior to arrival.</span>
+          </div>
+
+          <div class="bc-form-actions">
+            <%= f.submit "Save Changes", class: "bc-btn-pink" %>
+            <%= link_to "Cancel", customer_profile_path, class: "bc-btn-ghost" %>
+          </div>
+        <% end %>
+      </div>
+
+    <%# ── TAB 2: SAVED ADDRESSES ── %>
+    <% elsif @active_tab == "addresses" %>
+      <div class="bc-addresses-section">
+        <div class="bc-section-header">
+          <div>
+            <h2>Saved Addresses</h2>
+            <p>Manage your doorstep service locations. Beauticians will travel directly to your default address.</p>
+          </div>
+          <button type="button" class="bc-btn-pink" id="bc-btn-toggle-addr-form" onclick="document.getElementById('bc-new-addr-panel').classList.toggle('d-none');">
+            <i class="ti ti-plus"></i> Add New Address
+          </button>
+        </div>
+
+        <!-- Add New Address Panel (Collapsible) -->
+        <div id="bc-new-addr-panel" class="bc-card bc-new-addr-panel mb-4 <%= 'd-none' unless @new_address.errors.any? %>">
+          <div class="bc-card-header">
+            <h3><i class="ti ti-map-pin-plus text-pink me-2"></i> Add New Service Address</h3>
+          </div>
+
+          <%= form_with model: @new_address, url: customer_addresses_path, method: :post, local: true, class: "bc-form-grid" do |f| %>
+            <div class="bc-field-group">
+              <%= f.label :label, "Address Label", class: "bc-label" %>
+              <%= f.text_field :label, placeholder: "e.g. Home, Office, Villa", class: "bc-input", required: true %>
+            </div>
+
+            <div class="bc-field-group">
+              <%= f.label :city, "City", class: "bc-label" %>
+              <%= f.select :city, @cities.map(&:name), { selected: @user.city.presence || @cities.first&.name }, class: "bc-input", required: true %>
+            </div>
+
+            <div class="bc-field-group full-width">
+              <%= f.label :line1, "Flat / House No. / Building / Street", class: "bc-label" %>
+              <%= f.text_field :line1, placeholder: "e.g. Flat 402, Lotus Residency, MG Road", class: "bc-input", required: true %>
+            </div>
+
+            <div class="bc-field-group full-width">
+              <%= f.label :line2, "Landmark / Area (Optional)", class: "bc-label" %>
+              <%= f.text_field :line2, placeholder: "e.g. Near HDFC Bank, Green Park", class: "bc-input" %>
+            </div>
+
+            <div class="bc-field-group">
+              <%= f.label :state, "State", class: "bc-label" %>
+              <%= f.text_field :state, placeholder: "e.g. Maharashtra", class: "bc-input" %>
+            </div>
+
+            <div class="bc-field-group">
+              <%= f.label :pincode, "PIN Code", class: "bc-label" %>
+              <%= f.text_field :pincode, placeholder: "e.g. 400001", class: "bc-input" %>
+            </div>
+
+            <div class="bc-field-group full-width">
+              <label class="bc-checkbox-label">
+                <%= f.check_box :is_default %>
+                <span>Set as my default service address</span>
+              </label>
+            </div>
+
+            <div class="bc-form-actions">
+              <%= f.submit "Save Address", class: "bc-btn-pink" %>
+              <button type="button" class="bc-btn-ghost" onclick="document.getElementById('bc-new-addr-panel').classList.add('d-none');">Cancel</button>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Addresses List -->
+        <% if @addresses.any? %>
+          <div class="bc-address-cards-grid">
+            <% @addresses.each do |addr| %>
+              <div class="bc-addr-card <%= 'is-default' if addr.is_default? %>">
+                <div class="bc-addr-top">
+                  <div class="bc-addr-label-wrap">
+                    <span class="bc-addr-badge"><i class="ti ti-map-pin"></i> <%= addr.display_label %></span>
+                    <% if addr.is_default? %>
+                      <span class="bc-default-badge"><i class="ti ti-check"></i> Default</span>
+                    <% end %>
+                  </div>
+
+                  <div class="bc-addr-actions">
+                    <% unless addr.is_default? %>
+                      <%= button_to customer_default_address_path(addr), method: :patch, class: "bc-btn-text-sm", title: "Make Default Address" do %>
+                        <i class="ti ti-star"></i> Set Default
+                      <% end %>
+                    <% end %>
+                    <%= button_to customer_address_path(addr), method: :delete, data: { turbo_confirm: "Are you sure you want to delete this address?" }, class: "bc-btn-icon-del", title: "Delete Address" do %>
+                      <i class="ti ti-trash"></i>
+                    <% end %>
+                  </div>
+                </div>
+
+                <div class="bc-addr-body">
+                  <p class="bc-addr-line"><%= addr.line1 %></p>
+                  <% if addr.line2.present? %>
+                    <p class="bc-addr-line text-muted"><%= addr.line2 %></p>
+                  <% end %>
+                  <p class="bc-addr-city">
+                    <%= addr.city %><%= ", #{addr.state}" if addr.state.present? %> <%= addr.pincode %>
+                  </p>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="bc-empty-state">
+            <div class="bc-empty-icon"><i class="ti ti-map-pin-off"></i></div>
+            <h3>No addresses saved yet</h3>
+            <p>Add your home or office address to book doorstep services quickly.</p>
+            <button type="button" class="bc-btn-pink" onclick="document.getElementById('bc-new-addr-panel').classList.remove('d-none');">
+              <i class="ti ti-plus"></i> Add Your First Address
+            </button>
+          </div>
+        <% end %>
+      </div>
+
+    <%# ── TAB 3: SECURITY & PASSWORD ── %>
+    <% elsif @active_tab == "security" %>
+      <div class="bc-card">
+        <div class="bc-card-header">
+          <div>
+            <h2>Security & Password</h2>
+            <p>Keep your account secure by using a strong password with letters, numbers, and symbols.</p>
+          </div>
+        </div>
+
+        <%= form_with url: customer_password_path, method: :patch, local: true, class: "bc-form-grid" do |f| %>
+          <div class="bc-field-group full-width">
+            <%= f.label :current_password, "Current Password", class: "bc-label" %>
+            <%= f.password_field :current_password, required: true, class: "bc-input", placeholder: "••••••••••••" %>
+            <span class="bc-field-hint">Enter your existing account password to authorize changes.</span>
+          </div>
+
+          <div class="bc-field-group">
+            <%= f.label :new_password, "New Password", class: "bc-label" %>
+            <%= f.password_field :new_password, required: true, class: "bc-input", placeholder: "At least 6 characters" %>
+          </div>
+
+          <div class="bc-field-group">
+            <%= f.label :password_confirmation, "Confirm New Password", class: "bc-label" %>
+            <%= f.password_field :password_confirmation, required: true, class: "bc-input", placeholder: "Re-enter new password" %>
+          </div>
+
+          <div class="bc-form-actions">
+            <%= f.submit "Update Password", class: "bc-btn-pink" %>
+          </div>
+        <% end %>
+      </div>
+
+    <%# ── TAB 4: COUPONS & PERKS ── %>
+    <% elsif @active_tab == "offers" %>
+      <div class="bc-coupons-section">
+        <div class="bc-section-header">
+          <div>
+            <h2>Available Member Coupons</h2>
+            <p>Apply these promo codes during checkout to enjoy exclusive discounts on your doorstep appointments.</p>
+          </div>
+          <%= link_to "/categories", class: "bc-btn-pink" do %>
+            <i class="ti ti-sparkles"></i> Browse Services
+          <% end %>
+        </div>
+
+        <% if @available_coupons.any? %>
+          <div class="bc-coupons-profile-grid">
+            <% @available_coupons.each do |c| %>
+              <div class="bc-coupon-box">
+                <div class="bc-cpn-left">
+                  <div class="bc-cpn-discount">
+                    <% if c.discount_type == "percentage" %>
+                      <%= c.discount_value.to_i %>% OFF
+                    <% else %>
+                      ₹<%= c.discount_value.to_i %> OFF
+                    <% end %>
+                  </div>
+                  <div class="bc-cpn-desc"><%= c.description.presence || "Exclusive BeautyNest discount" %></div>
+                  <div class="bc-cpn-sub">
+                    <% if c.min_order_amount.to_f > 0 %>
+                      Min. spend: ₹<%= c.min_order_amount.to_i %> •
+                    <% end %>
+                    Valid now
+                  </div>
+                </div>
+
+                <div class="bc-cpn-right">
+                  <span class="bc-code-pill"><%= c.code %></span>
+                  <%= link_to "/categories", class: "bc-btn-text-sm" do %>
+                    Apply in Cart <i class="ti ti-arrow-right"></i>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="bc-empty-state">
+            <div class="bc-empty-icon"><i class="ti ti-ticket-off"></i></div>
+            <h3>No active coupons at this time</h3>
+            <p>Check back soon for seasonal festival offers and loyalty promo codes.</p>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+  </div>
+</div>
+
+<style>
+  /* Customer Profile Avatar Uploader */
+  .bc-avatar-upload-group {
+    grid-column: 1 / -1 !important;
+  }
+
+  .bc-avatar-uploader-card {
+    display: flex !important;
+    align-items: center !important;
+    gap: 1.5rem !important;
+    background: #f8fafc !important;
+    border: 1.5px dashed #cbd5e1 !important;
+    border-radius: 16px !important;
+    padding: 1.25rem 1.5rem !important;
+    transition: border-color 0.2s ease, background 0.2s ease !important;
+  }
+
+  .bc-avatar-uploader-card:hover {
+    border-color: #db2777 !important;
+    background: #fdf2f8 !important;
+  }
+
+  .bc-avatar-preview-wrapper {
+    width: 84px !important;
+    height: 84px !important;
+    border-radius: 22px !important;
+    background: linear-gradient(135deg, #db2777, #be185d) !important;
+    box-shadow: 0 4px 14px rgba(219, 39, 119, 0.25) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    overflow: hidden !important;
+    position: relative !important;
+    border: 2px solid #ffffff !important;
+  }
+
+  .bc-avatar-preview-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 20px !important;
+    display: block;
+  }
+
+  .bc-avatar-preview-img.d-none {
+    display: none !important;
+  }
+
+  .bc-avatar-preview-fallback {
+    color: #ffffff !important;
+    font-size: 2rem !important;
+    font-weight: 800 !important;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .bc-avatar-preview-fallback.d-none {
+    display: none !important;
+  }
+
+  .bc-avatar-uploader-content {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+    flex: 1 !important;
+  }
+
+  .bc-avatar-upload-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    flex-wrap: wrap !important;
+  }
+
+  .bc-btn-upload-avatar {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    background: #ffffff !important;
+    color: #db2777 !important;
+    border: 1.5px solid #db2777 !important;
+    padding: 0.5rem 1.15rem !important;
+    border-radius: 50px !important;
+    font-size: 0.88rem !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 6px rgba(219, 39, 119, 0.12) !important;
+    transition: all 0.15s ease !important;
+  }
+
+  .bc-btn-upload-avatar:hover {
+    background: #db2777 !important;
+    color: #ffffff !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(219, 39, 119, 0.25) !important;
+  }
+
+  .bc-avatar-hidden-file-input {
+    display: none !important;
+  }
+
+  .bc-avatar-filename {
+    font-size: 0.85rem !important;
+    color: #64748b !important;
+    font-weight: 500 !important;
+  }
+
+  .bc-avatar-upload-hints {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    font-size: 0.78rem !important;
+    flex-wrap: wrap !important;
+  }
+
+  .bc-text-muted-sm {
+    color: #64748b !important;
+  }
+
+  .bc-remove-avatar-wrap {
+    margin-top: 4px !important;
+  }
+
+  .bc-remove-avatar-check {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-size: 0.82rem !important;
+    color: #dc2626 !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+  }
+
+  .bc-remove-avatar-check input {
+    cursor: pointer !important;
+  }
+</style>
+
+<script>
+  function handleCustomerAvatarChange(e) {
+    var file = e.target.files && e.target.files[0];
+    var label = document.getElementById('customer-avatar-filename');
+    var previewImg = document.getElementById('customer-avatar-preview-img');
+    var previewFallback = document.getElementById('customer-avatar-preview-fallback');
+    var removeCheck = document.getElementById('customer_remove_avatar');
+
+    if (removeCheck) {
+      removeCheck.checked = false;
+    }
+
+    if (file) {
+      if (label) label.textContent = file.name;
+      var reader = new FileReader();
+      reader.onload = function(evt) {
+        if (previewImg) {
+          previewImg.src = evt.target.result;
+          previewImg.classList.remove('d-none');
+        }
+        if (previewFallback) {
+          previewFallback.classList.add('d-none');
+        }
+      };
+      reader.readAsDataURL(file);
+    } else {
+      if (label) label.textContent = 'No file chosen';
+    }
+  }
+
+  function handleRemoveAvatarToggle(cb) {
+    var previewImg = document.getElementById('customer-avatar-preview-img');
+    var previewFallback = document.getElementById('customer-avatar-preview-fallback');
+    var fileInput = document.getElementById('customer_avatar_input');
+    var label = document.getElementById('customer-avatar-filename');
+
+    if (cb.checked) {
+      if (fileInput) fileInput.value = '';
+      if (label) label.textContent = 'No file chosen';
+      if (previewImg) {
+        previewImg.classList.add('d-none');
+      }
+      if (previewFallback) {
+        previewFallback.classList.remove('d-none');
+      }
+    }
+  }
+</script>

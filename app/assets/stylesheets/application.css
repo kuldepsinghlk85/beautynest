@@ -1,0 +1,1327 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap');
+
+/* ==========================================================================
+   BeautyNest Design System — BeautyNest Pink Theme
+   ========================================================================== */
+
+:root {
+  --apple-font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --display-font: "Playfair Display", Georgia, serif;
+  --tblr-font-sans-serif: var(--apple-font);
+  font-family: var(--apple-font);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ----------------------------------------------------
+   Light Theme Tokens — BeautyNest Pink
+   ---------------------------------------------------- */
+[data-bs-theme="light"],
+[data-theme="light"],
+:root {
+  color-scheme: light;
+
+  /* Surfaces */
+  --bg: #f4f3f8;
+  --surface: #ffffff;
+  --surface-2: #f8f7fc;
+  --surface-3: #f0eef8;
+  --surface-glass: rgba(255, 255, 255, 0.90);
+
+  /* Borders */
+  --border: rgba(0, 0, 0, 0.07);
+  --border-subtle: rgba(0, 0, 0, 0.04);
+  --border-strong: rgba(0, 0, 0, 0.14);
+
+  /* Typography (WCAG 2.1 AA Compliant) */
+  --text-1: #111827; /* 15.8:1 */
+  --text-2: #374151; /* 9.3:1 */
+  --text-3: #4b5563; /* 7.1:1 */
+  --text-4: #64748b; /* 4.6:1 */
+
+  /* BeautyNest Pink Accent */
+  --accent: #db2777;
+  --accent-hover: #be185d;
+  --accent-dim: rgba(219, 39, 119, 0.10);
+  --accent-ring: rgba(219, 39, 119, 0.25);
+
+  /* Sidebar */
+  --sidebar-bg: #171717;
+  --sidebar-text: rgba(255,255,255,0.75);
+  --sidebar-text-active: #ffffff;
+  --sidebar-active-bg: #db2777;
+  --sidebar-section-text: rgba(255,255,255,0.35);
+  --sidebar-hover-bg: rgba(255,255,255,0.07);
+  --sidebar-border: rgba(255,255,255,0.08);
+  /* Status Colors */
+  --success: #15803d;
+  --warning: #b45309;
+  --danger: #b91c1c;
+  --info: #0369a1;
+  --purple: #6d28d9;
+  --pink: #db2777;
+
+  /* Framework Variable Mapping */
+  --tblr-body-bg: var(--bg);
+  --tblr-bg-surface: var(--surface);
+  --tblr-bg-surface-secondary: var(--surface-2);
+  --tblr-bg-surface-tertiary: var(--surface-3);
+  --tblr-border-color: var(--border);
+  --tblr-border-color-translucent: var(--border);
+  --tblr-body-color: var(--text-1);
+  --tblr-secondary-color: var(--text-3);
+  --tblr-primary: var(--accent);
+  --tblr-primary-rgb: 219, 39, 119;
+
+  /* Card and Shadows */
+  --tblr-card-bg: var(--surface);
+  --tblr-card-border-color: var(--border);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 20px -4px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 12px 36px -6px rgba(0, 0, 0, 0.10), 0 4px 8px -2px rgba(0, 0, 0, 0.04);
+}
+
+/* ----------------------------------------------------
+   Dark Theme Tokens (BeautyNest Dark)
+   ---------------------------------------------------- */
+[data-bs-theme="dark"],
+[data-theme="dark"],
+body.theme-dark {
+  color-scheme: dark;
+
+  /* Surfaces */
+  --bg: #0f0f13;
+  --surface: #18181f;
+  --surface-2: #1f1f2a;
+  --surface-3: #28283a;
+  --surface-glass: rgba(24, 24, 31, 0.90);
+
+  /* Borders */
+  --border: rgba(255, 255, 255, 0.09);
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border-strong: rgba(255, 255, 255, 0.16);
+
+  /* Typography */
+  --text-1: #f8fafc;
+  --text-2: #e2e8f0;
+  --text-3: #94a3b8;
+  --text-4: #828ea2;
+
+  /* Accent */
+  --accent: #f472b6;
+  --accent-hover: #ec4899;
+  --accent-dim: rgba(244, 114, 182, 0.16);
+  --accent-ring: rgba(244, 114, 182, 0.30);
+
+  /* Sidebar stays dark in dark mode too */
+  --sidebar-bg: #0f0f13;
+  --sidebar-text: rgba(255,255,255,0.70);
+  --sidebar-text-active: #ffffff;
+  --sidebar-active-bg: #db2777;
+  --sidebar-section-text: rgba(255,255,255,0.30);
+  --sidebar-hover-bg: rgba(255,255,255,0.06);
+  --sidebar-border: rgba(255,255,255,0.08);
+
+  /* Status Colors */
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --info: #38bdf8;
+  --purple: #c084fc;
+  --pink: #f472b6;
+
+  /* Framework Variable Mapping */
+  --tblr-body-bg: var(--bg) !important;
+  --tblr-body-bg-rgb: 15, 15, 19 !important;
+  --tblr-bg-surface: var(--surface) !important;
+  --tblr-bg-surface-secondary: var(--surface-2) !important;
+  --tblr-bg-surface-tertiary: var(--surface-3) !important;
+  --tblr-border-color: var(--border) !important;
+  --tblr-border-color-translucent: var(--border) !important;
+  --tblr-border-color-subtle: var(--border-subtle) !important;
+  --tblr-body-color: var(--text-1) !important;
+  --tblr-body-color-rgb: 248, 250, 252 !important;
+  --tblr-secondary-color: var(--text-3) !important;
+  --tblr-secondary-color-rgb: 148, 163, 184 !important;
+  --tblr-primary: var(--accent) !important;
+  --tblr-primary-rgb: 244, 114, 182 !important;
+  --tblr-link-color: var(--accent) !important;
+  --tblr-link-hover-color: var(--accent-hover) !important;
+
+  /* Card and Shadows */
+  --tblr-card-bg: var(--surface) !important;
+  --tblr-card-border-color: var(--border) !important;
+  --tblr-table-bg: var(--surface) !important;
+  --tblr-table-striped-bg: var(--surface-2) !important;
+  --tblr-table-hover-bg: rgba(255, 255, 255, 0.04) !important;
+  --tblr-table-border-color: var(--border) !important;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 20px -2px rgba(0, 0, 0, 0.45), 0 2px 6px -1px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 16px 36px -4px rgba(0, 0, 0, 0.55), 0 4px 12px -2px rgba(0, 0, 0, 0.3);
+}
+
+/* ----------------------------------------------------
+   Base Document & Typography
+   ---------------------------------------------------- */
+html, body {
+  overflow-x: hidden !important;
+  max-width: 100vw;
+  width: 100%;
+}
+
+body {
+  font-family: var(--apple-font);
+  background-color: var(--bg);
+  color: var(--text-1);
+  letter-spacing: -0.011em;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Prevent flex container blowout on right-hand panel */
+.page {
+  max-width: 100vw;
+  width: 100%;
+  overflow-x: hidden;
+  min-width: 0;
+}
+
+.page-wrapper {
+  flex: 1 1 auto;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow-x: hidden;
+}
+
+@media (min-width: 992px) {
+  .page-wrapper {
+    margin-left: 15rem !important;
+    max-width: calc(100vw - 15rem) !important;
+    width: calc(100% - 15rem) !important;
+  }
+  header.navbar {
+    margin-left: 15rem !important;
+    max-width: calc(100vw - 15rem) !important;
+    width: calc(100% - 15rem) !important;
+  }
+}
+
+.page-body {
+  flex: 1 1 auto;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  width: 100%;
+}
+
+.container-xl,
+.container-fluid,
+.container-lg {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  width: 100%;
+}
+
+turbo-frame {
+  display: block;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
+  font-family: var(--apple-font);
+  letter-spacing: -0.022em;
+  color: var(--text-1);
+  font-weight: 700;
+}
+
+/* Page title gets the display font like BeautyNest */
+.page-title, .navbar-brand .site-name {
+  font-family: var(--display-font) !important;
+  font-weight: 700;
+}
+
+.text-secondary {
+  color: var(--text-3) !important;
+}
+
+.text-muted {
+  color: var(--text-4) !important;
+}
+
+.page-pretitle,
+.subheader {
+  color: var(--text-3) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  font-size: 0.72rem !important;
+}
+
+/* ----------------------------------------------------
+   Apple Squircle Cards & Elevated Surfaces
+   ---------------------------------------------------- */
+.card {
+  background-color: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 16px !important;
+  box-shadow: var(--shadow-md) !important;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.card-header,
+.card-footer {
+  background-color: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+
+.card-title {
+  color: var(--text-1) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.015em;
+}
+
+/* ----------------------------------------------------
+   Apple Glassmorphic Header & Navigation
+   ---------------------------------------------------- */
+.navbar {
+  border-color: var(--border) !important;
+}
+
+header.navbar {
+  background-color: var(--surface-glass) !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border) !important;
+}
+
+/* ----------------------------------------------------
+   Dark Sidebar — BeautyNest Style
+   ---------------------------------------------------- */
+.navbar-vertical {
+  background-color: var(--sidebar-bg) !important;
+  border-right: 1px solid var(--sidebar-border) !important;
+}
+
+/* Section labels */
+.navbar-vertical .nav-item.text-uppercase,
+.navbar-vertical .nav-item[style*="letter-spacing"] {
+  color: var(--sidebar-section-text) !important;
+}
+
+.navbar-vertical .nav-link {
+  color: var(--sidebar-text) !important;
+  border-radius: 9px !important;
+  margin: 2px 10px;
+  padding: 8px 12px !important;
+  font-weight: 500;
+  font-size: 0.88rem;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.navbar-vertical .nav-link:hover {
+  color: var(--sidebar-text-active) !important;
+  background-color: var(--sidebar-hover-bg) !important;
+}
+
+.navbar-vertical .nav-item.active .nav-link,
+.navbar-vertical .nav-link.active {
+  color: #ffffff !important;
+  background-color: var(--sidebar-active-bg) !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 14px rgba(219, 39, 119, 0.35);
+}
+
+.navbar-vertical .nav-item.active .nav-link-icon i,
+.navbar-vertical .nav-item.active .nav-link-icon svg {
+  color: #ffffff !important;
+}
+
+/* Sidebar brand / logo area text */
+.navbar-vertical .navbar-brand a,
+.navbar-vertical .navbar-brand-autodark a {
+  color: #ffffff !important;
+  text-decoration: none;
+}
+
+/* Sidebar user footer */
+.navbar-vertical .border-top {
+  border-color: var(--sidebar-border) !important;
+}
+
+.navbar-vertical .overflow-hidden .font-weight-medium {
+  color: #ffffff !important;
+}
+
+.navbar-vertical .overflow-hidden .text-secondary {
+  color: rgba(255,255,255,0.50) !important;
+}
+
+/* ----------------------------------------------------
+   Apple System Form Controls & Inputs
+   ---------------------------------------------------- */
+.form-control,
+.form-select {
+  background-color: var(--surface) !important;
+  border: 1px solid var(--border-strong) !important;
+  border-radius: 10px !important;
+  color: var(--text-1) !important;
+  font-size: 0.9rem;
+  padding: 0.5rem 0.85rem;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.form-control::placeholder {
+  color: var(--text-4) !important;
+  opacity: 1;
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: var(--surface) !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px var(--accent-ring) !important;
+  color: var(--text-1) !important;
+  outline: none;
+}
+
+.form-label {
+  color: var(--text-1) !important;
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-bottom: 0.4rem;
+}
+
+.form-label-description {
+  color: var(--text-3) !important;
+}
+
+.input-icon-addon {
+  color: var(--text-3) !important;
+}
+
+/* ----------------------------------------------------
+   Apple Buttons & Interactive Elements
+   ---------------------------------------------------- */
+.btn {
+  border-radius: 9px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em;
+  padding: 0.48rem 1rem;
+  transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-primary {
+  background-color: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(219, 39, 119, 0.30);
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-hover) !important;
+  border-color: var(--accent-hover) !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(219, 39, 119, 0.38) !important;
+}
+
+.btn-outline-secondary {
+  border-color: var(--border-strong) !important;
+  color: var(--text-2) !important;
+  background-color: transparent;
+}
+
+.btn-outline-secondary:hover {
+  background-color: var(--surface-2) !important;
+  color: var(--text-1) !important;
+  border-color: var(--border-strong) !important;
+}
+
+.btn-ghost-secondary {
+  color: var(--text-3) !important;
+}
+
+.btn-ghost-secondary:hover {
+  color: var(--text-1) !important;
+  background-color: var(--surface-2) !important;
+}
+
+.btn-ghost-warning {
+  color: var(--warning) !important;
+}
+
+.btn-ghost-warning:hover {
+  background-color: rgba(245, 158, 11, 0.14) !important;
+  color: var(--warning) !important;
+}
+
+.btn-ghost-danger {
+  color: var(--danger) !important;
+}
+
+.btn-ghost-danger:hover {
+  background-color: rgba(239, 68, 68, 0.14) !important;
+  color: var(--danger) !important;
+}
+
+.btn-ghost-success {
+  color: var(--success) !important;
+}
+
+.btn-ghost-success:hover {
+  background-color: rgba(34, 197, 94, 0.14) !important;
+  color: var(--success) !important;
+}
+
+.btn-ghost-primary {
+  color: var(--accent) !important;
+}
+
+.btn-ghost-primary:hover {
+  background-color: var(--accent-dim) !important;
+  color: var(--accent) !important;
+}
+
+.btn-outline-primary {
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+  background-color: transparent;
+}
+.btn-outline-primary:hover {
+  background-color: var(--accent) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(219, 39, 119, 0.28) !important;
+}
+
+/* ----------------------------------------------------
+   Apple Tables (Visibility & Readability Calibrated)
+   ---------------------------------------------------- */
+.table {
+  color: var(--text-1) !important;
+  --tblr-table-color: var(--text-1);
+}
+
+.table thead th {
+  background-color: var(--surface-2) !important;
+  color: var(--text-3) !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  border-bottom: 1px solid var(--border) !important;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background-color 0.12s ease;
+}
+
+.table-hover tbody tr:hover {
+  background-color: var(--surface-2) !important;
+}
+
+.table-striped-columns td:nth-of-type(even) {
+  background-color: transparent !important;
+}
+
+/* ----------------------------------------------------
+   Apple High-Density Condensed Admin Table
+   (Compresses columns to fit on screen without scrollbar,
+    keeps Edit/View Actions directly visible in front of user)
+   ---------------------------------------------------- */
+.table-condensed-admin {
+  width: 100% !important;
+  font-size: 0.80rem !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+
+.table-condensed-admin thead th {
+  padding: 0.5rem 0.45rem !important;
+  font-size: 0.67rem !important;
+  white-space: nowrap !important;
+  background-color: var(--surface-2) !important;
+  letter-spacing: 0.05em !important;
+}
+
+.table-condensed-admin tbody td {
+  padding: 0.45rem 0.45rem !important;
+  vertical-align: middle !important;
+}
+
+.table-condensed-admin .badge {
+  font-size: 0.68rem !important;
+  padding: 0.22em 0.55em !important;
+  white-space: nowrap !important;
+}
+
+.table-condensed-admin .col-actions,
+.table thead th.col-actions,
+.table tbody td.col-actions {
+  position: sticky !important;
+  right: 0 !important;
+  z-index: 4 !important;
+  background-color: var(--surface) !important;
+  box-shadow: -4px 0 8px rgba(0, 0, 0, 0.05);
+}
+
+.table-hover tbody tr:hover td.col-actions {
+  background-color: var(--surface-2) !important;
+}
+
+.table-condensed-admin .btn-icon.btn-sm {
+  width: 1.75rem !important;
+  height: 1.75rem !important;
+  padding: 0 !important;
+}
+
+/* Stacking context elevation:
+   Ensures when an action dropdown is open, its row and sticky cell float ABOVE all other rows and cells */
+.table-condensed-admin tr:hover td.col-actions,
+.table tbody tr:hover td.col-actions,
+.table tbody tr.tr-dropdown-open td.col-actions,
+.table tbody td.col-actions.td-dropdown-open,
+.table tbody tr:has(.dropdown-menu.show) td.col-actions,
+.table tbody tr:has(.show) td.col-actions,
+.table tbody td.col-actions:has(.show),
+.table tbody td.col-actions:focus-within {
+  z-index: 1050 !important;
+}
+
+.table tbody tr.tr-dropdown-open,
+.table tbody tr:has(.dropdown-menu.show),
+.table tbody tr:has(.show) {
+  position: relative !important;
+  z-index: 1050 !important;
+}
+
+/* Dropdown popup styling for action columns:
+   Opens cleanly BELOW the button, aligned flush to the right (dropdown-menu-end),
+   without overlapping the Status badges of the current row */
+.col-actions .dropdown,
+.table-condensed-admin .col-actions .dropdown {
+  position: relative !important;
+}
+
+.col-actions .dropdown-menu,
+.table-condensed-admin .col-actions .dropdown-menu {
+  position: absolute !important;
+  top: 100% !important;
+  right: 0 !important;
+  left: auto !important;
+  margin-top: 4px !important;
+  transform: none !important;
+  z-index: 1060 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 10px !important;
+  border: 1px solid var(--border) !important;
+  background-color: var(--surface) !important;
+  min-width: 180px !important;
+}
+
+.col-actions .dropup .dropdown-menu,
+.table-condensed-admin .col-actions .dropup .dropdown-menu {
+  top: auto !important;
+  bottom: 100% !important;
+  margin-top: 0 !important;
+  margin-bottom: 4px !important;
+}
+
+.col-actions .dropdown-item {
+  white-space: nowrap !important;
+  display: flex !important;
+  align-items: center !important;
+  font-size: 0.81rem !important;
+  padding: 0.5rem 0.85rem !important;
+}
+
+/* ----------------------------------------------------
+   Apple Status Badges (WCAG AA Certified Contrast)
+   ---------------------------------------------------- */
+.badge {
+  border-radius: 20px !important;
+  font-weight: 600 !important;
+  font-size: 0.75rem !important;
+  padding: 0.32em 0.75em !important;
+  letter-spacing: 0.01em;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Light Mode Badges */
+[data-bs-theme="light"] .bg-success-lt,
+[data-theme="light"] .bg-success-lt,
+:root .bg-success-lt {
+  background-color: rgba(21, 128, 61, 0.12) !important;
+  color: #15803d !important;
+  border-color: rgba(21, 128, 61, 0.25) !important;
+}
+
+[data-bs-theme="light"] .bg-warning-lt,
+[data-theme="light"] .bg-warning-lt,
+:root .bg-warning-lt {
+  background-color: rgba(180, 83, 9, 0.12) !important;
+  color: #b45309 !important;
+  border-color: rgba(180, 83, 9, 0.25) !important;
+}
+
+[data-bs-theme="light"] .bg-danger-lt,
+[data-theme="light"] .bg-danger-lt,
+:root .bg-danger-lt {
+  background-color: rgba(185, 28, 28, 0.12) !important;
+  color: #b91c1c !important;
+  border-color: rgba(185, 28, 28, 0.25) !important;
+}
+
+[data-bs-theme="light"] .bg-azure-lt,
+[data-theme="light"] .bg-azure-lt,
+:root .bg-azure-lt {
+  background-color: rgba(3, 105, 161, 0.12) !important;
+  color: #0369a1 !important;
+  border-color: rgba(3, 105, 161, 0.25) !important;
+}
+
+[data-bs-theme="light"] .bg-indigo-lt,
+[data-theme="light"] .bg-indigo-lt,
+:root .bg-indigo-lt {
+  background-color: rgba(67, 56, 202, 0.12) !important;
+  color: #4338ca !important;
+  border-color: rgba(67, 56, 202, 0.25) !important;
+}
+
+[data-bs-theme="light"] .bg-purple-lt,
+[data-theme="light"] .bg-purple-lt,
+:root .bg-purple-lt {
+  background-color: rgba(109, 40, 217, 0.12) !important;
+  color: #6d28d9 !important;
+  border-color: rgba(109, 40, 217, 0.25) !important;
+}
+
+[data-bs-theme="light"] .bg-secondary-lt,
+[data-theme="light"] .bg-secondary-lt,
+:root .bg-secondary-lt {
+  background-color: rgba(75, 85, 99, 0.12) !important;
+  color: #374151 !important;
+  border-color: rgba(75, 85, 99, 0.25) !important;
+}
+
+/* Dark Mode Badges */
+[data-bs-theme="dark"] .bg-success-lt,
+[data-theme="dark"] .bg-success-lt,
+body.theme-dark .bg-success-lt {
+  background-color: rgba(52, 211, 153, 0.16) !important;
+  color: #34d399 !important;
+  border-color: rgba(52, 211, 153, 0.32) !important;
+}
+
+[data-bs-theme="dark"] .bg-warning-lt,
+[data-theme="dark"] .bg-warning-lt,
+body.theme-dark .bg-warning-lt {
+  background-color: rgba(251, 191, 36, 0.16) !important;
+  color: #fbbf24 !important;
+  border-color: rgba(251, 191, 36, 0.32) !important;
+}
+
+[data-bs-theme="dark"] .bg-danger-lt,
+[data-theme="dark"] .bg-danger-lt,
+body.theme-dark .bg-danger-lt {
+  background-color: rgba(248, 113, 113, 0.16) !important;
+  color: #f87171 !important;
+  border-color: rgba(248, 113, 113, 0.32) !important;
+}
+
+[data-bs-theme="dark"] .bg-azure-lt,
+[data-theme="dark"] .bg-azure-lt,
+body.theme-dark .bg-azure-lt {
+  background-color: rgba(56, 189, 248, 0.16) !important;
+  color: #38bdf8 !important;
+  border-color: rgba(56, 189, 248, 0.32) !important;
+}
+
+[data-bs-theme="dark"] .bg-indigo-lt,
+[data-theme="dark"] .bg-indigo-lt,
+body.theme-dark .bg-indigo-lt {
+  background-color: rgba(129, 140, 248, 0.16) !important;
+  color: #a5b4fc !important;
+  border-color: rgba(129, 140, 248, 0.32) !important;
+}
+
+[data-bs-theme="dark"] .bg-purple-lt,
+[data-theme="dark"] .bg-purple-lt,
+body.theme-dark .bg-purple-lt {
+  background-color: rgba(192, 132, 252, 0.16) !important;
+  color: #c084fc !important;
+  border-color: rgba(192, 132, 252, 0.32) !important;
+}
+
+[data-bs-theme="dark"] .bg-secondary-lt,
+[data-theme="dark"] .bg-secondary-lt,
+body.theme-dark .bg-secondary-lt {
+  background-color: rgba(148, 163, 184, 0.16) !important;
+  color: #cbd5e1 !important;
+  border-color: rgba(148, 163, 184, 0.32) !important;
+}
+
+/* Status Dots */
+.status-dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.status-dot.status-success {
+  background-color: var(--success);
+}
+
+.status-dot.status-warning {
+  background-color: var(--warning);
+}
+
+.status-dot.status-danger {
+  background-color: var(--danger);
+}
+
+.status-dot.status-azure {
+  background-color: var(--info);
+}
+
+.status-dot.status-indigo {
+  background-color: var(--accent);
+}
+
+.status-dot.status-purple {
+  background-color: var(--purple);
+}
+
+.status-dot.status-secondary {
+  background-color: var(--text-4);
+}
+
+.status-dot.status-dot-animated {
+  box-shadow: 0 0 0 0 rgba(21, 128, 61, 0.6);
+  animation: status-pulse 2s infinite cubic-bezier(0.66, 0, 0, 1);
+}
+
+@keyframes status-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(21, 128, 61, 0.7);
+  }
+
+  70% {
+    box-shadow: 0 0 0 6px rgba(21, 128, 61, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(21, 128, 61, 0);
+  }
+}
+
+
+/* KPI lift on hover */
+.kpi-card-link {
+  text-decoration: none !important;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.kpi-card-link:hover .card {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg) !important;
+}
+
+/* Pink skill badges */
+.bg-pink-lt {
+  background-color: rgba(219, 39, 119, 0.10) !important;
+  color: #db2777 !important;
+  border-color: rgba(219, 39, 119, 0.22) !important;
+}
+
+.text-pink { color: #db2777 !important; }
+
+[data-bs-theme="dark"] .bg-pink-lt,
+[data-theme="dark"] .bg-pink-lt,
+body.theme-dark .bg-pink-lt {
+  background-color: rgba(244, 114, 182, 0.16) !important;
+  color: #f472b6 !important;
+  border-color: rgba(244, 114, 182, 0.28) !important;
+}
+
+[data-bs-theme="dark"] .text-pink,
+[data-theme="dark"] .text-pink {
+  color: #f472b6 !important;
+}
+
+/* ----------------------------------------------------
+   Chart Container Utility
+   ---------------------------------------------------- */
+.chart-container-sm {
+  position: relative;
+  height: 180px;
+  width: 100%;
+}
+
+.chart-container-md {
+  position: relative;
+  height: 260px;
+  width: 100%;
+}
+
+/* ----------------------------------------------------
+   Table Wrapper Responsiveness & Compact Styling
+   ---------------------------------------------------- */
+.table-responsive {
+  display: block;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+  border-radius: inherit;
+}
+
+/* Compact padding for card tables so data fits comfortably without blowout */
+.card-table th,
+.card-table td {
+  padding: 0.65rem 0.85rem !important;
+  vertical-align: middle;
+}
+
+/* Apple-style discreet slim scrollbar for tables */
+.table-responsive::-webkit-scrollbar {
+  height: 6px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: var(--surface-2);
+  border-radius: 3px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 3px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: var(--text-4);
+}
+
+/* ----------------------------------------------------
+   Icon Alignment
+   ---------------------------------------------------- */
+.icon,
+i.ti {
+  vertical-align: -0.125em;
+}
+
+svg[data-feather] {
+  width: 1.15rem;
+  height: 1.15rem;
+  stroke-width: 2;
+  vertical-align: -0.15em;
+}
+
+/* ----------------------------------------------------
+   List Groups & Settings Tabs
+   ---------------------------------------------------- */
+.list-group-item {
+  background-color: transparent !important;
+  color: var(--text-2) !important;
+  border-color: var(--border) !important;
+  font-weight: 500;
+  padding: 0.75rem 1rem;
+  transition: all 0.15s ease;
+}
+
+.list-group-item:hover {
+  background-color: var(--surface-2) !important;
+  color: var(--text-1) !important;
+}
+
+.list-group-item-action.active {
+  background-color: var(--accent-dim) !important;
+  color: var(--accent) !important;
+  font-weight: 600 !important;
+  border-color: var(--border) !important;
+}
+
+/* ----------------------------------------------------
+   Dropdowns (Apple Translucent Floating Menus)
+   ---------------------------------------------------- */
+.dropdown-menu {
+  background-color: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--shadow-lg) !important;
+  padding: 6px !important;
+}
+
+.dropdown-item {
+  color: var(--text-2) !important;
+  border-radius: 7px !important;
+  padding: 8px 12px !important;
+  font-weight: 500;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.dropdown-menu form {
+  margin: 0;
+  display: block;
+  width: 100%;
+}
+
+.dropdown-menu form button.dropdown-item {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background-color: var(--surface-2) !important;
+  color: var(--text-1) !important;
+}
+
+.dropdown-item.text-danger:hover {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+  color: var(--danger) !important;
+}
+
+/* ----------------------------------------------------
+   Animated Blinking Green Dot for New Items
+   ---------------------------------------------------- */
+.green-blink-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #22c55e;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  animation: greenPulse 1.8s infinite;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+@keyframes greenPulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  }
+
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
+  }
+
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
+}
+
+/* ==========================================================================
+   BeautyNest Pagination Bar  (nodepilot-style)
+   ========================================================================== */
+
+.bc-pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+  border-radius: 0 0 12px 12px;
+}
+
+.bc-pagination-total {
+  font-size: 0.8125rem;
+  color: var(--text-3);
+  letter-spacing: -0.01em;
+}
+
+.bc-pagination-total strong {
+  color: var(--text-2);
+  font-weight: 600;
+}
+
+.bc-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+
+.bc-pagination-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8125rem;
+  color: var(--text-3);
+  margin-right: 0.25rem;
+  white-space: nowrap;
+}
+
+.bc-pagination-label svg {
+  opacity: 0.55;
+  flex-shrink: 0;
+}
+
+.bc-page-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.bc-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.375rem;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--text-2);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.14s ease, color 0.14s ease, border-color 0.14s ease,
+    box-shadow 0.14s ease;
+  user-select: none;
+  letter-spacing: -0.01em;
+}
+
+a.bc-page-btn:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.bc-page-btn--active {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #fff !important;
+  font-weight: 600;
+  cursor: default;
+  box-shadow: 0 2px 8px var(--accent-ring);
+}
+
+.bc-page-btn--arrow {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--text-3);
+}
+
+.bc-page-btn--gap {
+  background: transparent;
+  border-color: transparent;
+  cursor: default;
+  color: var(--text-4);
+  letter-spacing: 0.05em;
+}
+
+.bc-page-btn--disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Dark mode */
+[data-bs-theme="dark"] .bc-pagination-bar,
+[data-theme="dark"] .bc-pagination-bar {
+  background: var(--surface-2);
+  border-color: var(--border);
+}
+
+[data-bs-theme="dark"] .bc-page-btn,
+[data-theme="dark"] .bc-page-btn {
+  background: var(--surface-3);
+  border-color: var(--border-strong);
+  color: var(--text-2);
+}
+
+[data-bs-theme="dark"] a.bc-page-btn:hover,
+[data-theme="dark"] a.bc-page-btn:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Responsive: stack on very small screens */
+@media (max-width: 480px) {
+  .bc-pagination-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .bc-pagination-controls {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+/* ==========================================================================
+   BeautyNest Theme — Final Polish
+   ========================================================================== */
+
+/* Sidebar user avatar — pink gradient */
+.navbar-vertical .avatar.bg-primary-lt {
+  background: rgba(219, 39, 119, 0.15) !important;
+  color: #db2777 !important;
+}
+
+/* Page title gets Playfair Display */
+h2.page-title {
+  font-family: var(--display-font) !important;
+  letter-spacing: -0.025em;
+}
+
+/* Soften table header bg to match lavender page bg */
+.table thead th {
+  background-color: var(--surface-2) !important;
+}
+
+/* Pink active pagination button glow */
+.bc-page-btn--active {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #fff !important;
+  box-shadow: 0 2px 10px rgba(219, 39, 119, 0.35);
+}
+
+/* Cursor helper used in skill checkboxes */
+.cursor-pointer { cursor: pointer; }
+
+/* Card hover lift for worker/customer list cards */
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg) !important;
+}
+
+/* bc-page-btn active — override for pink */
+a.bc-page-btn:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ----------------------------------------------------
+   Apple HIG Segmented Control Switch
+   ---------------------------------------------------- */
+.apple-segmented-switch {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--surface-3);
+  padding: 3px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+  gap: 2px;
+}
+
+.apple-segmented-switch .seg-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 9px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-3);
+  text-decoration: none;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.apple-segmented-switch .seg-item:hover {
+  color: var(--text-1);
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+[data-bs-theme="dark"] .apple-segmented-switch .seg-item:hover,
+[data-theme="dark"] .apple-segmented-switch .seg-item:hover,
+body.theme-dark .apple-segmented-switch .seg-item:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.apple-segmented-switch .seg-item.active {
+  background-color: var(--surface);
+  color: var(--accent);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 0 1px rgba(0, 0, 0, 0.12);
+}
+
+.apple-segmented-switch .seg-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  font-size: 0.70rem;
+  font-weight: 700;
+  background-color: rgba(0, 0, 0, 0.06);
+  color: var(--text-2);
+  transition: all 0.18s ease;
+}
+
+.apple-segmented-switch .seg-item.active .seg-badge {
+  background-color: var(--accent);
+  color: #ffffff;
+}
+
+.apple-segmented-switch .seg-badge.warning {
+  background-color: #f59e0b;
+  color: #ffffff;
+}
+
+.apple-segmented-switch .seg-badge.azure {
+  background-color: #0284c7;
+  color: #ffffff;
+}
+
+.apple-segmented-switch .seg-badge.purple {
+  background-color: #8b5cf6;
+  color: #ffffff;
+}
+
+.apple-segmented-switch .seg-badge.success {
+  background-color: #16a34a;
+  color: #ffffff;
+}
+
+.apple-segmented-switch .seg-badge.danger {
+  background-color: #dc2626;
+  color: #ffffff;
+}
+
+/* Global utility */
+.d-none {
+  display: none !important;
+}

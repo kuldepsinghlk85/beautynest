@@ -1,0 +1,24 @@
+<%= paginator.render do %>
+  <nav class="bc-page-nav" aria-label="Pagination">
+    <% each_page do |page| %>
+      <% if page.left_outer? || page.right_outer? || page.inside_window? %>
+        <%= page_tag page %>
+      <% elsif !page.was_truncated? %>
+        <%= gap_tag %>
+      <% end %>
+    <% end %>
+
+    <!-- Next › -->
+    <%= next_page_tag %>
+
+    <!-- Last » -->
+    <% unless current_page.last? %>
+      <%= link_to "»", url_for(params.permit!.to_h.merge(page: total_pages)),
+            class: "bc-page-btn bc-page-btn--arrow",
+            aria: { label: "Last page" },
+            data: { turbo_action: "advance" } %>
+    <% else %>
+      <span class="bc-page-btn bc-page-btn--arrow bc-page-btn--disabled" aria-disabled="true">»</span>
+    <% end %>
+  </nav>
+<% end %>
